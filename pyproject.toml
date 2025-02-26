@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "lib-affir"
+version = "0.1.0"
+description = ""
+authors = ["Shon Qwezon <shonzbso@gmail.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^4.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
