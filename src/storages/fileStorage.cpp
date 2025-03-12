@@ -11,6 +11,7 @@
 
 unsigned short FileStorage::instancesNumber = 0;
 unsigned long FileStorage::cursor = 0;
+std::unordered_map<FileId, DataStruct> FileStorage::dataMap;
 
 FileStorage::FileStorage(const std::string &filename, const size_t filesize) {
     instancesNumber++;
@@ -23,7 +24,7 @@ FileStorage::FileStorage(const std::string &filename, const size_t filesize) {
                              dataStruct.filename, dataStruct.startPos, dataStruct.endPos, id) << std::endl;
 
     dataFile.seekp((long) dataStruct.startPos);
-    cursor += dataStruct.endPos + 1;
+    cursor = dataStruct.endPos;
 }
 
 FileStorage::FileStorage(const FileId id) : id(id) {
@@ -36,23 +37,13 @@ FileStorage::FileStorage(const FileId id) : id(id) {
 }
 
 void FileStorage::open() {
+    if (dataFile.is_open()) return;
+    createFile();
     dataFile.open(DATA_FILENAME_PATH, std::ios::out | std::ios::in);
-    if (!dataFile.is_open())
-        throw std::runtime_error("Cannot open file: " + std::string(strerror(errno)));
 }
 
 FileStorage::~FileStorage() {
     instancesNumber--;
-}
-
-size_t FileStorage::read() {
-    dataFile.seekg((long) 1024 * 1024 * 1024 * 5);
-    char buffer[2];
-    dataFile.read(buffer, 1);
-    buffer[1] = '\0';
-    std::cout << buffer << std::endl;
-
-    return 0;
 }
 
 void FileStorage::write(std::string_view data) {
@@ -78,4 +69,11 @@ size_t FileStorage::getFilesize() const {
 
 const std::string &FileStorage::getFilename() const {
     return dataStruct.filename;
+}
+
+void FileStorage::createFile() {
+    dataFile.open(DATA_FILENAME_PATH, std::ios::app);
+    if (!dataFile.is_open())
+        throw std::runtime_error("Cannot open file: " + std::string(strerror(errno)));
+    dataFile.close();
 }

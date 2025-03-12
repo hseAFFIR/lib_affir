@@ -50,6 +50,8 @@ private:
 
     const std::string DATA_FILENAME_PATH = "data_file.txt";
     std::fstream dataFile;
+
+    void createFile();
 };
 
 
