@@ -15,6 +15,10 @@ struct DataStruct {
     unsigned long endPos;
     std::string filename;
     size_t filesize;
+
+    unsigned long fileEnd() const {
+        return endPos - startPos;
+    }
 };
 
 typedef unsigned long FileId;
@@ -24,10 +28,21 @@ public:
     explicit FileStorage(FileId id);
     explicit FileStorage(const std::string& filename, size_t filesize);
 
-    size_t read();
     void write(std::string_view data);
+    size_t read(std::vector<char>& buffer, size_t bytesToRead, size_t startPos);
+    size_t read(std::vector<char>& buffer, size_t bytesToRead) { return read(buffer, bytesToRead, 0); }
+    size_t read(std::vector<char>& buffer) { return read(buffer, BYTES_BLOCK); }
+
+    bool isEnd();
 
     void close();
+
+    static const unsigned short BYTES_BLOCK = 512;
+    FileId getId() const;
+
+    size_t getFilesize() const;
+
+    std::string getFilename() const;
 
     ~FileStorage();
 private:
@@ -36,22 +51,15 @@ private:
     static std::unordered_map<FileId, DataStruct> dataMap;
 
     void open();
+    void createFile();
 
     DataStruct dataStruct;
     FileId id;
-public:
-    FileId getId() const;
-
-    size_t getFilesize() const;
-
-    const std::string &getFilename() const;
-
-private:
 
     const std::string DATA_FILENAME_PATH = "data_file.txt";
     std::fstream dataFile;
 
-    void createFile();
+    std::streampos currentPosition;
 };
 
 

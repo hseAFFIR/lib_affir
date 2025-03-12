@@ -11,5 +11,14 @@ int main() {
     fileStorage->write(str);
     fileStorage->close();
     fileStorage2->close();
+
+    auto *fileStorage3 = new FileStorage(1);
+
+    std::vector<char> buffer;
+    while (!fileStorage3->isEnd()) {
+        fileStorage3->read(buffer, 5);
+        std::cout << buffer.data() << std::endl;
+    }
+
     return 0;
 }

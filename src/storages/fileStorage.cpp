@@ -30,8 +30,6 @@ FileStorage::FileStorage(const std::string &filename, const size_t filesize) {
 FileStorage::FileStorage(const FileId id) : id(id) {
     open();
     dataStruct = dataMap[id];
-    dataFile.seekg((long) dataStruct.startPos);
-
     std::cout << std::format("Created file block with: filename = {}, startPos = {}, endPos = {}, id = {}",
                              dataStruct.filename, dataStruct.startPos, dataStruct.endPos, id) << std::endl;
 }
@@ -47,11 +45,26 @@ FileStorage::~FileStorage() {
 }
 
 void FileStorage::write(std::string_view data) {
-    dataFile.write(data.data(), (long) data.size());
+    dataFile.write(data.data(), (long)data.size());
     std::streampos position = dataFile.tellp();
-    std::cout << std::format("New pos (file {}) = {}", dataStruct.filename, (long) position) << std::endl;
+    std::cout << std::format("New pos (file {}) = {}", dataStruct.filename, (long)position) << std::endl;
     if (position > dataStruct.endPos)
-        throw std::runtime_error(std::format("position > dataStruct.endPos, {} > {}", (long) position, dataStruct.endPos));
+        throw std::out_of_range(std::format("position > dataStruct.endPos, {} > {}", (long)position, dataStruct.endPos));
+}
+
+size_t FileStorage::read(std::vector<char> &buffer, size_t bytesToRead, size_t startPos) {
+    if (startPos >= dataStruct.fileEnd())
+        throw std::out_of_range("Starting position exceeds file's end position.");
+
+    dataFile.seekg((long) startPos);
+
+    buffer.resize(bytesToRead + 1);
+    size_t bytesToEnd = dataStruct.endPos - dataFile.tellg();
+    dataFile.read(buffer.data(), (long)std::min(bytesToRead, bytesToEnd));
+
+    size_t bytesRead = dataFile.gcount();
+    std::cout << std::format("Read {} bytes from position {}", bytesRead, startPos) << std::endl;
+    return bytesRead;
 }
 
 void FileStorage::close() {
@@ -67,7 +80,7 @@ size_t FileStorage::getFilesize() const {
     return dataStruct.filesize;
 }
 
-const std::string &FileStorage::getFilename() const {
+std::string FileStorage::getFilename() const {
     return dataStruct.filename;
 }
 
@@ -77,3 +90,8 @@ void FileStorage::createFile() {
         throw std::runtime_error("Cannot open file: " + std::string(strerror(errno)));
     dataFile.close();
 }
+
+bool FileStorage::isEnd() {
+    return dataFile.tellg() == dataStruct.endPos;
+}
+
