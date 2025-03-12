@@ -30,6 +30,7 @@ FileStorage::FileStorage(const std::string &filename, const size_t filesize) {
 FileStorage::FileStorage(const FileId id) : id(id) {
     open();
     dataStruct = dataMap[id];
+    currentPosition = 0;
     std::cout << std::format("Created file block with: filename = {}, startPos = {}, endPos = {}, id = {}",
                              dataStruct.filename, dataStruct.startPos, dataStruct.endPos, id) << std::endl;
 }
@@ -64,6 +65,12 @@ size_t FileStorage::read(std::vector<char> &buffer, size_t bytesToRead, size_t s
 
     size_t bytesRead = dataFile.gcount();
     std::cout << std::format("Read {} bytes from position {}", bytesRead, startPos) << std::endl;
+    return bytesRead;
+}
+
+size_t FileStorage::read(std::vector<char> &buffer, size_t bytesToRead) {
+    size_t bytesRead = read(buffer, bytesToRead, currentPosition);
+    currentPosition += bytesToRead;
     return bytesRead;
 }
 

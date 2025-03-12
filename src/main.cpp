@@ -16,7 +16,7 @@ int main() {
 
     std::vector<char> buffer;
     while (!fileStorage3->isEnd()) {
-        fileStorage3->read(buffer, 5);
+        fileStorage3->read(buffer);
         std::cout << buffer.data() << std::endl;
     }
 

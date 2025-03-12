@@ -30,7 +30,7 @@ public:
 
     void write(std::string_view data);
     size_t read(std::vector<char>& buffer, size_t bytesToRead, size_t startPos);
-    size_t read(std::vector<char>& buffer, size_t bytesToRead) { return read(buffer, bytesToRead, 0); }
+    size_t read(std::vector<char>& buffer, size_t bytesToRead);
     size_t read(std::vector<char>& buffer) { return read(buffer, BYTES_BLOCK); }
 
     bool isEnd();
@@ -59,7 +59,7 @@ private:
     const std::string DATA_FILENAME_PATH = "data_file.txt";
     std::fstream dataFile;
 
-    std::streampos currentPosition;
+    size_t currentPosition;
 };
 
 
