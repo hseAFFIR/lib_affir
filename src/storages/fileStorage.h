@@ -44,22 +44,27 @@ public:
 
     std::string getFilename() const;
 
+    static void loadStorageMeta();
+    static void saveStorageMeta();
+
     ~FileStorage();
 private:
     static unsigned short instancesNumber;
-    static unsigned long cursor;
+    static unsigned long g_cursor;
     static std::unordered_map<FileId, DataStruct> dataMap;
+    static bool isStorageLoaded;
 
     void open();
-    void createFile();
+    void createDataFile();
 
     DataStruct dataStruct;
     FileId id;
 
-    const std::string DATA_FILENAME_PATH = "data_file.txt";
+    const static std::string DATA_FILENAME_PATH;
+    const static std::string META_FILENAME_PATH;
     std::fstream dataFile;
 
-    size_t currentPosition;
+    size_t currentPosition{};
 };
 
 
