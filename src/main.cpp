@@ -19,7 +19,6 @@ int main() {
         fileStorage3->read(buffer);
         std::cout << buffer.data() << std::endl;
     }
-
     FileStorage::saveStorageMeta();
     return 0;
 }

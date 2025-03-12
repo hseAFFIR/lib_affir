@@ -26,7 +26,7 @@ FileStorage::FileStorage(const std::string &filename, const size_t filesize) {
     std::cout << std::format("Created file block with: filename = {}, startPos = {}, endPos = {}, id = {}",
                              dataStruct.filename, dataStruct.startPos, dataStruct.endPos(), id) << std::endl;
 
-    dataFile.seekp((long) dataStruct.startPos);
+    dataStream.seekp((long) dataStruct.startPos);
     g_cursor = dataStruct.endPos();
 }
 
@@ -41,9 +41,9 @@ FileStorage::FileStorage(const FileId fileId) : id(fileId) {
 }
 
 void FileStorage::open() {
-    if (dataFile.is_open()) return;
+    if (dataStream.is_open()) return;
     createDataFile();
-    dataFile.open(DATA_FILENAME_PATH, std::ios::out | std::ios::in);
+    dataStream.open(DATA_FILENAME_PATH, std::ios::out | std::ios::in);
 }
 
 FileStorage::~FileStorage() {
@@ -51,8 +51,8 @@ FileStorage::~FileStorage() {
 }
 
 void FileStorage::write(std::string_view data) {
-    dataFile.write(data.data(), (long)data.size());
-    std::streampos position = dataFile.tellp();
+    dataStream.write(data.data(), (long)data.size());
+    std::streampos position = dataStream.tellp();
     std::cout << std::format("New pos (file {}) = {}", dataStruct.filename, (long)position) << std::endl;
     if (position > dataStruct.endPos())
         throw std::out_of_range(std::format("position > dataStruct.endPos, {} > {}", (long)position, dataStruct.endPos()));
@@ -62,13 +62,13 @@ size_t FileStorage::read(std::vector<char> &buffer, size_t bytesToRead, size_t s
     if (startPos >= dataStruct.filesize)
         throw std::out_of_range("Starting position exceeds file's end position.");
 
-    dataFile.seekg((long) startPos);
+    dataStream.seekg((long) startPos);
 
     buffer.resize(bytesToRead + 1);
-    size_t bytesToEnd = dataStruct.endPos() - dataFile.tellg();
-    dataFile.read(buffer.data(), (long)std::min(bytesToRead, bytesToEnd));
+    size_t bytesToEnd = dataStruct.endPos() - dataStream.tellg();
+    dataStream.read(buffer.data(), (long)std::min(bytesToRead, bytesToEnd));
 
-    size_t bytesRead = dataFile.gcount();
+    size_t bytesRead = dataStream.gcount();
     std::cout << std::format("Read {} bytes from position {}", bytesRead, startPos) << std::endl;
     return bytesRead;
 }
@@ -80,7 +80,7 @@ size_t FileStorage::read(std::vector<char> &buffer, size_t bytesToRead) {
 }
 
 void FileStorage::close() {
-    dataFile.close();
+    dataStream.close();
     delete this;
 }
 
@@ -97,14 +97,14 @@ std::string FileStorage::getFilename() const {
 }
 
 void FileStorage::createDataFile() {
-    dataFile.open(DATA_FILENAME_PATH, std::ios::app);
-    if (!dataFile.is_open())
+    dataStream.open(DATA_FILENAME_PATH, std::ios::app);
+    if (!dataStream.is_open())
         throw std::runtime_error("Cannot open file: " + std::string(strerror(errno)));
-    dataFile.close();
+    dataStream.close();
 }
 
 bool FileStorage::isEnd() {
-    return dataFile.tellg() == dataStruct.endPos();
+    return dataStream.tellg() == dataStruct.endPos();
 }
 
 void FileStorage::loadStorageMeta() {
