@@ -1,7 +1,3 @@
-//
-// Created by Shon on 10.03.2025.
-//
-
 #include <stdexcept>
 #include <iostream>
 #include <cerrno>
@@ -18,29 +14,30 @@ const std::string FileStorage::DATA_FILENAME_PATH = "storage_raw";
 const std::string FileStorage::META_FILENAME_PATH = "storage_metadata.bin";
 
 FileStorage::FileStorage(const std::string &filename, const size_t filesize) {
+
     loadStorageMeta();
 
     instancesNumber++;
     id = dataMap.size() + 1;
-    dataStruct = DataStruct(g_cursor, g_cursor + filesize, filename, filesize);
+    dataStruct = DataStruct(g_cursor, filename, filesize);
     dataMap[id] = dataStruct;
     open();
 
     std::cout << std::format("Created file block with: filename = {}, startPos = {}, endPos = {}, id = {}",
-                             dataStruct.filename, dataStruct.startPos, dataStruct.endPos, id) << std::endl;
+                             dataStruct.filename, dataStruct.startPos, dataStruct.endPos(), id) << std::endl;
 
     dataFile.seekp((long) dataStruct.startPos);
-    g_cursor = dataStruct.endPos;
+    g_cursor = dataStruct.endPos();
 }
 
-FileStorage::FileStorage(const FileId id) : id(id) {
+FileStorage::FileStorage(const FileId fileId) : id(fileId) {
     loadStorageMeta();
 
     open();
     dataStruct = dataMap[id];
     currentPosition = 0;
     std::cout << std::format("Created file block with: filename = {}, startPos = {}, endPos = {}, id = {}",
-                             dataStruct.filename, dataStruct.startPos, dataStruct.endPos, id) << std::endl;
+                             dataStruct.filename, dataStruct.startPos, dataStruct.endPos(), id) << std::endl;
 }
 
 void FileStorage::open() {
@@ -57,18 +54,18 @@ void FileStorage::write(std::string_view data) {
     dataFile.write(data.data(), (long)data.size());
     std::streampos position = dataFile.tellp();
     std::cout << std::format("New pos (file {}) = {}", dataStruct.filename, (long)position) << std::endl;
-    if (position > dataStruct.endPos)
-        throw std::out_of_range(std::format("position > dataStruct.endPos, {} > {}", (long)position, dataStruct.endPos));
+    if (position > dataStruct.endPos())
+        throw std::out_of_range(std::format("position > dataStruct.endPos, {} > {}", (long)position, dataStruct.endPos()));
 }
 
 size_t FileStorage::read(std::vector<char> &buffer, size_t bytesToRead, size_t startPos) {
-    if (startPos >= dataStruct.fileEnd())
+    if (startPos >= dataStruct.filesize)
         throw std::out_of_range("Starting position exceeds file's end position.");
 
     dataFile.seekg((long) startPos);
 
     buffer.resize(bytesToRead + 1);
-    size_t bytesToEnd = dataStruct.endPos - dataFile.tellg();
+    size_t bytesToEnd = dataStruct.endPos() - dataFile.tellg();
     dataFile.read(buffer.data(), (long)std::min(bytesToRead, bytesToEnd));
 
     size_t bytesRead = dataFile.gcount();
@@ -107,7 +104,7 @@ void FileStorage::createDataFile() {
 }
 
 bool FileStorage::isEnd() {
-    return dataFile.tellg() == dataStruct.endPos;
+    return dataFile.tellg() == dataStruct.endPos();
 }
 
 void FileStorage::loadStorageMeta() {
@@ -135,7 +132,6 @@ void FileStorage::loadStorageMeta() {
         // Read filesize
         DataStruct data;
         metaFileIn.read(reinterpret_cast<char*>(&data.startPos), sizeof(data.startPos));
-        metaFileIn.read(reinterpret_cast<char*>(&data.endPos), sizeof(data.endPos));
 
         // Read filename length
         size_t filenameSize;
@@ -170,7 +166,6 @@ void FileStorage::saveStorageMeta() {
 
         // Save DataStruct members
         metaFileOut.write(reinterpret_cast<const char*>(&pair.second.startPos), sizeof(pair.second.startPos));
-        metaFileOut.write(reinterpret_cast<const char*>(&pair.second.endPos), sizeof(pair.second.endPos));
 
         size_t filenameSize = pair.second.filename.size();
         // Write length of filename

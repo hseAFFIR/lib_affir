@@ -1,6 +1,7 @@
-//
-// Created by Shon on 10.03.2025.
-//
+/**
+ * @class FileStorage
+ * @brief Class for saving and reading text data, that have to be indexed further.
+ */
 
 #ifndef LIB_AFFIR_FILESTORAGE_H
 #define LIB_AFFIR_FILESTORAGE_H
@@ -12,12 +13,11 @@
 
 struct DataStruct {
     unsigned long startPos;
-    unsigned long endPos;
     std::string filename;
     size_t filesize;
 
-    unsigned long fileEnd() const {
-        return endPos - startPos;
+    unsigned long endPos() const {
+        return startPos + filesize;
     }
 };
 
@@ -25,7 +25,7 @@ typedef unsigned long FileId;
 
 class FileStorage {
 public:
-    explicit FileStorage(FileId id);
+    explicit FileStorage(FileId fileId);
     explicit FileStorage(const std::string& filename, size_t filesize);
 
     void write(std::string_view data);
