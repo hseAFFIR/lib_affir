@@ -34,7 +34,8 @@ void Indexer::addToken(const Token& token) {
 
         // Обновляем текущий размер
         size_t newSize = calculateBigTokenSize(newBT);
-        currentSizeInBytes += newSize;
+        currentSizeInBytes = currentSizeInBytes + newSize;
+        std::cout<<currentSizeInBytes<<std::endl;
 
         // Проверка превышения лимита
         if (currentSizeInBytes > maxBufferSizeInBytes) {
@@ -43,12 +44,16 @@ void Indexer::addToken(const Token& token) {
     } else {
         // Обновляем существующий BigToken
         BigToken& bt = it->second;
+        size_t oldSize = calculateBigTokenSize(bt);
+
         bt.filePositions[fileId].push_back(info);
 
         // Обновляем размер
-        size_t oldSize = calculateBigTokenSize(bt);
+
         size_t newSize = calculateBigTokenSize(bt);
-        currentSizeInBytes += (newSize - oldSize);
+        currentSizeInBytes = currentSizeInBytes + (newSize - oldSize);
+
+        std::cout<<currentSizeInBytes<<std::endl;
 
         if (currentSizeInBytes > maxBufferSizeInBytes) {
             saveTo(); // Сохраняем и очищаем буфер
@@ -74,8 +79,11 @@ size_t Indexer::calculateBigTokenSize(const BigToken& bt) const {
     // Размер map[fileId → vector<TokenInfo>]
     for (const auto& pair : bt.filePositions) {
         size += sizeof(unsigned long long); // Ключ fileId
-        size += pair.second.size() * sizeof(TokenInfo); // Размер вектора
+        // Используем квалифицированное имя BigToken::TokenInfo
+        size += pair.second.size() * sizeof(TokenInfo);
     }
+
+//    std::cout<<size<<std::endl;
 
     return size;
 }

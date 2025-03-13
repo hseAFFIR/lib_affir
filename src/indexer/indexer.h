@@ -28,7 +28,7 @@ private:
     BufferType buffer;
 
     unsigned long long maxBufferSizeInBytes; ///< Maximum allowed size of the buffer in bytes.
-    unsigned long long currentSizeInBytes = 0; ///< Current size of the buffer in bytes.
+    unsigned long long currentSizeInBytes; ///< Current size of the buffer in bytes.
 
     /**
      * @brief Saves the current buffer to persistent storage and clears it.
