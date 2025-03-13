@@ -25,10 +25,10 @@ struct Token {
 class Indexer {
 private:
     using BufferType = std::unordered_map<std::string, BigToken>;
-    BufferType buffer;
 
-    unsigned long maxBufferSizeInBytes; ///< Maximum allowed size of the buffer in bytes.
-    unsigned long currentSizeInBytes; ///< Current size of the buffer in bytes.
+    BufferType buffer; ///< Temporary storage for tokens before persisting.
+    unsigned long maxBufferSizeInBytes; ///< Maximum allowed buffer size in bytes.
+    unsigned long currentSizeInBytes; ///< Current buffer size in bytes.
 
     /**
      * @brief Saves the current buffer to persistent storage and clears it.
@@ -40,8 +40,6 @@ private:
 
     /**
      * @brief Clears the buffer and resets its size counter.
-     *
-     * Discards all tokens in the buffer and resets the currentSizeInBytes to zero.
      */
     void clearBuffer();
 
@@ -49,7 +47,7 @@ public:
     /**
      * @brief Constructs an Indexer instance with a specified buffer size limit.
      *
-     * @param bufferSize The maximum size (in bytes) before flushing to storage.
+     * @param bufferSize Maximum buffer size (in bytes) before flushing to storage.
      */
     explicit Indexer(unsigned long bufferSize);
 
@@ -69,27 +67,27 @@ public:
      * Searches the buffer for the BigToken associated with the provided body string.
      *
      * @param tokenName The body of the token to query.
-     * @return The BigToken instance if found, empty otherwise.
+     * @return Pointer to the BigToken instance if found, nullptr otherwise.
      */
-    BigToken getTokenInfo(const std::string& tokenName);
+    const BigToken* getTokenInfo(const std::string& tokenName) const;
 
     /**
      * @brief Returns the current buffer contents and clears the buffer.
      *
-     * Returns a copy of the buffer's data and then clears the buffer's contents.
+     * This method returns a copy of the buffer's contents and then clears it.
      *
-     * @return A copy of the buffer's contents
+     * @return A copy of the buffer's contents.
      */
     BufferType getBufferWithClear();
 
     /**
-     * @brief Returns the current buffer contents.
+     * @brief Returns a constant reference to the current buffer contents.
      *
-     * Returns a copy of the buffer's current state for debugging or inspection.
+     * This method provides read-only access to the buffer's current state.
      *
-     * @return A copy of the buffer's current state.
+     * @return A constant reference to the buffer.
      */
-    BufferType getBuffer() const;
+    const BufferType& getBuffer() const;
 
 };
 

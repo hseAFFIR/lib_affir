@@ -1,7 +1,5 @@
 #include "indexer.h"
-#include <vector>
 #include <iostream>
-#include "../models/bigToken.h"
 
 Indexer::Indexer(unsigned long bufferSize)
         : maxBufferSizeInBytes(bufferSize), currentSizeInBytes(0) {}
@@ -9,18 +7,18 @@ Indexer::Indexer(unsigned long bufferSize)
 void Indexer::clearBuffer() {
     buffer.clear();
     currentSizeInBytes = 0;
-    std::cout<<"Buffer cleared"<<std::endl;
+    std::cout << "Buffer cleared" << std::endl;
 }
 
 void Indexer::saveTo() {
-    // here will be logic of saving to indexStorage
+    // Logic for saving to index storage will be here
     clearBuffer();
 }
 
 void Indexer::addToken(const Token& token) {
     const std::string& body = token.body;
     unsigned long long fileId = token.fileId;
-    TokenInfo info{token.pos, token.wordPos};
+    const TokenInfo info{token.pos, token.wordPos};
 
     // Проверка существования BigToken с таким body
     auto it = buffer.find(body);
@@ -30,10 +28,10 @@ void Indexer::addToken(const Token& token) {
         newBT.addPosition(fileId, info);
 
         // Добавляем в буфер
-        buffer[body] = newBT;
+        buffer.emplace(body, std::move(newBT));
 
         // Обновляем текущий размер
-        size_t newSize = newBT.calculateSize();
+        const size_t newSize = buffer[body].calculateSize();
         currentSizeInBytes += newSize;
         std::cout << currentSizeInBytes << std::endl;
 
@@ -44,12 +42,12 @@ void Indexer::addToken(const Token& token) {
     } else {
         // Обновляем существующий BigToken
         BigToken& bt = it->second;
-        size_t oldSize = bt.calculateSize();
+        const size_t oldSize = bt.calculateSize();
 
         bt.addPosition(fileId, info);
 
         // Обновляем размер
-        size_t newSize = bt.calculateSize();
+        const size_t newSize = bt.calculateSize();
         currentSizeInBytes += (newSize - oldSize);
 
         std::cout << currentSizeInBytes << std::endl;
@@ -60,20 +58,17 @@ void Indexer::addToken(const Token& token) {
     }
 }
 
-
-BigToken Indexer::getTokenInfo(const std::string& tokenName) {
+const BigToken* Indexer::getTokenInfo(const std::string& tokenName) const {
     auto it = buffer.find(tokenName);
-    if (it != buffer.end()) {
-        return it->second;
-    }
-    return BigToken(); // Возвращаем пустой объект, если не найден
+    return (it != buffer.end()) ? &it->second : nullptr;
 }
 
-Indexer::BufferType Indexer::getBufferWithClear(){
+Indexer::BufferType Indexer::getBufferWithClear() {
+    BufferType copy = buffer;
     clearBuffer();
-    return buffer;
+    return copy;
 }
 
-Indexer::BufferType Indexer::getBuffer() const {
+const Indexer::BufferType& Indexer::getBuffer() const {
     return buffer;
 }
