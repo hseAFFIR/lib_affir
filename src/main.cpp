@@ -21,9 +21,9 @@ int main() {
         std::cout << buffer.data() << std::endl;
     }
     FileStorage::saveStorageMeta();
-    // Token token("Hello",1,2);
+    // Token token("Hello",1,2,1);
     // std::cout<<token<<std::endl;
-    // Token token2("Hello",1,2);
+    // Token token2("Hello",1,2,1);
     // if (token==token2) {
     //     std::cout<<"YES"<<std::endl;
     // }

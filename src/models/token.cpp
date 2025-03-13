@@ -6,25 +6,26 @@
 #include "token.h"
 
 // Реализация конструкторов
-Token::Token() : body(""), pos(0), index(0) {}
+Token::Token() : body(""), pos(0), index(0), fileId(0){}
 
-Token::Token(const std::string& body, int pos, int index)
-    : body(body), pos(pos), index(index) {}
+Token::Token(const std::string& body, long long pos, long long index,long long fileId)
+    : body(body), pos(pos), index(index), fileId(fileId){}
 
 // Геттеры
 std::string Token::getBody() const { return body; }
-int Token::getPos() const { return pos; }
-int Token::getIndex() const { return index; }
+long long Token::getPos() const { return pos; }
+long long Token::getIndex() const { return index; }
+long long Token::getFileId() const { return fileId; }
 
-// Сеттеров
+// Сеттеры
 void Token::setBody(const std::string& newBody) { body = newBody; }
-void Token::setPos(int newPos) { pos = newPos; }
-void Token::setIndex(int newIndex) { index = newIndex; }
+void Token::setPos(long long newPos) { pos = newPos; }
+void Token::setIndex(long long newIndex) { index = newIndex; }
 
 // Перегрузка оператора вывода в поток
 std::ostream& operator<<(std::ostream& os, const Token& token) {
     os << "Token(body='" << token.getBody() << "', pos=" << token.getPos()
-       << ", index=" << token.getIndex() << ")";
+       << ", index=" << token.getIndex() <<", fileId="<< token.getFileId() <<")";
     return os;
 }
 
