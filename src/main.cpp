@@ -1,5 +1,6 @@
 #include <iostream>
 #include "storages/fileStorage.h"
+#include "models/token.h"
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
@@ -20,5 +21,15 @@ int main() {
         std::cout << buffer.data() << std::endl;
     }
     FileStorage::saveStorageMeta();
+    // Token token("Hello",1,2);
+    // std::cout<<token<<std::endl;
+    // Token token2("Hello",1,2);
+    // if (token==token2) {
+    //     std::cout<<"YES"<<std::endl;
+    // }
+    // else {
+    //     std::cout<<"NO"<<std::endl;
+    //
+    // }
     return 0;
 }
