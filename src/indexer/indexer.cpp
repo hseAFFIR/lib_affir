@@ -3,7 +3,7 @@
 #include <iostream>
 #include "../models/bigToken.h"
 
-Indexer::Indexer(unsigned long long bufferSize)
+Indexer::Indexer(unsigned long bufferSize)
         : maxBufferSizeInBytes(bufferSize), currentSizeInBytes(0) {}
 
 void Indexer::clearBuffer() {
@@ -27,15 +27,15 @@ void Indexer::addToken(const Token& token) {
     if (it == buffer.end()) {
         // Создаем новый BigToken
         BigToken newBT(body);
-        newBT.filePositions[fileId].push_back(info);
+        newBT.addPosition(fileId, info);
 
         // Добавляем в буфер
         buffer[body] = newBT;
 
         // Обновляем текущий размер
-        size_t newSize = calculateBigTokenSize(newBT);
-        currentSizeInBytes = currentSizeInBytes + newSize;
-        std::cout<<currentSizeInBytes<<std::endl;
+        size_t newSize = newBT.calculateSize();
+        currentSizeInBytes += newSize;
+        std::cout << currentSizeInBytes << std::endl;
 
         // Проверка превышения лимита
         if (currentSizeInBytes > maxBufferSizeInBytes) {
@@ -44,22 +44,22 @@ void Indexer::addToken(const Token& token) {
     } else {
         // Обновляем существующий BigToken
         BigToken& bt = it->second;
-        size_t oldSize = calculateBigTokenSize(bt);
+        size_t oldSize = bt.calculateSize();
 
-        bt.filePositions[fileId].push_back(info);
+        bt.addPosition(fileId, info);
 
         // Обновляем размер
+        size_t newSize = bt.calculateSize();
+        currentSizeInBytes += (newSize - oldSize);
 
-        size_t newSize = calculateBigTokenSize(bt);
-        currentSizeInBytes = currentSizeInBytes + (newSize - oldSize);
-
-        std::cout<<currentSizeInBytes<<std::endl;
+        std::cout << currentSizeInBytes << std::endl;
 
         if (currentSizeInBytes > maxBufferSizeInBytes) {
             saveTo(); // Сохраняем и очищаем буфер
         }
     }
 }
+
 
 BigToken Indexer::getTokenInfo(const std::string& tokenName) {
     auto it = buffer.find(tokenName);
@@ -69,21 +69,11 @@ BigToken Indexer::getTokenInfo(const std::string& tokenName) {
     return BigToken(); // Возвращаем пустой объект, если не найден
 }
 
-Indexer::BufferType Indexer::getBuffer() const {
+Indexer::BufferType Indexer::getBufferWithClear(){
+    clearBuffer();
     return buffer;
 }
 
-size_t Indexer::calculateBigTokenSize(const BigToken& bt) const {
-    size_t size = bt.body.size(); // Размер строки body
-
-    // Размер map[fileId → vector<TokenInfo>]
-    for (const auto& pair : bt.filePositions) {
-        size += sizeof(unsigned long long); // Ключ fileId
-        // Используем квалифицированное имя BigToken::TokenInfo
-        size += pair.second.size() * sizeof(TokenInfo);
-    }
-
-//    std::cout<<size<<std::endl;
-
-    return size;
+Indexer::BufferType Indexer::getBuffer() const {
+    return buffer;
 }

@@ -4,6 +4,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 /**
@@ -13,8 +14,8 @@
  * in the original data stream.
  */
 struct TokenInfo {
-    unsigned long long pos;    ///< The absolute position in the data stream.
-    unsigned long long wordPos;///< The position within a word or sentence.
+    unsigned long pos;    ///< The absolute position in the data stream.
+    unsigned long wordPos;///< The position within a word or sentence.
 };
 
 /**
@@ -34,7 +35,7 @@ public:
      * Each key is a file identifier, and the value is a vector of TokenInfo
      * objects describing the token's occurrences in that file.
      */
-    std::unordered_map<unsigned long long, std::vector<TokenInfo>> filePositions;
+    std::unordered_map<unsigned long, std::vector<TokenInfo>> filePositions;
 
     /**
      * @brief Constructs a BigToken with an empty body and no file positions.
@@ -46,7 +47,27 @@ public:
      *
      * @param body The text content of the token.
      */
-    explicit BigToken(const std::string& body) : body(body) {}
+    explicit BigToken(std::string  body) : body(std::move(body)) {}
+
+    /**
+     * @brief Calculates the memory size occupied by this BigToken.
+     *
+     * @return The size in bytes.
+     */
+    size_t calculateSize() const;
+
+    /**
+     * @brief Adds a new position to the token for a given file ID.
+     *
+     * @param fileId The ID of the file where the token appears.
+     * @param info The TokenInfo structure containing position details.
+     */
+    void addPosition(unsigned long long fileId, const TokenInfo& info) {
+        filePositions[fileId].push_back(info);
+    }
+
+
+
 };
 
 

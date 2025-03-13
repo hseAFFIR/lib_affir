@@ -7,11 +7,11 @@
 
 struct Token {
     std::string body;
-    unsigned long long pos;
-    unsigned long long wordPos;
-    unsigned long long fileId;
+    unsigned long pos;
+    unsigned long wordPos;
+    unsigned long fileId;
 
-    static const size_t posSize = 3 * sizeof(unsigned long long);
+    static const size_t posSize = 3 * sizeof(unsigned long);
 };
 
 
@@ -27,8 +27,8 @@ private:
     using BufferType = std::unordered_map<std::string, BigToken>;
     BufferType buffer;
 
-    unsigned long long maxBufferSizeInBytes; ///< Maximum allowed size of the buffer in bytes.
-    unsigned long long currentSizeInBytes; ///< Current size of the buffer in bytes.
+    unsigned long maxBufferSizeInBytes; ///< Maximum allowed size of the buffer in bytes.
+    unsigned long currentSizeInBytes; ///< Current size of the buffer in bytes.
 
     /**
      * @brief Saves the current buffer to persistent storage and clears it.
@@ -45,21 +45,13 @@ private:
      */
     void clearBuffer();
 
-    /**
-     * @brief Calculates the size (in bytes) of a BigToken instance.
-     *
-     * @param bt The BigToken to measure.
-     * @return The estimated size of the BigToken in bytes.
-     */
-    size_t calculateBigTokenSize(const BigToken& bt) const;
-
 public:
     /**
      * @brief Constructs an Indexer instance with a specified buffer size limit.
      *
      * @param bufferSize The maximum size (in bytes) before flushing to storage.
      */
-    explicit Indexer(unsigned long long bufferSize);
+    explicit Indexer(unsigned long bufferSize);
 
     /**
      * @brief Adds a new token to the buffer, handling overflow.
@@ -86,7 +78,7 @@ public:
      *
      * Returns a copy of the buffer's data and then clears the buffer's contents.
      *
-     * @return A copy of the buffer's contents before clearing.
+     * @return A copy of the buffer's contents
      */
     BufferType getBufferWithClear();
 
