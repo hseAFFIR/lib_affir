@@ -11,10 +11,7 @@ set(MODEL_FILES
         src/models/token.h
         src/models/token.cpp)
 
-set(SOURCE_FILES
-        ${STORAGE_FILES}
-        ${MODEL_FILES}
-        src/main.cpp
+set(FILTERS
         src/filters/base.cpp
         src/filters/base.h
         src/filters/stem_filter.cpp
@@ -22,7 +19,13 @@ set(SOURCE_FILES
         src/filters/russian_porter_stemmer.cpp
         src/filters/russian_porter_stemmer.h
         src/filters/english_stemmer.cpp
-        src/filters/english_stemmer.h
+        src/filters/english_stemmer.h)
+
+set(SOURCE_FILES
+        ${STORAGE_FILES}
+        ${MODEL_FILES}
+        ${FILTERS}
+        src/main.cpp
 )
 
 add_executable(lib_affir ${SOURCE_FILES})
