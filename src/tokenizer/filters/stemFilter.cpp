@@ -2,12 +2,12 @@
 // Created by okosh on 14.03.2025.
 //
 
-#include "stem_filter.h"
+#include "stemFilter.h"
 #include <regex>
 
-StemFilter::StemFilter() {}
+StemFilter::StemFilter() { }
 
-std::string StemFilter::detect_language(const std::string& token) const {
+std::string StemFilter::detect_language(const std::string &token) const {
     if (std::regex_search(token, std::regex("[а-яА-Я]"))) {
         return "ru";
     }
@@ -17,7 +17,7 @@ std::string StemFilter::detect_language(const std::string& token) const {
     return "";
 }
 
-std::string StemFilter::process(const std::string& token) const {
+std::string StemFilter::process(const std::string &token) const {
     try {
         std::string lang = detect_language(token);
         if (lang == "ru") {

@@ -7,13 +7,12 @@
 #include <string>
 
 
-class base {
+class Base {
 public:
-    virtual ~base() = default; // Виртуальный деструктор
+    virtual ~Base() = default; // Виртуальный деструктор
 
     // Bиртуальный метод process
     virtual std::string process(const std::string& token) const = 0;
-
 };
 
 

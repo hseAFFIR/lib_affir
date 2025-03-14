@@ -8,10 +8,10 @@
 #include "base.h"
 #include <string>
 
-class EnglishStemmer : public base {
+class EnglishStemmer : public Base {
 public:
     // Реализация метода process
-    std::string process(const std::string& token) const override;
+    std::string process(const std::string &token) const override;
 };
 
 #endif // ENGLISH_STEMMER_H

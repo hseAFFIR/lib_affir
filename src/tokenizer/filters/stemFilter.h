@@ -6,20 +6,20 @@
 #define STEM_FILTER_H
 
 #include "base.h"
-#include "russian_porter_stemmer.h"
-#include "english_stemmer.h"
+#include "russianPorterStemmer.h"
+#include "englishStemmer.h"
 
-class StemFilter : public base {
+class StemFilter : public Base {
 private:
     RussianPorterStemmer russian_stemmer;
     EnglishStemmer english_stemmer;
 
-    std::string detect_language(const std::string& token) const;
+    std::string detect_language(const std::string &token) const;
 
 public:
     StemFilter();
 
-    std::string process(const std::string& token) const override;
+    std::string process(const std::string &token) const override;
 };
 
 #endif // STEM_FILTER_H

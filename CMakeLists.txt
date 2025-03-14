@@ -12,20 +12,20 @@ set(MODEL_FILES
         src/models/token.cpp)
 
 set(FILTERS
-        src/filters/base.cpp
-        src/filters/base.h
-        src/filters/stem_filter.cpp
-        src/filters/stem_filter.h
-        src/filters/russian_porter_stemmer.cpp
-        src/filters/russian_porter_stemmer.h
-        src/filters/english_stemmer.cpp
-        src/filters/english_stemmer.h)
+        src/tokenizer/filters/base.h
+        src/tokenizer/filters/stemFilter.cpp
+        src/tokenizer/filters/stemFilter.h
+        src/tokenizer/filters/russianPorterStemmer.cpp
+        src/tokenizer/filters/russianPorterStemmer.h
+        src/tokenizer/filters/englishStemmer.cpp
+        src/tokenizer/filters/englishStemmer.h)
 
 set(SOURCE_FILES
         ${STORAGE_FILES}
         ${MODEL_FILES}
         ${FILTERS}
         src/main.cpp
+        src/common.h
 )
 
 add_executable(lib_affir ${SOURCE_FILES})
