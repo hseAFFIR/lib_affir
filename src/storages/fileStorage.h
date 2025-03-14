@@ -5,10 +5,11 @@
 #include <vector>
 #include <fstream>
 #include <unordered_map>
+#include "../common.h"
 
 // Struct to hold metadata about a file.
 struct DataStruct {
-    unsigned long startPos;
+    Pos startPos;
     std::string filename;
     size_t filesize;
 
@@ -17,13 +18,10 @@ struct DataStruct {
      *
      * @return The end position of the data stored in the storage.
      */
-    unsigned long endPos() const {
+    Pos endPos() const {
         return startPos + filesize;
     }
 };
-
-// Type alias for FileId to represent file identifier.
-typedef unsigned long FileId;
 
 /**
  * @class FileStorage
@@ -122,7 +120,7 @@ public:
     ~FileStorage();
 private:
     static unsigned short instancesNumber;                     ///< Counter for instances of FileStorage.
-    static unsigned long g_cursor;                             ///< Global cursor to track read/write positions.
+    static Pos g_cursor;                                       ///< Global cursor to track read/write positions.
     static std::unordered_map<FileId, DataStruct> dataMap;     ///< Map of file metadata by FileId.
     static bool isStorageLoaded;                               ///< Flag to indicate if storage metadata is loaded.
 
@@ -130,6 +128,7 @@ private:
      * @brief Opens the file for reading and writing.
      */
     void open();
+
     /**
      * @brief Creates a data file if it doesn't exist.
      */
