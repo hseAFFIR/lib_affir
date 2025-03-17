@@ -4,18 +4,28 @@
 
 #ifndef BASE_H
 #define BASE_H
+
 #include <string>
 
-
+/**
+ * @class Base
+ * @brief Абстрактный базовый класс с виртуальным методом process.
+ */
 class Base {
 public:
-    virtual ~Base() = default; // Виртуальный деструктор
+    /**
+     * @brief Виртуальный деструктор.
+     * Позволяет корректно удалять объекты производных классов через указатель на базовый класс.
+     */
+    virtual ~Base() = default;
 
-    // Bиртуальный метод process
-    virtual std::string process(const std::string& token) const = 0;
+    /**
+     * @brief Чистый виртуальный метод для обработки токена.
+     * Должен быть переопределён в производных классах.
+     * @param token Входная строка, представляющая токен.
+     * @return Строка, содержащая результат обработки.
+     */
+    virtual std::string process(const std::string &token) const = 0;
 };
 
-
-
-#endif //BASE_H
-
+#endif // BASE_H

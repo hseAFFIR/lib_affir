@@ -8,9 +8,21 @@
 #include "base.h"
 #include <string>
 
+/**
+ * @class EnglishStemmer
+ * @brief Класс для стемминга английских слов.
+ *
+ * Наследуется от класса Base и реализует метод process для приведения слова к его корневой форме (стемминга).
+ */
 class EnglishStemmer : public Base {
 public:
-    // Реализация метода process
+    /**
+     * @brief Выполняет стемминг переданного слова.
+     *
+     * Метод принимает слово и возвращает его стемму (основу).
+     * @param token Входное слово.
+     * @return Стеммированное слово.
+     */
     std::string process(const std::string &token) const override;
 };
 
