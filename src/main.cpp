@@ -19,14 +19,14 @@ int main() {
     token2.wordPos = 2;
 
     Token token3;
-    token3.body = "apple";
+    token3.body = "apple2";
     token3.fileId = 1;
     token3.pos = 300;
     token3.wordPos = 3;
 
 
     std::cout << "Adding tokens..." << std::endl;
-    for (int i = 0; i < 7; ++i) {
+    for (int i = 0; i < 2; ++i) {
         token1.pos++;
         token2.pos++;
         token3.pos++;
@@ -37,6 +37,7 @@ int main() {
 
         indexer1->addToken(token1);
         indexer1->addToken(token2);
+        indexer1->addToken(token3);
     }
 
     std::cout << "\nChecking buffer after overflow:" << std::endl;

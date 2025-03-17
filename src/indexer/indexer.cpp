@@ -33,7 +33,7 @@ void Indexer::addToken(const Token& token) {
         // Обновляем текущий размер
         const size_t newSize = buffer[body].calculateSize();
         currentSizeInBytes += newSize;
-        std::cout << currentSizeInBytes << std::endl;
+        std::cout <<token.body<<"   "<< currentSizeInBytes << std::endl;
 
         // Проверка превышения лимита
         if (currentSizeInBytes > maxBufferSizeInBytes) {
@@ -50,7 +50,7 @@ void Indexer::addToken(const Token& token) {
         const size_t newSize = bt.calculateSize();
         currentSizeInBytes += (newSize - oldSize);
 
-        std::cout << currentSizeInBytes << std::endl;
+        std::cout <<token.body<<"   "<< currentSizeInBytes << std::endl;
 
         if (currentSizeInBytes > maxBufferSizeInBytes) {
             saveTo(); // Сохраняем и очищаем буфер

@@ -1,6 +1,6 @@
 #include "bigToken.h"
 
-size_t BigToken::calculateSize() const {
+const size_t BigToken::calculateSize() const {
     size_t size = body.size(); // Размер строки body
 
     // Размер map[fileId → vector<TokenInfo>]

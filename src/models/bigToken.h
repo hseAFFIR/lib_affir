@@ -54,7 +54,7 @@ public:
      *
      * @return The size in bytes.
      */
-    size_t calculateSize() const;
+    const size_t calculateSize() const;
 
     /**
      * @brief Adds a new position to the token for a given file ID.
