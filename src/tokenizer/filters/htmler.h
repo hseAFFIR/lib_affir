@@ -5,7 +5,7 @@
 
 class Htmler : public Base {
 public:
-    std::string process(std::string& token) override {}
+    std::string process(const std::string &token) const override {}
 };
 
 #endif // LIB_AFFIR_HTMLER_H

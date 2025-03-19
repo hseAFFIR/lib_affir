@@ -73,7 +73,7 @@ std::pair<std::string, std::string> EnglishStemmer::english_set_regions(const st
 }
 
 // Реализация шага замены суффиксов (часть шагов 0, 1a и 1c)
-std::string EnglishStemmer::english_replace_suffixes(const std::string &word) {
+std::string EnglishStemmer::english_replace_suffixes(const std::string &word) const {
     std::string res = word;
 
     // Шаг 0: удаляем окончания "'s" или "'s'"
@@ -194,7 +194,7 @@ bool EnglishStemmer::english_is_short_syllable(const std::string &word) const {
     return false;
 }
 
-std::string EnglishStemmer::step2(const std::string &word, const std::string &R1) {
+std::string EnglishStemmer::step2(const std::string &word, const std::string &R1) const {
     std::string res = word;
     if (!R1.empty()) {
         // Список суффиксов и замен
@@ -233,7 +233,7 @@ std::string EnglishStemmer::step2(const std::string &word, const std::string &R1
     return res;
 }
 
-std::string EnglishStemmer::step3(const std::string &word, const std::string &R1, const std::string &R2) {
+std::string EnglishStemmer::step3(const std::string &word, const std::string &R1, const std::string &R2) const {
     std::string res = word;
     if (!R1.empty()) {
         std::vector<std::pair<std::string, std::string>> suffixes = {
@@ -265,7 +265,7 @@ std::string EnglishStemmer::step3(const std::string &word, const std::string &R1
     return res;
 }
 
-std::string EnglishStemmer::step4(const std::string &word, const std::string &R2) {
+std::string EnglishStemmer::step4(const std::string &word, const std::string &R2) const {
     std::string res = word;
     std::vector<std::string> suffixes = {"al", "ance", "ence", "er", "ic", "able",
                                          "ible", "ant", "ement", "ment", "ent", "ism",
@@ -288,7 +288,7 @@ std::string EnglishStemmer::step4(const std::string &word, const std::string &R2
     return res;
 }
 
-std::string EnglishStemmer::step5(const std::string &word, const std::string &R1, const std::string &R2) {
+std::string EnglishStemmer::step5(const std::string &word, const std::string &R1, const std::string &R2) const {
     std::string res = word;
     bool e_flag = false, l_flag = false;
     if (!res.empty()) {
@@ -315,10 +315,10 @@ std::string EnglishStemmer::step5(const std::string &word, const std::string &R1
     return res;
 }
 
-std::string EnglishStemmer::english_stemmer(const std::string &inputWord) {
+std::string EnglishStemmer::process(const std::string &inputWord) const {
     // Если слово присутствует в исключениях – возвращаем его преобразование
     if (english_exceptions1.find(inputWord) != english_exceptions1.end())
-        return english_exceptions1[inputWord];
+        return english_exceptions1.at(inputWord);
 
     // Работая с копией слова
     std::string word = inputWord;

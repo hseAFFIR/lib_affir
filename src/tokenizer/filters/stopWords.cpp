@@ -58,7 +58,7 @@ void StopWords::initialize() {
     initialized = true;
 }
 
-std::string StopWords::process(std::string& token) {
+std::string StopWords::process(const std::string &token) const {
     if (!initialized)
         initialize();
     // Если токен присутствует хотя бы в одном из наборов стоп-слов,

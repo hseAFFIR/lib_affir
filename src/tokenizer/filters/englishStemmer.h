@@ -6,13 +6,14 @@
 #include <unordered_set>
 #include <vector>
 #include <utility>
+#include "base.h"
 
-class EnglishStemmer {
+class EnglishStemmer : public Base {
 public:
     /// Выполняет стемминг английского слова по алгоритму Porter2.
     /// :param word: слово в нижнем регистре без лишних символов
     /// :return: обрезанное слово
-    std::string english_stemmer(const std::string &word);
+    std::string process(const std::string &word) const override;
 
     EnglishStemmer();
 
@@ -21,18 +22,18 @@ private:
     std::string english_vowels;
     std::vector<std::string> english_doubles;
     std::string english_valid_li_endings;
-    std::unordered_map<std::string, std::string> english_exceptions1;
+    const std::unordered_map<const std::string, const std::string> english_exceptions1;
     std::unordered_set<std::string> english_exceptions2;
 
     // Вспомогательные методы
     std::pair<std::string, std::string> english_set_regions(const std::string &word) const;
-    std::string english_replace_suffixes(const std::string &word);
+    std::string english_replace_suffixes(const std::string &word) const;
     bool english_is_short(const std::string &word, const std::string &R1) const;
     bool english_is_short_syllable(const std::string &word) const;
-    std::string step2(const std::string &word, const std::string &R1);
-    std::string step3(const std::string &word, const std::string &R1, const std::string &R2);
-    std::string step4(const std::string &word, const std::string &R2);
-    std::string step5(const std::string &word, const std::string &R1, const std::string &R2);
+    std::string step2(const std::string &word, const std::string &R1) const;
+    std::string step3(const std::string &word, const std::string &R1, const std::string &R2) const;
+    std::string step4(const std::string &word, const std::string &R2) const;
+    std::string step5(const std::string &word, const std::string &R1, const std::string &R2) const;
 
     // Вспомогательные inline-функции
     static bool ends_with(const std::string &s, const std::string &suffix);

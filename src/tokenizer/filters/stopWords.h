@@ -7,7 +7,7 @@
 
 class StopWords : public Base {
 public:
-    std::string process(std::string& token) override {}    
+    std::string process(const std::string &token) const override {}    
 private:
     // Статические контейнеры для стоп-слов
     static std::unordered_set<std::string> stopWordsRu;
