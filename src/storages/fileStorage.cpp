@@ -6,7 +6,7 @@
 #include "fileStorage.h"
 
 unsigned short FileStorage::instancesNumber = 0;
-unsigned long FileStorage::g_cursor = 0;
+Pos FileStorage::g_cursor = 0;
 std::unordered_map<FileId, DataStruct> FileStorage::dataMap;
 
 bool FileStorage::isStorageLoaded = false;
@@ -26,7 +26,7 @@ FileStorage::FileStorage(const std::string &filename, const size_t filesize) {
     std::cout << std::format("Created file block with: filename = {}, startPos = {}, endPos = {}, id = {}",
                              dataStruct.filename, dataStruct.startPos, dataStruct.endPos(), id) << std::endl;
 
-    dataStream.seekp((long) dataStruct.startPos);
+    dataStream.seekp((long)dataStruct.startPos);
     g_cursor = dataStruct.endPos();
 }
 
@@ -55,14 +55,15 @@ void FileStorage::write(std::string_view data) {
     std::streampos position = dataStream.tellp();
     std::cout << std::format("New pos (file {}) = {}", dataStruct.filename, (long)position) << std::endl;
     if (position > dataStruct.endPos())
-        throw std::out_of_range(std::format("position > dataStruct.endPos, {} > {}", (long)position, dataStruct.endPos()));
+        throw std::out_of_range(
+                std::format("position > dataStruct.endPos, {} > {}", (long)position, dataStruct.endPos()));
 }
 
 size_t FileStorage::read(std::vector<char> &buffer, size_t bytesToRead, size_t startPos) {
     if (startPos >= dataStruct.filesize)
         throw std::out_of_range("Starting position exceeds file's end position.");
 
-    dataStream.seekg((long) startPos);
+    dataStream.seekg((long)startPos);
 
     buffer.resize(bytesToRead + 1);
     size_t bytesToEnd = dataStruct.endPos() - dataStream.tellg();
@@ -117,31 +118,31 @@ void FileStorage::loadStorageMeta() {
     }
 
     // Load cursor
-    metaFileIn.read(reinterpret_cast<char*>(&g_cursor), sizeof(g_cursor));
+    metaFileIn.read(reinterpret_cast<char *>(&g_cursor), sizeof(g_cursor));
 
     // Load size of dataMap
     size_t mapSize;
-    metaFileIn.read(reinterpret_cast<char*>(&mapSize), sizeof(mapSize));
+    metaFileIn.read(reinterpret_cast<char *>(&mapSize), sizeof(mapSize));
 
     dataMap.clear();
     for (size_t i = 0; i < mapSize; ++i) {
         // Read FileId
         FileId fileId;
-        metaFileIn.read(reinterpret_cast<char*>(&fileId), sizeof(fileId));
+        metaFileIn.read(reinterpret_cast<char *>(&fileId), sizeof(fileId));
 
         // Read filesize
         DataStruct data;
-        metaFileIn.read(reinterpret_cast<char*>(&data.startPos), sizeof(data.startPos));
+        metaFileIn.read(reinterpret_cast<char *>(&data.startPos), sizeof(data.startPos));
 
         // Read filename length
         size_t filenameSize;
-        metaFileIn.read(reinterpret_cast<char*>(&filenameSize), sizeof(filenameSize));
+        metaFileIn.read(reinterpret_cast<char *>(&filenameSize), sizeof(filenameSize));
         // Read filename
         data.filename.resize(filenameSize);
-        metaFileIn.read(&data.filename[0], (long) filenameSize);
+        metaFileIn.read(&data.filename[0], (long)filenameSize);
 
         // Read filesize
-        metaFileIn.read(reinterpret_cast<char*>(&data.filesize), sizeof(data.filesize));
+        metaFileIn.read(reinterpret_cast<char *>(&data.filesize), sizeof(data.filesize));
 
         dataMap[fileId] = data;
     }
@@ -153,28 +154,28 @@ void FileStorage::saveStorageMeta() {
     std::ofstream metaFileOut(FileStorage::META_FILENAME_PATH, std::ios::binary);
 
     // Save cursor
-    metaFileOut.write(reinterpret_cast<char*>(&g_cursor), sizeof(g_cursor));
+    metaFileOut.write(reinterpret_cast<char *>(&g_cursor), sizeof(g_cursor));
 
     // Save size of dataMap
     size_t mapSize = dataMap.size();
-    metaFileOut.write(reinterpret_cast<char*>(&mapSize), sizeof(mapSize));
+    metaFileOut.write(reinterpret_cast<char *>(&mapSize), sizeof(mapSize));
 
     // Save each element of the unordered_map
-    for (const auto& pair : dataMap) {
+    for (const auto &pair: dataMap) {
         // Write FileId
-        metaFileOut.write(reinterpret_cast<const char*>(&pair.first), sizeof(pair.first));
+        metaFileOut.write(reinterpret_cast<const char *>(&pair.first), sizeof(pair.first));
 
         // Save DataStruct members
-        metaFileOut.write(reinterpret_cast<const char*>(&pair.second.startPos), sizeof(pair.second.startPos));
+        metaFileOut.write(reinterpret_cast<const char *>(&pair.second.startPos), sizeof(pair.second.startPos));
 
         size_t filenameSize = pair.second.filename.size();
         // Write length of filename
-        metaFileOut.write(reinterpret_cast<char*>(&filenameSize), sizeof(filenameSize));
+        metaFileOut.write(reinterpret_cast<char *>(&filenameSize), sizeof(filenameSize));
         // Write filename
         metaFileOut.write(pair.second.filename.c_str(), (long)filenameSize);
 
         // Write filesize
-        metaFileOut.write(reinterpret_cast<const char*>(&pair.second.filesize), sizeof(pair.second.filesize));
+        metaFileOut.write(reinterpret_cast<const char *>(&pair.second.filesize), sizeof(pair.second.filesize));
     }
     metaFileOut.close();
 }
