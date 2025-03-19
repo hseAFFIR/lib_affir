@@ -8,38 +8,24 @@ int main() {
 
     auto *indexer1 = new Indexer(100);
 
-    Token token1;
-    token1.body = "apple";
-    token1.fileId = 1;
-    token1.pos = 100;
-    token1.wordPos = 1;
-
-    Token token2;
-    token2.body = "banana";
-    token2.fileId = 2;
-    token2.pos = 200;
-    token2.wordPos = 2;
-
-    Token token3;
-    token3.body = "apple2";
-    token3.fileId = 1;
-    token3.pos = 300;
-    token3.wordPos = 3;
+    auto *token1 = new Token("apple", 1, 200, 1);
+    auto *token2 = new Token("banana", 2, 300, 2);
+    auto *token3 = new Token("apple2", 1, 400, 3);
 
 
     std::cout << "Adding tokens..." << std::endl;
     for (int i = 0; i < 2; ++i) {
-        token1.pos++;
-        token2.pos++;
-        token3.pos++;
+//        token1.pos++;
+//        token2.pos++;
+//        token3.pos++;
+//
+//        token1.wordPos++;
+//        token2.wordPos++;
+//        token3.wordPos++;
 
-        token1.wordPos++;
-        token2.wordPos++;
-        token3.wordPos++;
-
-        indexer1->addToken(token1);
-        indexer1->addToken(token2);
-        indexer1->addToken(token3);
+        indexer1->addToken(*token1);
+        indexer1->addToken(*token2);
+        indexer1->addToken(*token3);
     }
 
     std::cout << "\nChecking buffer after overflow:" << std::endl;
@@ -58,14 +44,14 @@ int main() {
 //    fileStorage->close();
 //    fileStorage2->close();
 
-    auto *fileStorage3 = new FileStorage(1);
-
-    std::vector<char> buffer;
-    while (!fileStorage3->isEnd()) {
-        fileStorage3->read(buffer);
-        std::cout << buffer.data() << std::endl;
-    }
-    FileStorage::saveStorageMeta();
+//    auto *fileStorage3 = new FileStorage(1);
+//
+//    std::vector<char> buffer;
+//    while (!fileStorage3->isEnd()) {
+//        fileStorage3->read(buffer);
+//        std::cout << buffer.data() << std::endl;
+//    }
+//    FileStorage::saveStorageMeta();
     // Token token("Hello",1,2,1);
     // std::cout<<token<<std::endl;
     // Token token2("Hello",1,2,1);

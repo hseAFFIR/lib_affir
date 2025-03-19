@@ -26,8 +26,8 @@ struct TokenInfo {
  * of where a token appears across multiple files.
  */
 class BigToken {
-public:
-    std::string body; ///< The text content of the token.
+private:
+    std::string body;    ///< The text content of the token.
 
     /**
      * @brief Maps file IDs to lists of token positions in those files.
@@ -36,6 +36,28 @@ public:
      * objects describing the token's occurrences in that file.
      */
     std::unordered_map<unsigned long, std::vector<TokenInfo>> filePositions;
+public:
+    const std::string &getBody() const {
+        return body;
+    }
+
+    void setBody(const std::string &b) {
+        BigToken::body = b;
+    }
+
+    const std::unordered_map<unsigned long, std::vector<TokenInfo>> &getFilePositions() const;
+
+    void setFilePositions(const std::unordered_map<unsigned long, std::vector<TokenInfo>> &filePositions);
+
+
+
+    /**
+     * @brief Maps file IDs to lists of token positions in those files.
+     *
+     * Each key is a file identifier, and the value is a vector of TokenInfo
+     * objects describing the token's occurrences in that file.
+     */
+
 
     /**
      * @brief Constructs a BigToken with an empty body and no file positions.

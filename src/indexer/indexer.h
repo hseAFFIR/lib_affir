@@ -4,15 +4,7 @@
 #include <vector>
 #include <string>
 #include "../models/bigToken.h"
-
-struct Token {
-    std::string body;
-    unsigned long pos;
-    unsigned long wordPos;
-    unsigned long fileId;
-
-    static const size_t posSize = 3 * sizeof(unsigned long);
-};
+#include "../models/token.h"
 
 
 /**

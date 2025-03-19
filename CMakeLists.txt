@@ -31,7 +31,7 @@ set(FILTERS
 set(SOURCE_FILES
         ${STORAGE_FILES}
         ${MODEL_FILES}
-        ${FILTERS}
+#        ${FILTERS}
         ${INDEXER_FILES}
         src/main.cpp
         src/common.h

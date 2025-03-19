@@ -1,5 +1,6 @@
 #include "indexer.h"
 #include <iostream>
+#include "../models/token.h"
 
 Indexer::Indexer(unsigned long bufferSize)
         : maxBufferSizeInBytes(bufferSize), currentSizeInBytes(0) {}
@@ -16,9 +17,9 @@ void Indexer::saveTo() {
 }
 
 void Indexer::addToken(const Token& token) {
-    const std::string& body = token.body;
-    unsigned long long fileId = token.fileId;
-    const TokenInfo info{token.pos, token.wordPos};
+    const std::string& body = token.getBody();
+    unsigned long long fileId = token.getFileId();
+    const TokenInfo info{token.getPos(), token.getIndex()};
 
     // Проверка существования BigToken с таким body
     auto it = buffer.find(body);
@@ -33,7 +34,7 @@ void Indexer::addToken(const Token& token) {
         // Обновляем текущий размер
         const size_t newSize = buffer[body].calculateSize();
         currentSizeInBytes += newSize;
-        std::cout <<token.body<<"   "<< currentSizeInBytes << std::endl;
+        std::cout <<token.getBody()<<"   "<< currentSizeInBytes << std::endl;
 
         // Проверка превышения лимита
         if (currentSizeInBytes > maxBufferSizeInBytes) {
@@ -50,7 +51,7 @@ void Indexer::addToken(const Token& token) {
         const size_t newSize = bt.calculateSize();
         currentSizeInBytes += (newSize - oldSize);
 
-        std::cout <<token.body<<"   "<< currentSizeInBytes << std::endl;
+        std::cout <<token.getBody()<<"   "<< currentSizeInBytes << std::endl;
 
         if (currentSizeInBytes > maxBufferSizeInBytes) {
             saveTo(); // Сохраняем и очищаем буфер
