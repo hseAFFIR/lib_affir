@@ -49,16 +49,6 @@ public:
 
     void setFilePositions(const std::unordered_map<unsigned long, std::vector<TokenInfo>> &filePositions);
 
-
-
-    /**
-     * @brief Maps file IDs to lists of token positions in those files.
-     *
-     * Each key is a file identifier, and the value is a vector of TokenInfo
-     * objects describing the token's occurrences in that file.
-     */
-
-
     /**
      * @brief Constructs a BigToken with an empty body and no file positions.
      */
@@ -76,7 +66,7 @@ public:
      *
      * @return The size in bytes.
      */
-    const size_t calculateSize() const;
+    size_t calculateSize() const;
 
     /**
      * @brief Adds a new position to the token for a given file ID.
@@ -88,7 +78,19 @@ public:
         filePositions[fileId].push_back(info);
     }
 
+    /**
+    * @brief Merges new file position data into the existing structure.
+    *
+    * @param newFilePositions The new data to merge.
+    */
+    void mergeFilePositions(const std::unordered_map<unsigned long, std::vector<TokenInfo>>& newFilePositions);
 
+    /**
+     * @brief Destroys the BigToken object.
+     *
+     * Ensures that any dynamically allocated resources (if added in the future) are properly released.
+     */
+    ~BigToken();
 
 };
 

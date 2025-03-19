@@ -15,13 +15,6 @@ int main() {
 
     std::cout << "Adding tokens..." << std::endl;
     for (int i = 0; i < 2; ++i) {
-//        token1.pos++;
-//        token2.pos++;
-//        token3.pos++;
-//
-//        token1.wordPos++;
-//        token2.wordPos++;
-//        token3.wordPos++;
 
         indexer1->addToken(*token1);
         indexer1->addToken(*token2);
@@ -33,6 +26,71 @@ int main() {
     std::cout << "Current buffer size: " << buffer.size() << " entries" << std::endl;
 
 
+    // Создаем объект BigToken
+    BigToken token("example");
+
+    // Добавляем позиции для разных файлов
+    token.addPosition(1, {100, 5});
+    token.addPosition(1, {150, 7});
+    token.addPosition(2, {200, 10});
+
+    // Выводим начальные позиции
+    std::cout << "Initial positions:\n";
+    for (const auto& [fileId, positions] : token.getFilePositions()) {
+        std::cout << "File ID: " << fileId << " -> Positions: ";
+        for (const auto& pos : positions) {
+            std::cout << "(" << pos.pos << ", " << pos.wordPos << ") ";
+        }
+        std::cout << std::endl;
+    }
+
+    // Создаем новую структуру данных для слияния
+    std::unordered_map<unsigned long, std::vector<TokenInfo>> newPositions = {
+            {1, {{170, 8}, {180, 9}}},  // Дополняем существующий файл ID 1
+            {3, {{300, 15}, {310, 16}}} // Добавляем новый файл ID 3
+    };
+
+    // Вызываем addPosition с новой структурой
+    token.mergeFilePositions(newPositions);
+
+    std::cout << "\nAfter addPosition:\n";
+    for (const auto& [fileId, positions] : token.getFilePositions()) {
+        std::cout << "File ID: " << fileId << " -> Positions: ";
+        for (const auto& pos : positions) {
+            std::cout << "(" << pos.pos << ", " << pos.wordPos << ") ";
+        }
+        std::cout << std::endl;
+    }
+
+    // Создаем другую структуру данных для mergeFilePositions
+    std::unordered_map<unsigned long, std::vector<TokenInfo>> mergeData = {
+            {2, {{220, 11}}},          // Дополняем файл ID 2
+            {4, {{400, 20}, {410, 21}}} // Новый файл ID 4
+    };
+
+    // Вызываем mergeFilePositions
+    token.mergeFilePositions(mergeData);
+
+    std::cout << "\nAfter mergeFilePositions:\n";
+    for (const auto& [fileId, positions] : token.getFilePositions()) {
+        std::cout << "File ID: " << fileId << " -> Positions: ";
+        for (const auto& pos : positions) {
+            std::cout << "(" << pos.pos << ", " << pos.wordPos << ") ";
+        }
+        std::cout << std::endl;
+    }
+
+
+    BigToken bigToken = indexer1->getTokenInfo("example");
+
+    std::cout << "\nGet token Info:\n";
+    for (const auto& [fileId, positions] : bigToken.getFilePositions()) {
+        std::cout << "File ID: " << fileId << " -> Positions: ";
+        for (const auto& pos : positions) {
+            std::cout << "(" << pos.pos << ", " << pos.wordPos << ") ";
+        }
+        std::cout << std::endl;
+    }
 
 
 //    std::string str = "1234,5687,(),1234,4567,()";
