@@ -9,7 +9,15 @@ set(STORAGE_FILES
 
 set(MODEL_FILES
         src/models/token.h
-        src/models/token.cpp)
+        src/models/token.cpp
+        src/models/bigToken.h
+        src/models/bigToken.cpp
+)
+
+set(INDEXER_FILES
+        src/indexer/indexer.cpp
+        src/indexer/indexer.h
+)
 
 set(FILTERS
         src/tokenizer/filters/base.h
@@ -23,7 +31,8 @@ set(FILTERS
 set(SOURCE_FILES
         ${STORAGE_FILES}
         ${MODEL_FILES}
-        ${FILTERS}
+#        ${FILTERS}
+        ${INDEXER_FILES}
         src/main.cpp
         src/common.h
 )
