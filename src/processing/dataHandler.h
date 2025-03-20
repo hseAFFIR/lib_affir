@@ -16,7 +16,6 @@
  * used by the Indexer. It sorts the filters based on a predefined order and then processes the 
  * text by writing it to a file, tokenizing it, and passing the tokens to an indexer.
  */
-
 class DataHandler {
 public:
     /**

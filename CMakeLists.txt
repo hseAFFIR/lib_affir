@@ -41,13 +41,15 @@ set(FILTERS
         src/tokenizer/filters/punctuator.cpp
         src/tokenizer/filters/stopWords.h
         src/tokenizer/filters/stopWords.cpp
-        src/tokenizer/tokenizer.h)
+        src/tokenizer/tokenizer.h
+        src/tokenizer/filters/filters.h)
 
 set(SOURCE_FILES
         ${STORAGE_FILES}
         ${MODEL_FILES}
         ${FILTERS}
         ${INDEXER_FILES}
+        ${PROCESSING_FILES}
         src/main.cpp
         src/common.h
 )
