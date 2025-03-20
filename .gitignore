@@ -128,4 +128,4 @@ _deps
 .vscode/
 .idea/
 poetry.lock
-
+venv
