@@ -316,12 +316,12 @@ std::string EnglishStemmer::step5(const std::string &word, const std::string &R1
 }
 
 std::string EnglishStemmer::process(const std::string &inputWord) const {
+    std::string word = inputWord;
+    word = to_lower(word);
     // Если слово присутствует в исключениях – возвращаем его преобразование
     if (english_exceptions1.find(inputWord) != english_exceptions1.end())
         return english_exceptions1.at(inputWord);
 
-    // Работая с копией слова
-    std::string word = inputWord;
     if (!word.empty() && word[0] == 'y')
         word[0] = 'Y';
 

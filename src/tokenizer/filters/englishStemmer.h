@@ -17,6 +17,10 @@ public:
 
     EnglishStemmer();
 
+    FilterOrder getOrder() const override {
+        return FilterOrder::EnglishStemmer;
+    }
+
 private:
     // Константы, определённые в конструкторе
     std::string english_vowels;

@@ -8,6 +8,10 @@
 class Lowercaser : public Base {
 public:
     std::string process(const std::string& token) const override {}
+
+    FilterOrder getOrder() const override {
+        return FilterOrder::Lowercaser;
+    }
 };
 
 #endif // LIB_AFFIR_LOWERCASER_H
