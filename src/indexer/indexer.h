@@ -4,15 +4,7 @@
 #include <vector>
 #include <string>
 #include "../models/bigToken.h"
-
-struct Token {
-    std::string body;
-    unsigned long pos;
-    unsigned long wordPos;
-    unsigned long fileId;
-
-    static const size_t posSize = 3 * sizeof(unsigned long);
-};
+#include "../models/token.h"
 
 
 /**
@@ -67,9 +59,9 @@ public:
      * Searches the buffer for the BigToken associated with the provided body string.
      *
      * @param tokenName The body of the token to query.
-     * @return Pointer to the BigToken instance if found, nullptr otherwise.
+     * @return Ref to the BigToken instance if found, nullptr otherwise.
      */
-    const BigToken* getTokenInfo(const std::string& tokenName) const;
+    const BigToken& getTokenInfo(const std::string& tokenName) const;
 
     /**
      * @brief Returns the current buffer contents and clears the buffer.
@@ -88,6 +80,13 @@ public:
      * @return A constant reference to the buffer.
      */
     const BufferType& getBuffer() const;
+
+    /**
+     * @brief Destroys the Indexer object, ensuring buffer persistence.
+     *
+     * If the buffer contains unsaved tokens, it will be flushed to storage before destruction.
+     */
+    ~Indexer();
 
 };
 

@@ -26,8 +26,8 @@ struct TokenInfo {
  * of where a token appears across multiple files.
  */
 class BigToken {
-public:
-    std::string body; ///< The text content of the token.
+private:
+    std::string body;    ///< The text content of the token.
 
     /**
      * @brief Maps file IDs to lists of token positions in those files.
@@ -36,6 +36,18 @@ public:
      * objects describing the token's occurrences in that file.
      */
     std::unordered_map<unsigned long, std::vector<TokenInfo>> filePositions;
+public:
+    const std::string &getBody() const {
+        return body;
+    }
+
+    void setBody(const std::string &b) {
+        BigToken::body = b;
+    }
+
+    const std::unordered_map<unsigned long, std::vector<TokenInfo>> &getFilePositions() const;
+
+    void setFilePositions(const std::unordered_map<unsigned long, std::vector<TokenInfo>> &filePositions);
 
     /**
      * @brief Constructs a BigToken with an empty body and no file positions.
@@ -54,7 +66,7 @@ public:
      *
      * @return The size in bytes.
      */
-    const size_t calculateSize() const;
+    size_t calculateSize() const;
 
     /**
      * @brief Adds a new position to the token for a given file ID.
@@ -66,7 +78,19 @@ public:
         filePositions[fileId].push_back(info);
     }
 
+    /**
+    * @brief Merges new file position data into the existing structure.
+    *
+    * @param newFilePositions The new data to merge.
+    */
+    void mergeFilePositions(const std::unordered_map<unsigned long, std::vector<TokenInfo>>& newFilePositions);
 
+    /**
+     * @brief Destroys the BigToken object.
+     *
+     * Ensures that any dynamically allocated resources (if added in the future) are properly released.
+     */
+    ~BigToken();
 
 };
 
