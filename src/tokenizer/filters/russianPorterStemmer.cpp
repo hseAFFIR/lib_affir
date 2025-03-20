@@ -56,7 +56,7 @@ RussianPorterStemmer::russian_set_regions(const std::string &word) const {
 std::string RussianPorterStemmer::process(const std::string &token) const {
     std::string word = token;
     std::transform(word.begin(), word.end(), word.begin(), ::tolower);
-    std::replace(word.begin(), word.end(), 'ё', 'е');
+    std::replace(word.begin(), word.end(), L'ё', L'е');
 
     auto [rv, r1, r2] = russian_set_regions(word);
 
