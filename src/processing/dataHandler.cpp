@@ -1,9 +1,9 @@
 #include "dataHandler.h"
 #include "../storages/fileStorage.h"
-
+#include "../indexer/indexer.h"
 #include <algorithm>
 
-DataHandler::DataHandler(const std::vector<Base*> &filters)
+DataHandler::DataHandler(const std::vector<Base*> &filters, const size_t buffer)
     : filters(filters)
 {
     std::sort(this->filters.begin(), this->filters.end(), 
@@ -18,8 +18,8 @@ void DataHandler::processText(const std::string &text, const std::string &filena
     fs.write(std::string_view(text));
     fs.close();
     Tokenizer tk(filters);
-    tk.tokenize(text, [this, &filename](Token token) {
-        //Indexer::store_token(token, filename);
-        // Дополнительная обработка при необходимости
+    Indexer ind(buffer);
+    tk.tokenize(text, [this, &filename, &ind](Token token) {
+        ind.addToken(token);
     });
 }   

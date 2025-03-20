@@ -306,7 +306,6 @@ std::string EnglishStemmer::step5(const std::string &word, const std::string &R1
         else if (res.size() - 1 >= r1_start && !english_is_short_syllable(res.substr(0, res.size() - 1))) {
             res.resize(res.size() - 1);
         }
-        // После удаления можно было бы обновить регионы, если потребуется
     }
     if (l_flag && res.size() > 1 && res[res.size() - 2] == 'l') {
         if (res.size() - 1 >= r2_start)
