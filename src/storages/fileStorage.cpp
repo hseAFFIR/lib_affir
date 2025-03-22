@@ -4,6 +4,7 @@
 #include <cstring>
 #include <format>
 #include "fileStorage.h"
+#include "../logger/logger.h"
 
 unsigned short FileStorage::instancesNumber = 0;
 Pos FileStorage::g_cursor = 0;
@@ -22,9 +23,8 @@ FileStorage::FileStorage(const std::string &filename, const size_t filesize) {
     dataStruct = DataStruct(g_cursor, filename, filesize);
     dataMap[id] = dataStruct;
     open();
-
-    std::cout << std::format("Created file block with: filename = {}, startPos = {}, endPos = {}, id = {}",
-                             dataStruct.filename, dataStruct.startPos, dataStruct.endPos(), id) << std::endl;
+    Logger::debug("FileStorage", "Created file block with: filename = {}, startPos = {}, endPos = {}, id = {}",
+                  dataStruct.filename, dataStruct.startPos, dataStruct.endPos(), id);
 
     dataStream.seekp((long)dataStruct.startPos);
     g_cursor = dataStruct.endPos();
@@ -36,9 +36,9 @@ FileStorage::FileStorage(const FileId fileId) : id(fileId) {
     open();
     dataStruct = dataMap[id];
     currentPosition = 0;
-    std::cout << std::format("Created file block with: filename = {}, startPos = {}, endPos = {}, id = {}",
-                             dataStruct.filename, dataStruct.startPos, dataStruct.endPos(), id) << std::endl;
-}
+    Logger::debug("FileStorage", "Created file block with: filename = {}, startPos = {}, endPos = {}, id = {}",
+                  dataStruct.filename, dataStruct.startPos, dataStruct.endPos(), id);
+    }
 
 void FileStorage::open() {
     if (dataStream.is_open()) return;
@@ -53,7 +53,9 @@ FileStorage::~FileStorage() {
 void FileStorage::write(std::string_view data) {
     dataStream.write(data.data(), (long)data.size());
     std::streampos position = dataStream.tellp();
-    std::cout << std::format("New pos (file {}) = {}", dataStruct.filename, (long)position) << std::endl;
+
+    Logger::debug("FileStorage::write", "New pos (file {}) = {}", dataStruct.filename, (long)position);
+
     if (position > dataStruct.endPos())
         throw std::out_of_range(
                 std::format("position > dataStruct.endPos, {} > {}", (long)position, dataStruct.endPos()));
@@ -70,7 +72,7 @@ size_t FileStorage::read(std::vector<char> &buffer, size_t bytesToRead, size_t s
     dataStream.read(buffer.data(), (long)std::min(bytesToRead, bytesToEnd));
 
     size_t bytesRead = dataStream.gcount();
-    std::cout << std::format("Read {} bytes from position {}", bytesRead, startPos) << std::endl;
+    Logger::debug("FileStorage::read", "Read {} bytes from position {}", bytesRead, startPos);
     return bytesRead;
 }
 

@@ -4,38 +4,48 @@
 
 #include "search.h"
 #include <iostream>
+#include "../logger/logger.h"
+#include <cctype> // для ispunct
+#include <algorithm> // для remove_if
 
-Search::Search(Indexer& indexer) : indexer(indexer) {}
-
-std::vector<std::string> Search::tokenize(const std::string& text) {
-    // Простая токенизация по пробелам (можно заменить на более сложную логику)
-    std::vector<std::string> tokens;
-    std::string token;
-    for (char ch : text) {
-        if (ch == ' ') {
-            if (!token.empty()) {
-                tokens.push_back(token);
-                token.clear();
-            }
-        } else {
-            token += ch;
-        }
-    }
-    if (!token.empty()) {
-        tokens.push_back(token);
-    }
-    return tokens;
+std::string removePunctuation(const std::string& text) {
+    std::string result = text;
+    // Удаляем знаки препинания
+    result.erase(std::remove_if(result.begin(), result.end(), ::ispunct), result.end());
+    return result;
 }
 
+
+
+
+Search::Search(Indexer& indexer, StemFilter& stemFilter)
+        : indexer(indexer), stemFilter(stemFilter) {
+    Logger::warn("Search", "Search module initialized");
+}
 std::vector<std::pair<unsigned long, unsigned long>> Search::find(const std::string& text) {
+    Logger::debug("Search", "Starting search for text: {}", text);
     std::vector<std::pair<unsigned long, unsigned long>> results;
 
-    // Токенизация входного текста
-    std::vector<std::string> tokens = tokenize(text);
+    // Удаляем знаки препинания из текста
+    std::string cleanedText = removePunctuation(text);
 
-    // Поиск каждого токена в индексе
+    // Разбиваем текст на токены
+    std::vector<std::string> tokens;
+    std::istringstream stream(cleanedText);
+    std::string token;
+    while (stream >> token) {
+        tokens.push_back(token);
+    }
+    if (text.empty()){
+        Logger::error("Search", "Empty search text provided!");
+    }
+
+    // Обрабатываем каждый токен с помощью StemFilter
     for (const std::string& token : tokens) {
-        const BigToken& bigToken = indexer.getTokenInfo(token);
+        std::string stemmedToken = stemFilter.process(token);
+
+        // Ищем обработанный токен в индексе
+        const BigToken& bigToken = indexer.getTokenInfo(stemmedToken);
 
         // Получаем информацию о позициях токена в файлах
         const auto& filePositions = bigToken.getFilePositions();
@@ -47,6 +57,6 @@ std::vector<std::pair<unsigned long, unsigned long>> Search::find(const std::str
             }
         }
     }
-
+    Logger::info("Search", "Search completed successfully");
     return results;
 }

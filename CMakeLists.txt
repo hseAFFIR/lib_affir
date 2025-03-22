@@ -11,13 +11,11 @@ set(MODEL_FILES
         src/models/token.h
         src/models/token.cpp
         src/models/bigToken.h
-        src/models/bigToken.cpp
-)
+        src/models/bigToken.cpp)
 
 set(INDEXER_FILES
         src/indexer/indexer.cpp
-        src/indexer/indexer.h
-)
+        src/indexer/indexer.h)
 
 set(FILTERS
         src/tokenizer/filters/base.h
@@ -28,15 +26,24 @@ set(FILTERS
         src/tokenizer/filters/englishStemmer.cpp
         src/tokenizer/filters/englishStemmer.h)
 
+set(SEARCHER_FILES
+        src/searcher/search.h
+        src/searcher/search.cpp)
+
 set(SOURCE_FILES
         ${STORAGE_FILES}
         ${MODEL_FILES}
-#        ${FILTERS}
+        ${FILTERS}
         ${INDEXER_FILES}
+        ${SEARCHER_FILES}
         src/main.cpp
         src/common.h
-        src/searcher/search.cpp
-        src/searcher/search.h
-)
+        src/logger/logger.h
+        src/logger/logger.h
+        src/logger/logger.cpp)
+
 
 add_executable(lib_affir ${SOURCE_FILES})
+
+target_link_libraries(lib_affir PRIVATE spdlog::spdlog)
+find_package(spdlog CONFIG REQUIRED)
