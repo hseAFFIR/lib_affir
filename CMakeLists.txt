@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.28.1)
 project(lib_affir)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -35,6 +35,8 @@ set(SOURCE_FILES
         ${INDEXER_FILES}
         src/main.cpp
         src/common.h
+        src/searcher/search.cpp
+        src/searcher/search.h
 )
 
 add_executable(lib_affir ${SOURCE_FILES})
