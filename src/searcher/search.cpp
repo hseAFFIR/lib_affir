@@ -15,9 +15,6 @@ std::string removePunctuation(const std::string& text) {
     return result;
 }
 
-
-
-
 Search::Search(Indexer& indexer, StemFilter& stemFilter)
         : indexer(indexer), stemFilter(stemFilter) {
     Logger::warn("Search", "Search module initialized");
