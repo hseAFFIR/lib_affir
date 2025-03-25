@@ -6,17 +6,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-
-/**
- * @brief Represents the position information of a token within a file.
- *
- * This struct holds the position (pos) and word position (wordPos) of a token
- * in the original data stream.
- */
-struct TokenInfo {
-    unsigned long pos;    ///< The absolute position in the data stream.
-    unsigned long wordPos;///< The position within a word or sentence.
-};
+#include "../common.h"
 
 /**
  * @brief Aggregates all occurrences of a token across different files.
@@ -35,7 +25,7 @@ private:
      * Each key is a file identifier, and the value is a vector of TokenInfo
      * objects describing the token's occurrences in that file.
      */
-    std::unordered_map<unsigned long, std::vector<TokenInfo>> filePositions;
+    PosMap filePositions;
 public:
     const std::string &getBody() const {
         return body;
@@ -45,9 +35,9 @@ public:
         BigToken::body = b;
     }
 
-    const std::unordered_map<unsigned long, std::vector<TokenInfo>> &getFilePositions() const;
+    const PosMap &getFilePositions() const;
 
-    void setFilePositions(const std::unordered_map<unsigned long, std::vector<TokenInfo>> &filePositions);
+    void setFilePositions(const PosMap &filePositions);
 
     /**
      * @brief Constructs a BigToken with an empty body and no file positions.
@@ -83,7 +73,7 @@ public:
     *
     * @param newFilePositions The new data to merge.
     */
-    void mergeFilePositions(const std::unordered_map<unsigned long, std::vector<TokenInfo>>& newFilePositions);
+    void mergeFilePositions(const PosMap& newFilePositions);
 
     /**
      * @brief Destroys the BigToken object.
