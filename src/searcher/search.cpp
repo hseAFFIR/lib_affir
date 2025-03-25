@@ -7,7 +7,6 @@
 #include "../logger/logger.h"
 #include <cctype> // для ispunct
 #include <algorithm> // для remove_if
-#include <sstream>
 
 std::string removePunctuation(const std::string& text) {
     std::string result = text;
