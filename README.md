@@ -1,9 +1,11 @@
 # AFFIR library
 ## Table of Contents
-- [AFFIR library](#affir-library)
-  - [Table of Contents](#table-of-contents)
-  - [Developer Guide](#developer-guide)
-    - [Update dependencies](#update-dependencies)
+<!-- TOC -->
+* [AFFIR library](#affir-library)
+  * [Table of Contents](#table-of-contents)
+  * [Developer Guide](#developer-guide)
+    * [Update dependencies](#update-dependencies)
+<!-- TOC -->
 
 ## Developer Guide
 1. `git clone --recursive https://github.com/hseAFFIR/lib_affir.git`
