@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cerrno>
 #include <cstring>
-#include <format>
+#include <fmt/core.h>  // Вместо <format>
 #include "fileStorage.h"
 #include "../logger/logger.h"
 
@@ -57,8 +57,7 @@ void FileStorage::write(std::string_view data) {
     Logger::debug("FileStorage::write", "New pos (file {}) = {}", dataStruct.filename, (long)position);
 
     if (position > dataStruct.endPos())
-        throw std::out_of_range(
-                std::format("position > dataStruct.endPos, {} > {}", (long)position, dataStruct.endPos()));
+        Logger::debug("FileStorage::write","position > dataStruct.endPos, {} > {}", (long)position, dataStruct.endPos());
 }
 
 size_t FileStorage::read(std::vector<char> &buffer, size_t bytesToRead, size_t startPos) {

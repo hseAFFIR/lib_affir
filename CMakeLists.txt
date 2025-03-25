@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.28.1)
 project(lib_affir)
 
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(STORAGE_FILES
         src/storages/fileStorage.cpp
@@ -45,5 +46,8 @@ set(SOURCE_FILES
 
 add_executable(lib_affir ${SOURCE_FILES})
 
-target_link_libraries(lib_affir PRIVATE spdlog::spdlog)
 find_package(spdlog CONFIG REQUIRED)
+target_link_libraries(lib_affir PRIVATE spdlog::spdlog)
+
+
+
