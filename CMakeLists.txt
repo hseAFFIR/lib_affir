@@ -45,5 +45,5 @@ set(SOURCE_FILES
 
 add_executable(lib_affir ${SOURCE_FILES})
 
+add_subdirectory(external/spdlog)
 target_link_libraries(lib_affir PRIVATE spdlog::spdlog)
-find_package(spdlog CONFIG REQUIRED)
