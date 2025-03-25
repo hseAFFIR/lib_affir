@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.28.1)
 project(lib_affir)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -19,6 +19,11 @@ set(INDEXER_FILES
         src/indexer/indexer.h
 )
 
+set(SEARCHER_FILES
+        src/searcher/search.cpp
+        src/searcher/search.h
+)
+
 set(FILTERS
         src/tokenizer/filters/base.h
         src/tokenizer/filters/stemFilter.cpp
@@ -31,8 +36,9 @@ set(FILTERS
 set(SOURCE_FILES
         ${STORAGE_FILES}
         ${MODEL_FILES}
-#        ${FILTERS}
+        ${FILTERS}
         ${INDEXER_FILES}
+        ${SEARCHER_FILES}
         src/main.cpp
         src/common.h
         src/logger/logger.h
