@@ -11,11 +11,18 @@ set(MODEL_FILES
         src/models/token.h
         src/models/token.cpp
         src/models/bigToken.h
-        src/models/bigToken.cpp)
+        src/models/bigToken.cpp
+)
 
 set(INDEXER_FILES
         src/indexer/indexer.cpp
-        src/indexer/indexer.h)
+        src/indexer/indexer.h
+)
+
+set(SEARCHER_FILES
+        src/searcher/search.cpp
+        src/searcher/search.h
+)
 
 set(FILTERS
         src/tokenizer/filters/base.h
@@ -25,10 +32,6 @@ set(FILTERS
         src/tokenizer/filters/russianPorterStemmer.h
         src/tokenizer/filters/englishStemmer.cpp
         src/tokenizer/filters/englishStemmer.h)
-
-set(SEARCHER_FILES
-        src/searcher/search.h
-        src/searcher/search.cpp)
 
 set(SOURCE_FILES
         ${STORAGE_FILES}
