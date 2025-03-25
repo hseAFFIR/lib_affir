@@ -42,7 +42,6 @@ set(SOURCE_FILES
         src/main.cpp
         src/common.h
         src/logger/logger.h
-        src/logger/logger.h
         src/logger/logger.cpp)
 
 
