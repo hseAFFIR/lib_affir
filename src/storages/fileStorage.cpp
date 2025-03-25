@@ -2,7 +2,6 @@
 #include <iostream>
 #include <cerrno>
 #include <cstring>
-#include <fmt/core.h>  // Вместо <format>
 #include "fileStorage.h"
 #include "../logger/logger.h"
 
