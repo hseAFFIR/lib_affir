@@ -1,5 +1,5 @@
-#ifndef LIB_AFFIR_ISTORAGEINDEX_H
-#define LIB_AFFIR_ISTORAGEINDEX_H
+#ifndef LIB_AFFIR_IINDEXSTORAGE_H
+#define LIB_AFFIR_IINDEXSTORAGE_H
 
 #include <vector>
 #include <iostream>
@@ -13,7 +13,7 @@
  * raw index data. Implementations should provide their own logic for
  * creating and accessing an index.
  */
-class IStorageIndex {
+class IIndexStorage {
     /**
      * @brief Creates an index from the given data.
      *
@@ -30,4 +30,4 @@ class IStorageIndex {
 };
 
 
-#endif //LIB_AFFIR_ISTORAGEINDEX_H
+#endif //LIB_AFFIR_IINDEXSTORAGE_H
