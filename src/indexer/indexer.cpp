@@ -1,14 +1,17 @@
 #include "indexer.h"
 #include <iostream>
 #include "../models/token.h"
+#include "../logger/logger.h"
 
 Indexer::Indexer(unsigned long bufferSize)
-        : maxBufferSizeInBytes(bufferSize), currentSizeInBytes(0) {}
+        : maxBufferSizeInBytes(bufferSize), currentSizeInBytes(0) {
+    Logger::info("Indexer", "Indexer module initialized");
+}
 
 void Indexer::clearBuffer() {
     buffer.clear();
     currentSizeInBytes = 0;
-    std::cout << "Buffer cleared" << std::endl;
+    Logger::debug("Indexer", "Buffer cleared");
 }
 
 void Indexer::saveTo() {
@@ -34,8 +37,8 @@ void Indexer::addToken(const Token &token) {
         // Обновляем текущий размер
         const size_t newSize = buffer[body].calculateSize();
         currentSizeInBytes += newSize;
-        std::cout << token.getBody() << "   " << currentSizeInBytes << std::endl;
 
+        Logger::debug("Indexer::addToken", "{} sizeInBytes {}",token.getBody(),currentSizeInBytes);
         // Проверка превышения лимита
         if (currentSizeInBytes > maxBufferSizeInBytes) {
             saveTo(); // Сохраняем и очищаем буфер
@@ -51,7 +54,7 @@ void Indexer::addToken(const Token &token) {
         const size_t newSize = bt.calculateSize();
         currentSizeInBytes += (newSize - oldSize);
 
-        std::cout << token.getBody() << "   " << currentSizeInBytes << std::endl;
+        Logger::debug("Indexer::addToken", "{} sizeInBytes {}",token.getBody(),currentSizeInBytes);
 
         if (currentSizeInBytes > maxBufferSizeInBytes) {
             saveTo(); // Сохраняем и очищаем буфер
