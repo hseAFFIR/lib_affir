@@ -8,6 +8,8 @@
 
 #include "models/tokenInfo.h"
 
+#include <unordered_map>  // Добавьте эту строку
+#include <vector>         // Если ещё не подключен
 // Type alias for FileId to represent file identifier.
 typedef unsigned long FileId;
 typedef unsigned long Pos;
