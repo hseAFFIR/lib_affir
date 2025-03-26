@@ -3,12 +3,8 @@
 size_t BigToken::calculateSize() const {
     size_t size = body.size(); // Размер строки body
 
-    for (const auto& pair : filePositions) {
-        size += sizeof(unsigned long long); // Ключ fileId
-        size += pair.second.size() * sizeof(TokenInfo);
-    }
-
-    return size;
+    // sizeof(token_body) + ( sizeof(FileId) + sizeof(TokenInfo) * tokens_num ) * vector.size()
+    return size + posMapSize;
 }
 
 const PosMap &BigToken::getFilePositions() const {
@@ -33,4 +29,9 @@ void BigToken::mergeFilePositions(const PosMap& newFilePositions) {
 
 BigToken::~BigToken() {
     filePositions.clear(); // Явное освобождение памяти, если потребуется
+}
+
+void BigToken::addPosition(FileId fileId, const TokenInfo &info) {
+    filePositions[fileId].push_back(info);
+    posMapSize += sizeof(FileId) + sizeof(TokenInfo);
 }
