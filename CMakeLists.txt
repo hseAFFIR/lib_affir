@@ -5,7 +5,8 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(STORAGE_FILES
         src/storages/fileStorage.cpp
-        src/storages/fileStorage.h)
+        src/storages/fileStorage.h
+        src/storages/iIndexStorage.h)
 
 set(MODEL_FILES
         src/models/token.h
@@ -41,7 +42,6 @@ set(SOURCE_FILES
         ${SEARCHER_FILES}
         src/main.cpp
         src/common.h
-        src/logger/logger.h
         src/logger/logger.h
         src/logger/logger.cpp)
 
