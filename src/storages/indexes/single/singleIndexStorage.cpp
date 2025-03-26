@@ -1,10 +1,12 @@
 #include "singleIndexStorage.h"
-#include "../../logger/logger.h"
+#include "../../../logger/logger.h"
 
 const std::string SingleIndexStorage::STORAGE_FILENAME_PATH = "index";
 
-SingleIndexStorage::SingleIndexStorage(unsigned short blockSize) : blockSize(blockSize) {
-    Logger::info("SingleFileStorage", "Init storage with block size = {}", blockSize);
+
+
+SingleIndexStorage::SingleIndexStorage() {
+    Logger::info("SingleFileStorage", "Init storage");
     open();
 }
 
