@@ -4,7 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
-#include "../models/bigToken.h"
+#include "../../models/bigToken.h"
 
 /**
  * @brief Interface for a storage index.
@@ -23,10 +23,10 @@ class IIndexStorage {
     /**
      * @brief Retrieves the raw index from the files by given token bodies.
      *
-     * @param bodies A vector of strings representing the bodies to tokens.
+     * @param body A string for the body of token.
      * @param[out] output A vector of references to PosMap where results will be stored.
      */
-    virtual void getRawIndex(const std::vector<std::string>& bodies, std::vector<PosMap&>&) = 0;
+    virtual void getRawIndex(const std::string& body, std::vector<PosMap&>&) = 0;
 };
 
 

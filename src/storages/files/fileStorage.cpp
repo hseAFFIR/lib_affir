@@ -3,7 +3,7 @@
 #include <cerrno>
 #include <cstring>
 #include "fileStorage.h"
-#include "../logger/logger.h"
+#include "../../logger/logger.h"
 
 unsigned short FileStorage::instancesNumber = 0;
 Pos FileStorage::g_cursor = 0;
