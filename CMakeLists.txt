@@ -4,9 +4,11 @@ project(lib_affir)
 set(CMAKE_CXX_STANDARD 20)
 
 set(STORAGE_FILES
-        src/storages/fileStorage.cpp
-        src/storages/fileStorage.h
-        src/storages/iIndexStorage.h)
+        src/storages/files/fileStorage.cpp
+        src/storages/files/fileStorage.h
+        src/storages/indexes/iIndexStorage.h
+        src/storages/indexes/singleIndexStorage.cpp
+        src/storages/indexes/singleIndexStorage.h)
 
 set(MODEL_FILES
         src/models/token.h
