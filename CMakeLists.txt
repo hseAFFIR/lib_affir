@@ -7,8 +7,9 @@ set(STORAGE_FILES
         src/storages/files/fileStorage.cpp
         src/storages/files/fileStorage.h
         src/storages/indexes/iIndexStorage.h
-        src/storages/indexes/singleIndexStorage.cpp
-        src/storages/indexes/singleIndexStorage.h)
+        src/storages/indexes/single/singleIndexStorage.cpp
+        src/storages/indexes/single/singleIndexStorage.h
+)
 
 set(MODEL_FILES
         src/models/token.h
