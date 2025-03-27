@@ -26,7 +26,7 @@ private:
      * objects describing the token's occurrences in that file.
      */
     PosMap filePositions;
-    size_t posMapSize{};
+    uint32_t posMapSize{};
 public:
     const std::string &getBody() const { return body; }
 

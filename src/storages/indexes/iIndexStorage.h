@@ -14,6 +14,7 @@
  * creating and accessing an index.
  */
 class IIndexStorage {
+public:
     /**
      * @brief Creates an index from the given data.
      *
@@ -27,6 +28,10 @@ class IIndexStorage {
      * @param[out] output A vector of references to PosMap where results will be stored.
      */
     virtual void getRawIndex(const std::string& body, std::vector<PosMap&>&) = 0;
+
+    virtual void close() = 0;
+protected:
+
 };
 
 

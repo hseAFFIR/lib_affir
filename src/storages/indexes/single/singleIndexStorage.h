@@ -49,12 +49,12 @@ public:
 
     void getRawIndex(const std::string& body, std::vector<PosMap &> &vector) override;
 
+    void close() override;
 
 private:
     std::unordered_map<std::string, IndexPos> indexMap;
     const static std::string STORAGE_FILENAME_PATH;
     std::fstream indexStream;
-
     static const int MASK_MULTIPLE = 16;
     static const int ROW_SIZE = sizeof(TokenInfo) + sizeof(FileId);
 
@@ -62,11 +62,22 @@ private:
 
     static void markBlockFree(uint32_t blockPos, BlockMask blockMask);
 
+    static void mergeFreeBlock();
+
+    void updateStorageFile(IndexPos &indexPos, const PosMap& , uint32_t size);
+
+    void copyBytes(IndexPos from, IndexPos& to);
+    const size_t COPY_BLOCK_SIZE = 4096;
+
     static IndexPos getNewBlock(uint32_t indexSize);
 
     static uint32_t currentBlockPos;
 
     static BlockMask getMask(size_t size);
+
+    static uint32_t inBaseBlock(BlockMask blockMask);
+
+    std::streampos blockToPos(IndexPos blockPos) const;
 
     void open();
 
