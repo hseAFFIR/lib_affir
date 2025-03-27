@@ -11,15 +11,15 @@ size_t BigToken::calculateSize() const {
     return size;
 }
 
-const std::unordered_map<unsigned long, std::vector<TokenInfo>> &BigToken::getFilePositions() const {
+const PosMap &BigToken::getFilePositions() const {
     return filePositions;
 }
 
-void BigToken::setFilePositions(const std::unordered_map<unsigned long, std::vector<TokenInfo>> &fp) {
+void BigToken::setFilePositions(const PosMap &fp) {
     BigToken::filePositions = fp;
 }
 
-void BigToken::mergeFilePositions(const std::unordered_map<unsigned long, std::vector<TokenInfo>>& newFilePositions) {
+void BigToken::mergeFilePositions(const PosMap& newFilePositions) {
     for (const auto& [fileId, newPositions] : newFilePositions) {
         // Если fileId уже есть, добавляем данные
         if (filePositions.find(fileId) != filePositions.end()) {

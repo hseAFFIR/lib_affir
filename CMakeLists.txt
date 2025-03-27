@@ -1,11 +1,12 @@
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.28.1)
 project(lib_affir)
 
 set(CMAKE_CXX_STANDARD 20)
 
 set(STORAGE_FILES
         src/storages/fileStorage.cpp
-        src/storages/fileStorage.h)
+        src/storages/fileStorage.h
+        src/storages/iIndexStorage.h)
 
 set(MODEL_FILES
         src/models/token.h
@@ -23,6 +24,11 @@ set(PROCESSING_FILES
 set(INDEXER_FILES
         src/indexer/indexer.cpp
         src/indexer/indexer.h
+)
+
+set(SEARCHER_FILES
+        src/searcher/search.cpp
+        src/searcher/search.h
 )
 
 set(FILTERS
@@ -50,9 +56,14 @@ set(SOURCE_FILES
         ${FILTERS}
         ${INDEXER_FILES}
         ${PROCESSING_FILES}
+        ${SEARCHER_FILES}
         src/main.cpp
         src/common.h
-)
+        src/logger/logger.h
+        src/logger/logger.cpp)
+
 
 add_executable(lib_affir ${SOURCE_FILES})
 
+add_subdirectory(externals/spdlog)
+target_link_libraries(lib_affir PRIVATE spdlog::spdlog)

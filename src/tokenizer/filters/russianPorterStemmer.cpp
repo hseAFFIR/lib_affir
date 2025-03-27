@@ -3,6 +3,7 @@
 //
 
 #include "russianPorterStemmer.h"
+#include "../../logger/logger.h"
 #include <algorithm>
 #include <regex>
 
@@ -91,6 +92,7 @@ std::string RussianPorterStemmer::process(const std::string &token) const {
         word.pop_back();
     }
 
+    Logger::debug("russianPorterStemmer", "{} -> {}",token,word);
     return word;
 }
 
