@@ -35,7 +35,7 @@ void Indexer::addToken(const Token &token) {
         buffer.emplace(body, std::move(newBT));
 
         // Обновляем текущий размер
-        const size_t newSize = buffer[body].calculateSize();
+        const size_t newSize = buffer[body].getSize();
         currentSizeInBytes += newSize;
 
         Logger::debug("Indexer::addToken", "{} sizeInBytes {}",token.getBody(),currentSizeInBytes);
@@ -46,12 +46,12 @@ void Indexer::addToken(const Token &token) {
     } else {
         // Обновляем существующий BigToken
         BigToken &bt = it->second;
-        const size_t oldSize = bt.calculateSize();
+        const size_t oldSize = bt.getSize();
 
         bt.addPosition(fileId, info);
 
         // Обновляем размер
-        const size_t newSize = bt.calculateSize();
+        const size_t newSize = bt.getSize();
         currentSizeInBytes += (newSize - oldSize);
 
         Logger::debug("Indexer::addToken", "{} sizeInBytes {}",token.getBody(),currentSizeInBytes);

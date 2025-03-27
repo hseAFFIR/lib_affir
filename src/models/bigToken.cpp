@@ -1,6 +1,6 @@
 #include "bigToken.h"
 
-size_t BigToken::calculateSize() const {
+size_t BigToken::getSize() const {
     size_t size = body.size(); // Размер строки body
 
     // sizeof(token_body) + ( sizeof(FileId) + sizeof(TokenInfo) * tokens_num ) * vector.size()
@@ -34,4 +34,8 @@ BigToken::~BigToken() {
 void BigToken::addPosition(FileId fileId, const TokenInfo &info) {
     filePositions[fileId].push_back(info);
     posMapSize += sizeof(FileId) + sizeof(TokenInfo);
+}
+
+size_t BigToken::getPosesSize() const {
+    return posMapSize;
 }
