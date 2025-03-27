@@ -21,6 +21,8 @@ int main() {
     token1.addPosition(1, {100, 10});
     token1.addPosition(1, {150, 15});
     token1.addPosition(2, {200, 20});
+    token1.addPosition(3, {201, 109});
+    token1.addPosition(1, {201, 109});
 
     // Создаём BigToken для "test"
     BigToken token2("test");
