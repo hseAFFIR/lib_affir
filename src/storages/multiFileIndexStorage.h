@@ -24,14 +24,7 @@ private:
      *
      * @return An unordered_map where keys are tokens and values are lists of file names.
      */
-    std::unordered_map<std::string, std::vector<std::string>> loadMetadata();
-
-    /**
-     * @brief Saves metadata to JSON format.
-     *
-     * @param metadata The mapping of tokens to index files.
-     */
-    void saveMetadata(const std::unordered_map<std::string, std::vector<std::string>>& metadata);
+    std::unordered_map<std::string, std::vector<std::pair<std::string, size_t>>> loadMetadata();
 
     /**
      * @brief Converts PosMap to a JSON string.
@@ -53,6 +46,13 @@ public:
     MultiFileIndexStorage();
 
     ~MultiFileIndexStorage();
+
+    /**
+     * @brief Saves metadata to JSON format.
+     *
+     * @param metadata The mapping of tokens to index files.
+     */
+    void saveMetadata(const std::unordered_map<std::string, std::vector<std::pair<std::string, size_t>>> &metadata);
 
     void createIndex(std::unordered_map<std::string, BigToken>& data) override;
     void getRawIndex(const std::string& body, std::vector<PosMap>& output) override;

@@ -37,6 +37,8 @@ int main() {
     std::cout << "Создаём индекс..." << std::endl;
     storage.createIndex(data);
 
+//    storage.saveMetadata();
+
     // Проверяем, что файлы создались
     std::cout << "\nПроверьте файлы в каталоге!" << std::endl;
     system("ls -l");

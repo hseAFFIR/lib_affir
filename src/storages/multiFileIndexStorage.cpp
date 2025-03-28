@@ -5,59 +5,52 @@
 #include <filesystem>
 
 MultiFileIndexStorage::MultiFileIndexStorage() {
-    // Создаём директорию, если она не существует
     if (!std::filesystem::exists(storageDir)) {
         std::filesystem::create_directory(storageDir);
     }
 
-    // Загружаем fileCounter из файлов
-    std::ifstream meta(metadataFile);
-    if (meta) {
-        std::string line;
-        while (std::getline(meta, line)) {
-            fileCounter++;
+    fileCounter = 0;
+    for (const auto &entry : std::filesystem::directory_iterator(storageDir)) {
+        std::string filename = entry.path().filename().string();
+        if (filename.starts_with("index_") && filename.ends_with(".json")) {
+            try {
+                std::string numStr = filename.substr(6, filename.length() - 6 - 5); // "index_123.json" -> 123
+                unsigned long num = std::stoul(numStr);
+                if (num > fileCounter) {
+                    fileCounter = num;
+                }
+            } catch (...) {
+                // Ignore invalid files
+            }
         }
     }
+    fileCounter++; // Next file will be fileCounter
 }
 
 MultiFileIndexStorage::~MultiFileIndexStorage() {}
 
-// Функция создания индекса
 void MultiFileIndexStorage::createIndex(std::unordered_map<std::string, BigToken> &data) {
-    fileCounter++;
     std::string filename = storageDir + "/index_" + std::to_string(fileCounter) + ".json";
-
     std::ofstream outFile(filename);
     if (!outFile) {
         std::cerr << "Error creating index file: " << filename << std::endl;
         return;
     }
 
-    // Загружаем текущие метаданные
     auto metadata = loadMetadata();
 
-    // Записываем данные в JSON-формате
-    outFile << "{\n";
-    bool firstEntry = true;
-
-    for (const auto &[token, bigToken]: data) {
-        if (!firstEntry) outFile << ",\n";
-        firstEntry = false;
-
-        outFile << "  \"" << token << "\": " << posMapToJson(bigToken.getFilePositions());
-
-        // Обновляем metadata
-        metadata[token].push_back(filename);
+    for (const auto &[token, bigToken] : data) {
+        std::streampos offset = outFile.tellp();
+        std::string entry = posMapToJson(bigToken.getFilePositions()) + "\n";
+        outFile << entry;
+        metadata[token].emplace_back(filename, static_cast<size_t>(offset));
     }
 
-    outFile << "\n}\n";
     outFile.close();
-
-    // Сохраняем обновлённые метаданные
     saveMetadata(metadata);
+    fileCounter++;
 }
 
-// Функция получения индекса
 void MultiFileIndexStorage::getRawIndex(const std::string &body, std::vector<PosMap> &output) {
     auto metadata = loadMetadata();
 
@@ -66,113 +59,74 @@ void MultiFileIndexStorage::getRawIndex(const std::string &body, std::vector<Pos
         return;
     }
 
-    std::cout << "Найден токен '" << body << "' в файлах: ";
-    for (const auto &file: metadata[body]) {
-        std::cout << file << " ";
-    }
-    std::cout << std::endl;
-
-    // Загружаем данные из файлов
-    for (const auto &file: metadata[body]) {
-        std::cout << "Открываем файл: " << file << std::endl;
-
-        std::ifstream inFile(file);
+    for (const auto &[file, offset] : metadata[body]) {
+        std::ifstream inFile(file, std::ios::binary);
         if (!inFile) {
-            std::cerr << "Error reading index file: " << file << std::endl;
+            std::cerr << "Error opening file: " << file << std::endl;
             continue;
         }
 
-        std::stringstream buffer;
-        buffer << inFile.rdbuf();
-        std::string jsonStr = buffer.str();
-        inFile.close();
-
-        std::cout << "Содержимое файла:\n" << jsonStr << std::endl;
-
-        // Ищем нужный токен в JSON
-        size_t pos = jsonStr.find("\"" + body + "\":");
-        if (pos == std::string::npos) {
-            std::cerr << "Токен '" << body << "' не найден в файле " << file << std::endl;
+        inFile.seekg(offset);
+        std::string line;
+        if (!std::getline(inFile, line)) {
+            std::cerr << "Error reading line from file: " << file << " at offset " << offset << std::endl;
             continue;
         }
 
-        // Найдём начало объекта `{`
-        size_t start = jsonStr.find("{", pos);
-        if (start == std::string::npos) {
-            std::cerr << "Ошибка: не найден открывающий '{' для токена " << body << std::endl;
-            continue;
+        try {
+            output.push_back(jsonToPosMap(line));
+        } catch (const std::exception &e) {
+            std::cerr << "JSON parse error: " << e.what() << std::endl;
         }
-
-        // Найдём конец JSON-объекта с помощью подсчёта `{` и `}`
-        int balance = 1;  // Открывающая `{` уже найдена
-        size_t end = start + 1;
-        while (end < jsonStr.size() && balance > 0) {
-            if (jsonStr[end] == '{') balance++;
-            if (jsonStr[end] == '}') balance--;
-            end++;
-        }
-
-        if (balance != 0) {
-            std::cerr << "Ошибка: несбалансированные фигурные скобки в JSON для токена " << body << std::endl;
-            continue;
-        }
-
-        std::string tokenData = jsonStr.substr(start, end - start);
-        std::cout << "Извлечённые данные токена:\n" << tokenData << std::endl;
-
-        output.push_back(jsonToPosMap(tokenData));
-        std::cout << "Парсинг JSON завершён, добавлено " << output.back().size() << " записей.\n";
     }
 }
 
-
-// Загрузка метаданных
-std::unordered_map<std::string, std::vector<std::string>> MultiFileIndexStorage::loadMetadata() {
-    std::unordered_map<std::string, std::vector<std::string>> metadata;
+std::unordered_map<std::string, std::vector<std::pair<std::string, size_t>>> MultiFileIndexStorage::loadMetadata() {
+    std::unordered_map<std::string, std::vector<std::pair<std::string, size_t>>> metadata;
     std::ifstream inFile(metadataFile);
     if (!inFile) return metadata;
 
-    std::string token, file;
-    while (inFile >> token >> file) {
-        metadata[token].push_back(file);
+    std::string line;
+    while (std::getline(inFile, line)) {
+        std::istringstream iss(line);
+        std::string token, file;
+        size_t offset;
+        if (iss >> token >> file >> offset) {
+            metadata[token].emplace_back(file, offset);
+        }
     }
 
     return metadata;
 }
 
-// Сохранение метаданных
-void MultiFileIndexStorage::saveMetadata(const std::unordered_map<std::string, std::vector<std::string>> &metadata) {
+void MultiFileIndexStorage::saveMetadata(const std::unordered_map<std::string, std::vector<std::pair<std::string, size_t>>> &metadata) {
     std::ofstream outFile(metadataFile);
     if (!outFile) {
         std::cerr << "Error saving metadata file" << std::endl;
         return;
     }
 
-    for (const auto &[token, files]: metadata) {
-        for (const auto &file: files) {
-            outFile << token << " " << file << "\n";
+    for (const auto &[token, entries] : metadata) {
+        for (const auto &[file, offset] : entries) {
+            outFile << token << " " << file << " " << offset << "\n";
         }
     }
 }
 
-// Преобразование PosMap в JSON-строку
 std::string MultiFileIndexStorage::posMapToJson(const PosMap &posMap) {
     std::stringstream json;
     json << "{";
     bool firstFile = true;
-
-    for (const auto &[fileId, positions]: posMap) {
+    for (const auto &[fileId, positions] : posMap) {
         if (!firstFile) json << ",";
         firstFile = false;
         json << "\"" << fileId << "\":[";
-
         bool firstPos = true;
-        for (const auto &pos: positions) {
+        for (const auto &pos : positions) {
             if (!firstPos) json << ",";
             firstPos = false;
-            json <<  pos.pos << "," << pos.wordPos;
+            json << pos.pos << "," << pos.wordPos;
         }
-
         json << "]";
     }
     json << "}";
@@ -184,50 +138,37 @@ PosMap MultiFileIndexStorage::jsonToPosMap(const std::string &jsonStr) {
     size_t pos = 0;
 
     while (pos < jsonStr.size()) {
-        // Найти начало ключа (fileId)
         pos = jsonStr.find("\"", pos);
         if (pos == std::string::npos) break;
         size_t endKey = jsonStr.find("\"", pos + 1);
         if (endKey == std::string::npos) break;
 
-        // Преобразуем fileId в unsigned long
         unsigned long fileId = std::stoul(jsonStr.substr(pos + 1, endKey - pos - 1));
-        pos = jsonStr.find("[", endKey); // Найти начало массива
+        pos = jsonStr.find("[", endKey);
         if (pos == std::string::npos) break;
         pos++;
 
         std::vector<TokenInfo> positions;
         while (pos < jsonStr.size() && jsonStr[pos] != ']') {
-            // Найти первое число (pos)
             while (pos < jsonStr.size() && !isdigit(jsonStr[pos]) && jsonStr[pos] != '-') pos++;
-            if (pos >= jsonStr.size()) break;
-
             size_t endNum = pos;
             while (endNum < jsonStr.size() && (isdigit(jsonStr[endNum]) || jsonStr[endNum] == '-')) endNum++;
-            unsigned long posValue = std::stoi(jsonStr.substr(pos, endNum - pos));
+            unsigned long posValue = std::stoul(jsonStr.substr(pos, endNum - pos));
             pos = endNum;
 
-            // Найти второе число (wordPos)
             while (pos < jsonStr.size() && !isdigit(jsonStr[pos]) && jsonStr[pos] != '-') pos++;
-            if (pos >= jsonStr.size()) break;
-
             endNum = pos;
             while (endNum < jsonStr.size() && (isdigit(jsonStr[endNum]) || jsonStr[endNum] == '-')) endNum++;
-            unsigned long wordPosValue = std::stoi(jsonStr.substr(pos, endNum - pos));
+            unsigned long wordPosValue = std::stoul(jsonStr.substr(pos, endNum - pos));
             pos = endNum;
 
-            positions.push_back(TokenInfo{posValue, wordPosValue});
+            positions.emplace_back(TokenInfo{posValue, wordPosValue});
 
-            // Пропустить запятую, если есть
             while (pos < jsonStr.size() && (jsonStr[pos] == ',' || isspace(jsonStr[pos]))) pos++;
         }
 
         posMap[fileId] = positions;
-
-        // Найти закрывающую `]` и продолжить
-        pos = jsonStr.find("]", pos);
-        if (pos == std::string::npos) break;
-        pos++;
+        pos = jsonStr.find("]", pos) + 1;
     }
 
     return posMap;
