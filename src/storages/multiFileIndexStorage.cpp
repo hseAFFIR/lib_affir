@@ -9,120 +9,104 @@ MultiFileIndexStorage::MultiFileIndexStorage() {
         std::filesystem::create_directory(storageDir);
     }
 
+    metadata = loadMetadata();
+
     fileCounter = 0;
-    for (const auto &entry : std::filesystem::directory_iterator(storageDir)) {
+    for (const auto &entry: std::filesystem::directory_iterator(storageDir)) {
         std::string filename = entry.path().filename().string();
         if (filename.starts_with("index_") && filename.ends_with(".json")) {
             try {
-                std::string numStr = filename.substr(6, filename.length() - 6 - 5); // "index_123.json" -> 123
-                unsigned long num = std::stoul(numStr);
-                if (num > fileCounter) {
-                    fileCounter = num;
-                }
-            } catch (...) {
-                // Ignore invalid files
-            }
+                size_t num = std::stoul(filename.substr(6, filename.length() - 11));
+                if (num >= fileCounter) fileCounter = num + 1;
+            } catch (...) {}
         }
     }
-    fileCounter++; // Next file will be fileCounter
 }
 
 MultiFileIndexStorage::~MultiFileIndexStorage() {}
 
 void MultiFileIndexStorage::createIndex(std::unordered_map<std::string, BigToken> &data) {
-    std::string filename = storageDir + "/index_" + std::to_string(fileCounter) + ".json";
-    std::ofstream outFile(filename);
+    std::string filename = storageDir + "/index_" + std::to_string(fileCounter++) + ".json";
+    std::ofstream outFile(filename, std::ios::binary);
+
     if (!outFile) {
         std::cerr << "Error creating index file: " << filename << std::endl;
         return;
     }
 
-    auto metadata = loadMetadata();
+    for (auto &[token, bigToken]: data) {
+        size_t offset = static_cast<size_t>(outFile.tellp());
 
-    for (const auto &[token, bigToken] : data) {
-        std::streampos offset = outFile.tellp();
-        std::string entry = posMapToJson(bigToken.getFilePositions()) + "\n";
-        outFile << entry;
-        metadata[token].emplace_back(filename, static_cast<size_t>(offset));
+        outFile << posMapToJson(bigToken.getFilePositions()) << '\n';
+
+        metadata[token].emplace_back(filename, offset);
     }
-
-    outFile.close();
-    saveMetadata(metadata);
-    fileCounter++;
 }
 
 void MultiFileIndexStorage::getRawIndex(const std::string &body, std::vector<PosMap> &output) {
-    auto metadata = loadMetadata();
+    auto it = metadata.find(body);
+    if (it == metadata.end()) return;
 
-    if (metadata.find(body) == metadata.end()) {
-        std::cerr << "Token not found: " << body << std::endl;
-        return;
-    }
-
-    for (const auto &[file, offset] : metadata[body]) {
+    for (const auto &[file, offset]: it->second) {
         std::ifstream inFile(file, std::ios::binary);
-        if (!inFile) {
-            std::cerr << "Error opening file: " << file << std::endl;
-            continue;
-        }
+        if (!inFile) continue;
 
         inFile.seekg(offset);
         std::string line;
-        if (!std::getline(inFile, line)) {
-            std::cerr << "Error reading line from file: " << file << " at offset " << offset << std::endl;
-            continue;
-        }
-
-        try {
+        if (std::getline(inFile, line)) {
             output.push_back(jsonToPosMap(line));
-        } catch (const std::exception &e) {
-            std::cerr << "JSON parse error: " << e.what() << std::endl;
         }
+    }
+}
+
+void MultiFileIndexStorage::saveMetadata() {
+    std::ofstream outFile(metadataFile);
+    for (const auto &[token, entries]: metadata) {
+        outFile << token;
+        for (const auto &[file, offset]: entries) {
+            outFile << " " << file << " " << offset;
+        }
+        outFile << "\n";
     }
 }
 
 std::unordered_map<std::string, std::vector<std::pair<std::string, size_t>>> MultiFileIndexStorage::loadMetadata() {
-    std::unordered_map<std::string, std::vector<std::pair<std::string, size_t>>> metadata;
-    std::ifstream inFile(metadataFile);
-    if (!inFile) return metadata;
+    std::unordered_map<std::string, std::vector<std::pair<std::string, size_t>>> result;
 
+    std::ifstream inFile(metadataFile);
     std::string line;
+
     while (std::getline(inFile, line)) {
         std::istringstream iss(line);
-        std::string token, file;
+        std::string token;
+        iss >> token;
+
+        std::vector<std::pair<std::string, size_t>> entries;
+        std::string file;
         size_t offset;
-        if (iss >> token >> file >> offset) {
-            metadata[token].emplace_back(file, offset);
+
+        while (iss >> file >> offset) {
+            entries.emplace_back(file, offset);
+        }
+
+        if (!entries.empty()) {
+            result[token] = entries;
         }
     }
 
-    return metadata;
-}
-
-void MultiFileIndexStorage::saveMetadata(const std::unordered_map<std::string, std::vector<std::pair<std::string, size_t>>> &metadata) {
-    std::ofstream outFile(metadataFile);
-    if (!outFile) {
-        std::cerr << "Error saving metadata file" << std::endl;
-        return;
-    }
-
-    for (const auto &[token, entries] : metadata) {
-        for (const auto &[file, offset] : entries) {
-            outFile << token << " " << file << " " << offset << "\n";
-        }
-    }
+    return result;
 }
 
 std::string MultiFileIndexStorage::posMapToJson(const PosMap &posMap) {
     std::stringstream json;
     json << "{";
     bool firstFile = true;
-    for (const auto &[fileId, positions] : posMap) {
+    for (const auto &[fileId, positions]: posMap) {
         if (!firstFile) json << ",";
         firstFile = false;
         json << "\"" << fileId << "\":[";
         bool firstPos = true;
-        for (const auto &pos : positions) {
+        for (const auto &pos: positions) {
             if (!firstPos) json << ",";
             firstPos = false;
             json << pos.pos << "," << pos.wordPos;

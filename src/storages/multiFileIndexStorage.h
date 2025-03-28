@@ -11,48 +11,41 @@
  * @brief Multi-file storage implementation for indexing.
  *
  * This class manages token indexes across multiple JSON files, providing
- * efficient storage and retrieval of positional data.
+ * efficient storage and retrieval of positional data with in-memory metadata.
  */
 class MultiFileIndexStorage : public IIndexStorage {
 private:
-    std::string storageDir = "index_files"; ///< Directory where index files are stored.
-    std::string metadataFile = storageDir + "/index_metadata.json"; ///< File tracking token locations.
-    unsigned int fileCounter = 0; ///< Counter for unique file naming.
+    std::string storageDir = "index_files";
+    std::string metadataFile = storageDir + "/metadata.idx";
+    unsigned int fileCounter = 0;
+
+    /// In-memory metadata storage: token -> vector of (filename, offset)
+    std::unordered_map<std::string, std::vector<std::pair<std::string, size_t>>> metadata;
 
     /**
-     * @brief Loads metadata mapping tokens to index files.
-     *
-     * @return An unordered_map where keys are tokens and values are lists of file names.
+     * @brief Loads metadata from disk to memory
      */
     std::unordered_map<std::string, std::vector<std::pair<std::string, size_t>>> loadMetadata();
 
     /**
-     * @brief Converts PosMap to a JSON string.
-     *
-     * @param posMap The positional map to convert.
-     * @return A string in JSON format.
+     * @brief Converts PosMap to compact JSON format
      */
     std::string posMapToJson(const PosMap& posMap);
 
     /**
-     * @brief Parses a JSON string into a PosMap.
-     *
-     * @param jsonStr The JSON string containing position data.
-     * @return Parsed PosMap.
+     * @brief Parses compact JSON to PosMap
      */
     PosMap jsonToPosMap(const std::string& jsonStr);
 
 public:
     MultiFileIndexStorage();
-
     ~MultiFileIndexStorage();
 
     /**
-     * @brief Saves metadata to JSON format.
-     *
-     * @param metadata The mapping of tokens to index files.
+     * @brief Flushes in-memory metadata to disk
      */
-    void saveMetadata(const std::unordered_map<std::string, std::vector<std::pair<std::string, size_t>>> &metadata);
+    void saveMetadata();
+
 
     void createIndex(std::unordered_map<std::string, BigToken>& data) override;
     void getRawIndex(const std::string& body, std::vector<PosMap>& output) override;

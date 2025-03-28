@@ -33,11 +33,18 @@ int main() {
     data["example"] = token1;
     data["test"] = token2;
 
+    std::unordered_map<std::string, BigToken> data2;
+    BigToken token3("example");
+    token3.addPosition(1, {110, 190});
+    token3.addPosition(3, {150, 15});
+    data2["example"] = token3;
+
     // Записываем в индекс
     std::cout << "Создаём индекс..." << std::endl;
     storage.createIndex(data);
+    storage.createIndex(data2);
 
-//    storage.saveMetadata();
+    storage.saveMetadata();
 
     // Проверяем, что файлы создались
     std::cout << "\nПроверьте файлы в каталоге!" << std::endl;
