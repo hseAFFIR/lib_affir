@@ -10,16 +10,20 @@ DataHandler::DataHandler(const std::vector<Base*> &filters, const size_t buffer)
         [](const Base* a, const Base* b) {
             return static_cast<int>(a->getOrder()) < static_cast<int>(b->getOrder());
         });
+    
+    encodingHandler.initConsole();
 }
 
 void DataHandler::processText(const std::string &text, const std::string &filename) {
-    FileStorage fs(filename, text.size());
+    std::string utf8Text = encodingHandler.processInput(text);
+
+    FileStorage fs(filename, utf8Text.size());
     FileId id = fs.getId();
-    fs.write(std::string_view(text));
+    fs.write(std::string_view(utf8Text));
     fs.close();
     Tokenizer tk(filters);
     Indexer ind(buffer);
-    tk.tokenize(text, [this, &filename, &ind](Token token) {
+    tk.tokenize(utf8Text, [this, &filename, &ind](Token token) {
         ind.addToken(token);
     });
 }   

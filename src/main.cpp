@@ -5,16 +5,31 @@
 #include <cassert>
 #include <fstream>
 
+#include "processing/encodingHandler/encodingHandler.h"
+
 int main(){
     // Htmler html();
-    // Lowercaser lc();
+    Htmler* html = new Htmler();
+    Lowercaser* lc = new Lowercaser(); 
+    StopWords* sw = new StopWords();
+    Punctuator* pc = new Punctuator();
+    StemFilter* sf = new StemFilter();
     // Punctuator pc();
     // StemFilter sf();
     // StopWords sw();
     std::vector<Base*> filters = {new Lowercaser(), new Htmler(), new Punctuator(), 
         new StopWords(), new StemFilter()};
     DataHandler dh(filters,100);
-    std::string text = "This is a test text. <b>Hello<\b> World!";
+    std::string text = "Привет, мир!";
+
+    std::string testtext = "漢";
+    EncodingHandler encodingHandler;
+    encodingHandler.initConsole();
+    std::string utf8Text = encodingHandler.processInput(testtext);
+    std::cout << utf8Text << "\n";
+    utf8Text = lc->process(utf8Text);
+    std::cout << utf8Text;
+    
     std::string filename = "test_output.txt";
     dh.processText(text, filename);
 }

@@ -19,6 +19,8 @@ set(PROCESSING_FILES
         src/processing/filterOrder.h
         src/processing/dataHandler.h
         src/processing/dataHandler.cpp
+        src/processing/encodingHandler/encodingHandler.h
+        src/processing/encodingHandler/encodingHandler.cpp
 )
 
 set(INDEXER_FILES
@@ -48,6 +50,7 @@ set(FILTERS
         src/tokenizer/filters/stopWords.h
         src/tokenizer/filters/stopWords.cpp
         src/tokenizer/tokenizer.h
+        src/tokenizer/tokenizer.cpp
         src/tokenizer/filters/filters.h)
 
 set(SOURCE_FILES
