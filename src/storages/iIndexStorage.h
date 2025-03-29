@@ -14,6 +14,7 @@
  * creating and accessing an index.
  */
 class IIndexStorage {
+public:
     /**
      * @brief Creates an index from the given data.
      *

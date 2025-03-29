@@ -25,14 +25,6 @@ private:
     IIndexStorage &indexStorage; ///< Ref to indexStorage
 
     /**
-     * @brief Saves the current buffer to persistent storage and clears it.
-     *
-     * This method is automatically called when the buffer reaches its size limit.
-     * It transfers all tokens from the buffer to the storage and resets the buffer.
-     */
-    void saveTo();
-
-    /**
      * @brief Clears the buffer and resets its size counter.
      */
     void clearBuffer();
@@ -89,6 +81,14 @@ public:
      * If the buffer contains unsaved tokens, it will be flushed to storage before destruction.
      */
     ~Indexer();
+
+    /**
+     * @brief Saves the current buffer to persistent storage and clears it.
+     *
+     * This method is automatically called when the buffer reaches its size limit.
+     * It transfers all tokens from the buffer to the storage and resets the buffer.
+     */
+    void saveTo();
 
 };
 

@@ -13,38 +13,19 @@ int main() {
 
     MultiFileIndexStorage storage;
 
-    Indexer indexer(100, storage);
+    Indexer indexer(25, storage);
 
-    // Данные для индексации
-    std::unordered_map<std::string, BigToken> data;
+    indexer.addToken(Token("example", 100, 10, 1));
+    indexer.addToken(Token("example", 150, 15, 1));
+    indexer.addToken(Token("example", 200, 20, 2));
+    indexer.addToken(Token("example", 201, 109, 3));
+    indexer.addToken(Token("example", 201, 109, 1));
 
-    // Создаём BigToken для "example"
-    BigToken token1("example");
-    token1.addPosition(1, {100, 10});
-    token1.addPosition(1, {150, 15});
-    token1.addPosition(2, {200, 20});
-    token1.addPosition(3, {201, 109});
-    token1.addPosition(1, {201, 109});
+    indexer.addToken(Token("test", 50, 5, 3));
+    indexer.addToken(Token("test", 75, 7, 3));
 
-    // Создаём BigToken для "test"
-    BigToken token2("test");
-    token2.addPosition(3, {50, 5});
-    token2.addPosition(3, {75, 7});
+    indexer.saveTo();
 
-    // Добавляем в структуру данных
-    data["example"] = token1;
-    data["test"] = token2;
-
-    std::unordered_map<std::string, BigToken> data2;
-    BigToken token3("example");
-    token3.addPosition(1, {110, 190});
-    token3.addPosition(3, {150, 15});
-    data2["example"] = token3;
-
-    // Записываем в индекс
-    std::cout << "Создаём индекс..." << std::endl;
-    storage.createIndex(data);
-    storage.createIndex(data2);
 
     storage.saveMetadata();
 
@@ -60,13 +41,24 @@ int main() {
     // Вывод результатов
     for (size_t i = 0; i < results.size(); ++i) {
         std::cout << "Файл #" << (i + 1) << " содержит:" << std::endl;
-        for (const auto& [fileId, positions] : results[i]) {
+        for (const auto &[fileId, positions]: results[i]) {
             std::cout << "  В файле " << fileId << " позиции: ";
-            for (const auto& pos : positions) {
+            for (const auto &pos: positions) {
                 std::cout << "(" << pos.pos << ", " << pos.wordPos << ") ";
             }
             std::cout << std::endl;
         }
+    }
+
+    std::cout << "\n\nПроверка getTokenInfo\n";
+    BigToken resultBt = indexer.getTokenInfo("example");
+    PosMap tokenPos = resultBt.getFilePositions();
+    for (const auto &[fileId, positions]: tokenPos) {
+        std::cout << "  В файле " << fileId << " позиции: ";
+        for (const auto &pos: positions) {
+            std::cout << "(" << pos.pos << ", " << pos.wordPos << ") ";
+        }
+        std::cout << std::endl;
     }
 
 
