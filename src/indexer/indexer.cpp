@@ -3,8 +3,8 @@
 #include "../models/token.h"
 #include "../logger/logger.h"
 
-Indexer::Indexer(unsigned long bufferSize)
-        : maxBufferSizeInBytes(bufferSize), currentSizeInBytes(0) {
+Indexer::Indexer(unsigned long bufferSize, IIndexStorage &indStor)
+        : maxBufferSizeInBytes(bufferSize), currentSizeInBytes(0), indexStorage(indStor) {
     Logger::info("Indexer", "Indexer module initialized");
 }
 

@@ -5,6 +5,7 @@
 #include <string>
 #include "../models/bigToken.h"
 #include "../models/token.h"
+#include "../storages/iIndexStorage.h"
 
 
 /**
@@ -21,6 +22,7 @@ private:
     BufferType buffer; ///< Temporary storage for tokens before persisting.
     unsigned long maxBufferSizeInBytes; ///< Maximum allowed buffer size in bytes.
     unsigned long currentSizeInBytes; ///< Current buffer size in bytes.
+    IIndexStorage &indexStorage; ///< Ref to indexStorage
 
     /**
      * @brief Saves the current buffer to persistent storage and clears it.
@@ -41,7 +43,7 @@ public:
      *
      * @param bufferSize Maximum buffer size (in bytes) before flushing to storage.
      */
-    explicit Indexer(unsigned long bufferSize);
+    explicit Indexer(unsigned long bufferSize, IIndexStorage &indStor);
 
     /**
      * @brief Adds a new token to the buffer, handling overflow.

@@ -13,6 +13,8 @@ int main() {
 
     MultiFileIndexStorage storage;
 
+    Indexer indexer(100, storage);
+
     // Данные для индексации
     std::unordered_map<std::string, BigToken> data;
 
