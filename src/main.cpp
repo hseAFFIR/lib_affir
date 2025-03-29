@@ -3,7 +3,7 @@
 #include "tokenizer/filters/stemFilter.h"
 #include <iostream>
 #include "logger/logger.h"
-#include "storages/multiFileIndexStorage.h"
+#include "storages/indexes/multi/multiFileIndexStorage.h"
 
 int main() {
     // Logger
@@ -20,6 +20,12 @@ int main() {
     indexer.addToken(Token("example", 200, 20, 2));
     indexer.addToken(Token("example", 201, 109, 3));
     indexer.addToken(Token("example", 201, 109, 1));
+    indexer.addToken(Token("example", 2, 432, 4321));
+    indexer.addToken(Token("example", 12, 12, 14));
+    indexer.addToken(Token("example", 13, 20, 212));
+    indexer.addToken(Token("example", 4, 1234, 32));
+    indexer.addToken(Token("example", 2134, 4, 16));
+
 
     indexer.addToken(Token("test", 50, 5, 3));
     indexer.addToken(Token("test", 75, 7, 3));

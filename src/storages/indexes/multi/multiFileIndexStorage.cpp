@@ -3,7 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <filesystem>
-#include "../logger/logger.h"
+#include "../../../logger/logger.h"
 
 MultiFileIndexStorage::MultiFileIndexStorage() {
     Logger::debug("MultiFileIndexStorage", "MultiFileIndexStorage module initialized");

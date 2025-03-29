@@ -4,11 +4,11 @@ project(lib_affir)
 set(CMAKE_CXX_STANDARD 20)
 
 set(STORAGE_FILES
-        src/storages/fileStorage.cpp
-        src/storages/fileStorage.h
-        src/storages/iIndexStorage.h
-        src/storages/multiFileIndexStorage.h
-        src/storages/multiFileIndexStorage.cpp
+        src/storages/files/fileStorage.cpp
+        src/storages/files/fileStorage.h
+        src/storages/indexes/iIndexStorage.h
+        src/storages/indexes/multi/multiFileIndexStorage.h
+        src/storages/indexes/multi/multiFileIndexStorage.cpp
 )
 
 set(MODEL_FILES

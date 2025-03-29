@@ -1,7 +1,7 @@
 #ifndef LIB_AFFIR_MULTIFILEINDEXSTORAGE_H
 #define LIB_AFFIR_MULTIFILEINDEXSTORAGE_H
 
-#include "iIndexStorage.h"
+#include "../iIndexStorage.h"
 #include <fstream>
 #include <sstream>
 #include <unordered_map>
