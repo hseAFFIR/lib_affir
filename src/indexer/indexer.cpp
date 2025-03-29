@@ -15,7 +15,6 @@ void Indexer::clearBuffer() {
 }
 
 void Indexer::saveTo() {
-    // Logic for saving to index storage will be here
     indexStorage.createIndex(buffer);
     clearBuffer();
 }
@@ -64,23 +63,6 @@ void Indexer::addToken(const Token &token) {
 }
 
 const BigToken &Indexer::getTokenInfo(const std::string &tokenName) const {
-
-//    std::vector<BigToken *> inputBigTokens;
-//    BigToken token("example");
-//
-//    // Добавляем позиции для разных файлов
-//    token.addPosition(1, {100, 5});
-//    token.addPosition(1, {150, 7});
-//    token.addPosition(2, {200, 10});
-//    inputBigTokens.push_back(&token);
-//
-//    BigToken token2("example");
-//
-//    // Добавляем позиции для разных файлов
-//    token.addPosition(3, {100, 5});
-//    token.addPosition(3, {150, 7});
-//    token.addPosition(4, {200, 10});
-//    inputBigTokens.push_back(&token2);
 
     auto resultBigToken = new BigToken(tokenName);
 

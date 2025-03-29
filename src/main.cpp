@@ -13,7 +13,7 @@ int main() {
 
     MultiFileIndexStorage storage;
 
-    Indexer indexer(25, storage);
+    Indexer indexer(75, storage);
 
     indexer.addToken(Token("example", 100, 10, 1));
     indexer.addToken(Token("example", 150, 15, 1));
