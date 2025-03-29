@@ -1,6 +1,5 @@
 #include "indexer.h"
 #include <iostream>
-#include "../models/token.h"
 #include "../logger/logger.h"
 
 Indexer::Indexer(unsigned long bufferSize, IIndexStorage &indStor)
@@ -24,41 +23,36 @@ void Indexer::addToken(const Token &token) {
     unsigned long long fileId = token.getFileId();
     const TokenInfo info{token.getPos(), token.getIndex()};
 
-    // Проверка существования BigToken с таким body
+    // Checking the existence of BigToken with this body
     auto it = buffer.find(body);
     if (it == buffer.end()) {
-        // Создаем новый BigToken
         BigToken newBT(body);
         newBT.addPosition(fileId, info);
 
-        // Добавляем в буфер
-        buffer.emplace(body, std::move(newBT));
-
-        // Обновляем текущий размер
         const size_t newSize = buffer[body].calculateSize();
         currentSizeInBytes += newSize;
 
         Logger::debug("Indexer::addToken", "{} sizeInBytes {}",token.getBody(),currentSizeInBytes);
-        // Проверка превышения лимита
+
         if (currentSizeInBytes > maxBufferSizeInBytes) {
-            saveTo(); // Сохраняем и очищаем буфер
+            saveTo();
         }
+
+        buffer.emplace(body, std::move(newBT));
     } else {
-        // Обновляем существующий BigToken
         BigToken &bt = it->second;
         const size_t oldSize = bt.calculateSize();
 
-        bt.addPosition(fileId, info);
-
-        // Обновляем размер
         const size_t newSize = bt.calculateSize();
         currentSizeInBytes += (newSize - oldSize);
 
         Logger::debug("Indexer::addToken", "{} sizeInBytes {}",token.getBody(),currentSizeInBytes);
 
         if (currentSizeInBytes > maxBufferSizeInBytes) {
-            saveTo(); // Сохраняем и очищаем буфер
+            saveTo();
         }
+
+        bt.addPosition(fileId, info);
     }
 }
 
@@ -89,6 +83,6 @@ const Indexer::BufferType &Indexer::getBuffer() const {
 
 Indexer::~Indexer() {
     if (!buffer.empty()) {
-        saveTo(); // Сохранение буфера перед уничтожением
+        saveTo();
     }
 }

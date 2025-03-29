@@ -29,16 +29,10 @@ int main() {
 
     storage.saveMetadata();
 
-    // Проверяем, что файлы создались
-    std::cout << "\nПроверьте файлы в каталоге!" << std::endl;
-    system("ls -l");
-
-    // Запрашиваем индекс для "example"
     std::cout << "\nПолучаем индекс для 'example':" << std::endl;
     std::vector<PosMap> results;
     storage.getRawIndex("example", results);
 
-    // Вывод результатов
     for (size_t i = 0; i < results.size(); ++i) {
         std::cout << "Файл #" << (i + 1) << " содержит:" << std::endl;
         for (const auto &[fileId, positions]: results[i]) {
@@ -62,25 +56,23 @@ int main() {
     }
 
 
-//    // Создаем Indexer и добавляем несколько токенов
-//    Indexer indexer(1000);
-//    indexer.addToken(Token("example", 100, 5, 1));
-//    indexer.addToken(Token("test", 200, 10, 2));
-//
-//    // Создаем StemFilter
-//    StemFilter stemFilter;
-//
-//    // Создаем модуль поиска
-//    Search search(indexer, stemFilter);
-//
-//    // Выполняем поиск
-//    auto results2 = search.find("Пройдет много лет, и полковник\n"
-//                               "Аурелиано Буэндиа, стоя у стены в ожидании расстрела, вспомнит тот далекий вечер, когда отец взял его с собой посмотреть на лед. Макондо было тогда небольшим селением с двумя десятками хижин, выстроенных из глины и бамбука на берегу реки, которая мчала свои прозрачные воды по ложу из белых отполированных камней, огромных, как доисторические яйца.");
-//
-//    // Выводим результаты
-//    for (const auto& result : results2) {
-//        std::cout << "File ID: " << result.first << ", Position: " << result.second << std::endl;
-//    }
+    indexer.addToken(Token("example", 100, 5, 1));
+    indexer.addToken(Token("test", 200, 10, 2));
+
+    // Создаем StemFilter
+    StemFilter stemFilter;
+
+    // Создаем модуль поиска
+    Search search(indexer, stemFilter);
+
+    // Выполняем поиск
+    auto results2 = search.find("Пройдет много лет, и полковник\n"
+                               "Аурелиано Буэндиа, стоя у стены в ожидании расстрела, вспомнит тот далекий вечер, когда отец взял его с собой посмотреть на лед. Макондо было тогда небольшим селением с двумя десятками хижин, выстроенных из глины и бамбука на берегу реки, которая мчала свои прозрачные воды по ложу из белых отполированных камней, огромных, как доисторические яйца.");
+
+    // Выводим результаты
+    for (const auto& result : results2) {
+        std::cout << "File ID: " << result.first << ", Position: " << result.second << std::endl;
+    }
 
     return 0;
 }
