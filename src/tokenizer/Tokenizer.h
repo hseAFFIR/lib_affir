@@ -1,5 +1,5 @@
-#ifndef TOKENIZER_PIPELINE_H
-#define TOKENIZER_PIPELINE_H
+#ifndef TOKENIZER_H
+#define TOKENIZER_H
 
 #include <vector>
 #include <regex>
@@ -7,23 +7,20 @@
 #include "filters/base.h"
 #include "../models/Token.h"
 
-class TokenizerPipeline {
+class Tokenizer {
 public:
-    explicit TokenizerPipeline(std::vector<Base*> filters);
+    explicit Tokenizer(std::vector<Base*> filters);
 
-    std::vector<Token> run(const std::string &text, FileId fileId);
+    void tokenizeRaw(const std::string &text, FileId fileId, std::function<void(Token)> callback);
 
-    void tokenize(const std::string &text, FileId fileId, std::function<void(Token)> callback);
+    void tokenizeFiltered(const std::string &text, FileId fileId, std::function<void(Token)> callback);
 
     void addFilter(Base* filter);
 
 private:
     std::vector<Base*> filters;
     std::regex htmlPattern;
-
-    std::vector<Token> tokenize(const std::string &text, FileId fileId);
-
     std::string applyFilters(const std::string &token);
 };
 
-#endif // TOKENIZER_PIPELINE_H
+#endif // TOKENIZER_H
