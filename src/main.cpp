@@ -2,19 +2,26 @@
 #include "tokenizer/filters/filters.h"
 #include "processing/dataHandler.h"
 #include <vector>
-#include <cassert>
 #include <fstream>
 
 int main(){
-    // Htmler html();
-    // Lowercaser lc();
-    // Punctuator pc();
-    // StemFilter sf();
-    // StopWords sw();
-    std::vector<Base*> filters = {new Lowercaser(), new Htmler(), new Punctuator(), 
+
+    std::vector<Base*> filters = {new Lowercaser(), new Htmler(), new Punctuator(),
         new StopWords(), new StemFilter()};
-    DataHandler dh(filters,100);
-    std::string text = "This is a test text. <b>Hello<\b> World!";
-    std::string filename = "test_output.txt";
-    dh.processText(text, filename);
+
+    Tokenizer tokenizer(filters);
+
+    std::string text = "Hello, this is a <b>test</b> text with HTML and some stopwords.";
+
+    FileId fileId = 1;
+
+    tokenizer.tokenizeFiltered(text, fileId, [](Token token) {
+        std::cout << "Token: " << token.getBody() << " | Pos: " << token.getPos() << std::endl;
+    });
+
+    for (auto filter : filters) {
+        delete filter;
+    }
+
+    return 0;
 }

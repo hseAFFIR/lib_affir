@@ -1,64 +1,26 @@
-// tokenizer.h
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
 
 #include <vector>
-#include <string>
+#include <regex>
 #include <functional>
 #include "filters/base.h"
-#include "../models/token.h"
+#include "../models/Token.h"
 
 class Tokenizer {
 public:
-    // Конструктор с передачей владения фильтрами
-    explicit Tokenizer(const std::vector<Base*>& filters);
-    
-    // Итератор для пошаговой обработки
-    class Iterator {
-    public:
-        Iterator(Tokenizer* tokenizer, std::string buffer)
-            : tokenizer_(tokenizer), buffer_(std::move(buffer)) {}
-            
-        Token operator*() const { return current_token_; }
-        
-        Iterator& operator++() {
-            current_token_ = next_token_();
-            return *this;
-        }
-        
-        bool operator!=(const Iterator& other) const {
-            return current_pos_ < buffer_.size();
-        }
-        
-    private:
-        Token next_token_() {
-            // Реализация логики токенизации
-            // ...
-            return Token();
-        }
-        
-        Tokenizer* tokenizer_;
-        std::string buffer_;
-        size_t current_pos_ = 0;
-        Token current_token_;
-    };
+    explicit Tokenizer(std::vector<Base*> filters);
 
-    // Функция для использования в data_handler, стоило бы переехать в .cpp
-    void tokenize(const std::string& buffer, 
-                std::function<void(Token)> add_token) 
-    {
-        for(auto it = begin(buffer); it != end(); ++it) {
-            add_token(*it);
-        }
-    }
+    void tokenizeRaw(const std::string &text, FileId fileId, std::function<void(Token)> callback);
 
-    Iterator begin(const std::string& buffer) {
-        return Iterator(this, buffer);
-    }
-    
-    Iterator end() const { return Iterator(nullptr, ""); }
+    void tokenizeFiltered(const std::string &text, FileId fileId, std::function<void(Token)> callback);
+
+    void addFilter(Base* filter);
 
 private:
     std::vector<Base*> filters;
+    std::regex htmlPattern;
+    std::string applyFilters(const std::string &token);
 };
-#endif
+
+#endif // TOKENIZER_H

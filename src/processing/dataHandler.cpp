@@ -19,7 +19,8 @@ void DataHandler::processText(const std::string &text, const std::string &filena
     fs.close();
     Tokenizer tk(filters);
     Indexer ind(buffer);
-    tk.tokenize(text, [this, &filename, &ind](Token token) {
+    tk.tokenizeFiltered(text,id, [this, &filename, &ind](Token token) {
         ind.addToken(token);
     });
-}   
+    return;
+}

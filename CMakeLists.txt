@@ -41,7 +41,7 @@ set(FILTERS
         src/tokenizer/filters/punctuator.cpp
         src/tokenizer/filters/stopWords.h
         src/tokenizer/filters/stopWords.cpp
-        src/tokenizer/tokenizer.h
+        src/tokenizer/Tokenizer.h
         src/tokenizer/filters/filters.h)
 
 set(SOURCE_FILES
@@ -52,6 +52,7 @@ set(SOURCE_FILES
         ${PROCESSING_FILES}
         src/main.cpp
         src/common.h
+        src/tokenizer/Tokenizer.cpp
 )
 
 add_executable(lib_affir ${SOURCE_FILES})
