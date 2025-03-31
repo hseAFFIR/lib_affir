@@ -14,36 +14,48 @@
 _< description >_
 
 ## Single approach
-*Пока на русском, но в конце перепишу.
-
 ### Overview
-Суть подхода — хранение индекса в одном файле.
+The core idea is to store the index in a single file.
+```mermaid
+graph TD
+A[Input: BigToken] -->|Check indexMap| B{Exists in indexMap?}
+B -->|No| C[Find a new block]
+C --> D[Append new positions to the storage]
+
+B -->|Yes| E{Is the mask size sufficient?}
+E -->|Yes| D
+E -->|No| F[Free the current block]
+F --> G[Find a new block for the larger mask]
+G --> H[Copy existing positions\nto the new block location]
+H --> D
+```
 
 ### Pros and Cons
-**Плюсы:**
-- Работа с одним файлом → нет больших задержек на открытие многих файлов
+**Pros:**
+- Working with a single file → no significant delays from opening multiple files
 
-**Минусы:**
-- Сложность сжатия файла. При частом обновлении индекса появляются пустые блоки,
-которые нужно как-то отслеживать и сжимать.
+**Cons:**
+- File compression complexity. Frequent index updates create empty blocks
+that need to be tracked and compressed.
 
 ### Implementation
-Создаём два файла:
-1. Метаданные индекса
-2. Сам индекс
+Two files are created:
+1. Index metadata
+2. The index itself
 
 #### Metadata file
-Описывает индекс-файл.
-Представляет собой хеш-таблицу `<token_body, (block_bitmask, block_num)>`.
-- `block_bitmask`:
-Определяет размер блока. Блоки могут иметь разную длину, что сделано для того, чтобы
-эффективно хранить токены с разной частотой.
-- `block_num`:
-Обозначает порядковый номер блока размером, указанного в `block_bitmask`.
+Describes the index file.
+Consists of two hash tables:
+1. A map <blockStart, blockCount> that stores the starting position of free space 
+and its size in base blocks (16 tokens per block).
+2. A map `<token_body, (blockMask, blockStart, bytesSize)>`:
+   - `blockMask`: Determines the block size. Blocks can have different lengths to efficiently 
+store tokens of varying frequency.
+   - `blockStart`: Marks the starting position (in base blocks) 
+of a free space segment of size blockMask.
 
 #### Index file
-Файл в байтовом представлении. Хранит пары `(size_t, size_t)`.
-Если при обновлении индекса блок выходит за свои рамки, 
-он расширяется до блока следующего размера.
+A byte-encoded file storing triples `(uint_32, uint_32, uint_32)` representing (fileId, pos, posWord).
+If an index block exceeds its allocated space during an update, it expands to the next block size.
 
 ## Multi approach
