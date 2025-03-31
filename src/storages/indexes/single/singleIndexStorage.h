@@ -36,8 +36,8 @@ constexpr BlockMask allBlockMasks[] = {
 
 struct IndexPos {
     BlockMask blockMask;
-    uint32_t blockNumber{};
-    uint32_t size{};
+    uint32_t blockStart{};
+    uint32_t bytesSize{};
 };
 
 class SingleIndexStorage : public IIndexStorage {
@@ -63,7 +63,7 @@ private:
 
     static void markBlockAvailable(uint32_t blockStart, uint32_t blockCount);
 
-    void updateStorageFile(IndexPos &indexPos, const PosMap& , uint32_t size);
+    void updateStorageFile(IndexPos &indexPos, const PosMap& positions);
 
     void copyBytes(IndexPos from, IndexPos& to);
     const size_t COPY_BLOCK_SIZE = 4096;
@@ -74,11 +74,9 @@ private:
 
     static BlockMask getMask(size_t size);
 
-    static uint32_t maskToBytes(BlockMask blockMask);
+    static uint32_t toBaseBlocks(BlockMask blockMask);
 
-    static uint32_t inBaseBlock(BlockMask blockMask);
-
-    std::streampos blockToPos(IndexPos blockPos) const;
+    std::streampos blockToPos(const IndexPos &indexPos) const;
 
     void open();
 

@@ -11,30 +11,26 @@ SingleIndexStorage::SingleIndexStorage() {
 
 void SingleIndexStorage::createIndex(std::unordered_map<std::string, BigToken> &data) {
     for (const auto& [key, value] : data) {
+        uint32_t incomingIndexSize = value.getPosesSize();
         // Already exists
         if (indexMap.find(key) != indexMap.end()) {
             IndexPos curIndexPos = indexMap[key];
-            uint32_t newIndexSize = value.getPosesSize();
-            BlockMask neededMask = getMask(curIndexPos.size + newIndexSize);
+            BlockMask neededMask = getMask(curIndexPos.bytesSize + incomingIndexSize);
+            // New mask is short, we need larger
             if(curIndexPos.blockMask != neededMask) {
                 // Save old position
                 IndexPos oldIndexPos = indexMap[key];
                 // Save the new one
-                markBlockFree(curIndexPos.blockNumber, curIndexPos.blockMask);
-                mergeFreeBlock();
-                indexMap[key] = getNewBlock(curIndexPos.size + newIndexSize);
+                markBlockAvailable(curIndexPos.blockStart, toBaseBlocks(curIndexPos.blockMask));
+                indexMap[key] = getNewBlock(curIndexPos.bytesSize + incomingIndexSize);
                 // Copy old bytes
                 copyBytes(oldIndexPos, indexMap[key]);
-
             }
-            updateStorageFile(indexMap[key], value.getFilePositions(), newIndexSize);
         }
         // Find available pos for the completely new item
-        else {
-            uint32_t newIndexSize = value.getPosesSize();
-            indexMap[key] = getNewBlock(newIndexSize);
-            updateStorageFile(indexMap[key], value.getFilePositions(), newIndexSize);
-        }
+        else
+            indexMap[key] = getNewBlock(incomingIndexSize);
+        updateStorageFile(indexMap[key], value.getFilePositions(), incomingIndexSize);
     }
 }
 
@@ -45,7 +41,7 @@ void SingleIndexStorage::copyBytes(const IndexPos from, IndexPos& to) {
     // Move the write position to 'to'
     indexStream.seekp(blockToPos(to));
 
-    size_t bytesToCopy = from.size;
+    size_t bytesToCopy = from.bytesSize;
     while (bytesToCopy > 0) {
         size_t bytesToRead = std::min(bytesToCopy, COPY_BLOCK_SIZE);
         // Read data into buffer
@@ -54,13 +50,20 @@ void SingleIndexStorage::copyBytes(const IndexPos from, IndexPos& to) {
         indexStream.write(buffer.data(), (long)bytesToRead);
         // Decrease the remaining byte count and increase 'to' struct
         bytesToCopy -= bytesToRead;
-        to.size += bytesToRead;
+        to.bytesSize += bytesToRead;
     }
 }
 
-void SingleIndexStorage::updateStorageFile(IndexPos &indexPos, const PosMap& positions, uint32_t size) {
-    // Записать начиная с indexPos.blockPos + indexPos.size
-    indexPos.size += size;
+void SingleIndexStorage::updateStorageFile(IndexPos &indexPos, const PosMap& positions) {
+    indexStream.seekp(blockToPos(indexPos));
+    for (const auto& [fileId, tokens] : positions) {
+        for (const auto& token : tokens) {
+            indexStream.write(reinterpret_cast<const char*>(fileId), sizeof(fileId));
+            indexStream.write(reinterpret_cast<const char*>(&token.pos), sizeof(token.pos));
+            indexStream.write(reinterpret_cast<const char*>(&token.wordPos), sizeof(token.wordPos));
+        }
+        indexPos.bytesSize += ROW_SIZE;
+    }
 }
 
 void SingleIndexStorage::getRawIndex(const std::string& body, std::vector<PosMap &> &vector) {
@@ -113,7 +116,7 @@ void SingleIndexStorage::markBlockAvailable(const uint32_t blockStart, const uin
 
 IndexPos SingleIndexStorage::getNewBlock(uint32_t indexSize) {
     BlockMask requiredBlockMask = getMask(indexSize);
-    uint32_t requiredBlocks = inBaseBlock(requiredBlockMask);
+    uint32_t requiredBlocks = toBaseBlocks(requiredBlockMask);
 
     IndexPos indexPos;
     uint32_t availableBlocks = 0;
@@ -127,8 +130,9 @@ IndexPos SingleIndexStorage::getNewBlock(uint32_t indexSize) {
     }
     // We should remove reserved space from map
     if(availableBlocks) {
-        freeBlockPoses.erase(indexPos.blockNumber);
-        uint32_t newFreeIndexPos = indexPos.blockNumber + requiredBlocks;
+        // Remove from freeBlocks == reserve it
+        freeBlockPoses.erase(indexPos.blockStart);
+        uint32_t newFreeIndexPos = indexPos.blockStart + requiredBlocks;
         markBlockAvailable(newFreeIndexPos, availableBlocks - requiredBlocks);
     }
     // Otherwise there is no such pos, then we must allocate new one
@@ -139,18 +143,15 @@ IndexPos SingleIndexStorage::getNewBlock(uint32_t indexSize) {
     return indexPos;
 }
 
-uint32_t SingleIndexStorage::maskToBytes(BlockMask blockMask) {
-    return (blockMask * blockMask) * MASK_MULTIPLE;
-}
-
 void SingleIndexStorage::close() {
     indexStream.close();
 }
 
-std::streampos SingleIndexStorage::blockToPos(IndexPos indexPos) const {
-    return indexPos.blockMask * indexPos.blockMask * MASK_MULTIPLE * ROW_SIZE * indexPos.blockNumber;
+// Return startPos for startBlock
+std::streampos SingleIndexStorage::blockToPos(const IndexPos &indexPos) const {
+    return MASK_MULTIPLE * ROW_SIZE * indexPos.blockStart;
 }
 
-uint32_t SingleIndexStorage::inBaseBlock(BlockMask blockMask) {
+uint32_t SingleIndexStorage::toBaseBlocks(BlockMask blockMask) {
     return (blockMask * blockMask) / (BlockMask::P_16 * BlockMask::P_16);
 }
