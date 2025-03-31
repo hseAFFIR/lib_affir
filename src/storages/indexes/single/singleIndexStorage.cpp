@@ -1,11 +1,14 @@
 #include "singleIndexStorage.h"
 #include "../../../logger/logger.h"
 
-const std::string SingleIndexStorage::STORAGE_FILENAME_PATH = "index";
+const std::string SingleIndexStorage::STORAGE_FILENAME_PATH = "index_storage.bin";
+const std::string SingleIndexStorage::META_FILENAME_PATH = "index_storage_metadata.bin";
+bool SingleIndexStorage::isStorageLoaded = false;
 uint32_t currentBlockPos = 0;
 
 SingleIndexStorage::SingleIndexStorage() {
     Logger::info("SingleFileStorage", "Init storage");
+    loadStorageMeta();
     open();
 }
 
@@ -30,7 +33,7 @@ void SingleIndexStorage::createIndex(std::unordered_map<std::string, BigToken> &
         // Find available pos for the completely new item
         else
             indexMap[key] = getNewBlock(incomingIndexSize);
-        updateStorageFile(indexMap[key], value.getFilePositions(), incomingIndexSize);
+        updateStorageFile(indexMap[key], value.getFilePositions());
     }
 }
 
@@ -154,4 +157,74 @@ std::streampos SingleIndexStorage::blockToPos(const IndexPos &indexPos) const {
 
 uint32_t SingleIndexStorage::toBaseBlocks(BlockMask blockMask) {
     return (blockMask * blockMask) / (BlockMask::P_16 * BlockMask::P_16);
+}
+
+void SingleIndexStorage::loadStorageMeta() {
+    if (isStorageLoaded) return;
+
+    std::ifstream metaFileIn(SingleIndexStorage::META_FILENAME_PATH, std::ios::binary);
+    if (!metaFileIn.is_open()) {
+        std::cerr << "Cannot open file: " + std::string(strerror(errno)) << std::endl;
+        return;
+    }
+
+    freeBlockPoses.clear();
+    indexMap.clear();
+
+    // Load freeBlockPoses
+    size_t freeBlockSize;
+    metaFileIn.read(reinterpret_cast<char*>(&freeBlockSize), sizeof(freeBlockSize));
+    for (uint32_t i = 0; i < freeBlockSize; ++i) {
+        uint32_t key, value;
+        metaFileIn.read(reinterpret_cast<char*>(&key), sizeof(key));
+        metaFileIn.read(reinterpret_cast<char*>(&value), sizeof(value));
+        freeBlockPoses[key] = value;
+    }
+
+    // Load indexMap
+    size_t indexMapSize;
+    metaFileIn.read(reinterpret_cast<char*>(&indexMapSize), sizeof(indexMapSize));
+    for (uint32_t i = 0; i < indexMapSize; ++i) {
+        size_t keySize;
+        metaFileIn.read(reinterpret_cast<char*>(&keySize), sizeof(keySize));
+        std::string key(keySize, '\0');
+        metaFileIn.read(key.data(), keySize);
+
+        IndexPos value;
+        metaFileIn.read(reinterpret_cast<char*>(&value.blockMask), sizeof(value.blockMask));
+        metaFileIn.read(reinterpret_cast<char*>(&value.blockStart), sizeof(value.blockStart));
+        metaFileIn.read(reinterpret_cast<char*>(&value.bytesSize), sizeof(value.bytesSize));
+
+        indexMap[key] = value;
+    }
+
+    metaFileIn.close();
+    isStorageLoaded = true;
+}
+
+void SingleIndexStorage::saveStorageMeta() {
+    std::ofstream metaFileOut(SingleIndexStorage::META_FILENAME_PATH, std::ios::binary);
+
+    size_t freeBlockCount = freeBlockPoses.size();
+    // Save free block map
+    metaFileOut.write(reinterpret_cast<const char*>(&freeBlockCount), sizeof(freeBlockCount));
+    for (const auto& [key, val] : freeBlockPoses) {
+        metaFileOut.write(reinterpret_cast<const char*>(&key), sizeof(key));
+        metaFileOut.write(reinterpret_cast<const char*>(&val), sizeof(val));
+    }
+
+    // Save indexMap
+    size_t indexMapSize = indexMap.size();
+    metaFileOut.write(reinterpret_cast<char*>(&indexMapSize), sizeof(indexMapSize));
+    for (const auto& [key, value] : indexMap) {
+        size_t keySize = key.size();
+        metaFileOut.write(reinterpret_cast<char*>(&keySize), sizeof(keySize));
+        metaFileOut.write(key.data(), keySize);
+
+        metaFileOut.write(reinterpret_cast<const char*>(&value.blockMask), sizeof(value.blockMask));
+        metaFileOut.write(reinterpret_cast<const char*>(&value.blockStart), sizeof(value.blockStart));
+        metaFileOut.write(reinterpret_cast<const char*>(&value.bytesSize), sizeof(value.bytesSize));
+    }
+
+    metaFileOut.close();
 }

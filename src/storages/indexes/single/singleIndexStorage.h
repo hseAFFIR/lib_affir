@@ -52,9 +52,11 @@ public:
     void close() override;
 
 private:
-    std::unordered_map<std::string, IndexPos> indexMap;
+    static std::unordered_map<std::string, IndexPos> indexMap;
     const static std::string STORAGE_FILENAME_PATH;
+    const static std::string META_FILENAME_PATH; ///< Path to the metadata file.
     std::fstream indexStream;
+    static bool isStorageLoaded;
     static const int MASK_MULTIPLE = 16;
     static const int ROW_SIZE = sizeof(TokenInfo) + sizeof(FileId);
 
@@ -81,6 +83,16 @@ private:
     void open();
 
     void createIndexFile();
+
+    /**
+ * @brief Loads metadata for the storage system.
+ */
+    static void loadStorageMeta();
+    /**
+     * @brief Saves metadata for the storage system.
+     * @note It has to be called before exit!
+     */
+    static void saveStorageMeta();
 };
 
 
