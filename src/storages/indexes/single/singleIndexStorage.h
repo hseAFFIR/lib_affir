@@ -58,11 +58,10 @@ private:
     static const int MASK_MULTIPLE = 16;
     static const int ROW_SIZE = sizeof(TokenInfo) + sizeof(FileId);
 
-    static std::map<uint32_t, BlockMask> treeBlockPoses;
+    // Block number, block count (available space)
+    static std::map<uint32_t, uint32_t> freeBlockPoses;
 
-    static void markBlockFree(uint32_t blockPos, BlockMask blockMask);
-
-    static void mergeFreeBlock();
+    static void markBlockAvailable(uint32_t blockStart, uint32_t blockCount);
 
     void updateStorageFile(IndexPos &indexPos, const PosMap& , uint32_t size);
 
@@ -74,6 +73,8 @@ private:
     static uint32_t currentBlockPos;
 
     static BlockMask getMask(size_t size);
+
+    static uint32_t maskToBytes(BlockMask blockMask);
 
     static uint32_t inBaseBlock(BlockMask blockMask);
 

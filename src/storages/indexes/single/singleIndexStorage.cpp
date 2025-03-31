@@ -87,41 +87,49 @@ BlockMask SingleIndexStorage::getMask(size_t size) {
     throw std::runtime_error("There is no suitable mask for the size = " + std::to_string(size));
 }
 
-void SingleIndexStorage::markBlockFree(uint32_t blockPos, BlockMask blockMask) {
-    auto lower_it = treeBlockPoses.lower_bound(blockPos);
-    if(lower_it->first == blockPos)
+void SingleIndexStorage::markBlockAvailable(const uint32_t blockStart, const uint32_t blockCount) {
+    auto lower_it = freeBlockPoses.lower_bound(blockStart);
+    if(lower_it->first == blockStart)
         throw std::runtime_error("Block pos already exists in treeBlockPoses.");
 
-    treeBlockPoses[blockPos] = blockMask;
+    uint32_t newBlockPos = blockStart;
+    uint32_t newBlockCount = blockCount;
+
+    // Merged with prev block
+    if(lower_it->first + lower_it->second == blockStart) {
+        newBlockPos = lower_it->first;
+        newBlockCount = lower_it->second + blockCount;
+        freeBlockPoses.erase(lower_it);
+    }
+    auto upper_it = freeBlockPoses.upper_bound(blockStart);
+    // Merged with next block
+    if(upper_it->first == blockStart + blockCount) {
+        newBlockCount += upper_it->second;
+        freeBlockPoses.erase(upper_it);
+    }
+
+    freeBlockPoses[newBlockPos] = newBlockCount;
 }
-
-void SingleIndexStorage::mergeFreeBlock() {
-
-}
-
 
 IndexPos SingleIndexStorage::getNewBlock(uint32_t indexSize) {
     BlockMask requiredBlockMask = getMask(indexSize);
+    uint32_t requiredBlocks = inBaseBlock(requiredBlockMask);
+
     IndexPos indexPos;
-    BlockMask foundMask;
-    bool isFound = false;
-    // Finding first available pos, which mask is greater or equal ours
-    for (const auto& pair : treeBlockPoses) {
-        if(pair.second <= requiredBlockMask) {
-            foundMask = pair.second;
+    uint32_t availableBlocks = 0;
+    // Finding first available pos, which free bytes are greater or equal our indexSize
+    for (const auto& pair : freeBlockPoses) {
+        if(pair.second <= requiredBlocks) {
             indexPos = IndexPos(requiredBlockMask, pair.first, 0);
-            isFound = true;
+            availableBlocks = pair.second;
             break;
         }
     }
-    // We should mark left space as free in tree, since our required space might be less than available
-    if(isFound) {
-        treeBlockPoses.erase(indexPos.blockNumber);
-        const int times = (foundMask * foundMask) / (requiredBlockMask * requiredBlockMask) - 1;
-        const uint32_t step = inBaseBlock(requiredBlockMask);
-        for (int i = 1; i <= times; ++i)
-            markBlockFree(indexPos.blockNumber + step * i, requiredBlockMask);
-        mergeFreeBlock();
+    // We should remove reserved space from map
+    if(availableBlocks) {
+        freeBlockPoses.erase(indexPos.blockNumber);
+        uint32_t newFreeIndexPos = indexPos.blockNumber + requiredBlocks;
+        markBlockAvailable(newFreeIndexPos, availableBlocks - requiredBlocks);
     }
     // Otherwise there is no such pos, then we must allocate new one
     else {
@@ -131,8 +139,8 @@ IndexPos SingleIndexStorage::getNewBlock(uint32_t indexSize) {
     return indexPos;
 }
 
-uint32_t SingleIndexStorage::inBaseBlock(BlockMask blockMask) {
-    return (blockMask * blockMask) / (BlockMask::P_16 * BlockMask::P_16);
+uint32_t SingleIndexStorage::maskToBytes(BlockMask blockMask) {
+    return (blockMask * blockMask) * MASK_MULTIPLE;
 }
 
 void SingleIndexStorage::close() {
@@ -141,4 +149,8 @@ void SingleIndexStorage::close() {
 
 std::streampos SingleIndexStorage::blockToPos(IndexPos indexPos) const {
     return indexPos.blockMask * indexPos.blockMask * MASK_MULTIPLE * ROW_SIZE * indexPos.blockNumber;
+}
+
+uint32_t SingleIndexStorage::inBaseBlock(BlockMask blockMask) {
+    return (blockMask * blockMask) / (BlockMask::P_16 * BlockMask::P_16);
 }
