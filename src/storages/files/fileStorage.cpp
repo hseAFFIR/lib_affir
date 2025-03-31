@@ -10,8 +10,8 @@ Pos FileStorage::g_cursor = 0;
 std::unordered_map<FileId, DataStruct> FileStorage::dataMap;
 
 bool FileStorage::isStorageLoaded = false;
-const std::string FileStorage::DATA_FILENAME_PATH = "storage_raw";
-const std::string FileStorage::META_FILENAME_PATH = "storage_metadata.bin";
+const std::string FileStorage::DATA_FILENAME_PATH = "file_storage_raw";
+const std::string FileStorage::META_FILENAME_PATH = "file_storage_metadata.bin";
 
 FileStorage::FileStorage(const std::string &filename, const size_t filesize) {
 
