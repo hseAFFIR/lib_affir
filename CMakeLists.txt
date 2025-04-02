@@ -46,7 +46,9 @@ set(SOURCE_FILES
         src/main.cpp
         src/common.h
         src/logger/logger.h
-        src/logger/logger.cpp)
+        src/logger/logger.cpp
+        src/tokenizer/Tokenizer.cpp
+        src/tokenizer/Tokenizer.h)
 
 
 add_executable(lib_affir ${SOURCE_FILES})
