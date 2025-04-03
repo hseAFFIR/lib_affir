@@ -2,9 +2,19 @@
 #include <cctype>
 #include <iostream>
 
+/**
+ * @brief Конструктор Tokenizer.
+ * @param filters Вектор указателей на объекты фильтров, применяемых к токенам.
+ */
 tokenizer::tokenizer(std::vector<Base*> filters)
     : filters(std::move(filters)), htmlPattern(R"(<\/?\w+.*?>)") {}
 
+/**
+ * @brief Разбивает текст на токены без применения фильтров.
+ * @param text Входной текст.
+ * @param fileId Идентификатор файла, откуда взят текст.
+ * @param callback Функция обратного вызова для обработки каждого найденного токена.
+ */
 void tokenizer::tokenizeRaw(const std::string &text, FileId fileId, std::function<void(Token)> callback) {
     size_t currentPos = 0;
     size_t index = 0;
@@ -21,7 +31,7 @@ void tokenizer::tokenizeRaw(const std::string &text, FileId fileId, std::functio
         size_t startPos = currentPos;
         std::string token;
 
-        if (*it == '<') {
+        if (*it == '<') {  // Проверяем HTML-теги
             std::smatch match;
             std::string remainingText(it, text.end());
 
@@ -34,11 +44,11 @@ void tokenizer::tokenizeRaw(const std::string &text, FileId fileId, std::functio
                 ++it;
                 ++currentPos;
             }
-        } else if (!std::isalnum(*it)) {
+        } else if (!std::isalnum(*it)) {  // Обрабатываем одиночные символы
             token = *it;
             ++it;
             ++currentPos;
-        } else {
+        } else {  // Собираем слова и числа
             while (it != text.end() && std::isalnum(*it)) {
                 token += *it;
                 ++it;
@@ -50,6 +60,12 @@ void tokenizer::tokenizeRaw(const std::string &text, FileId fileId, std::functio
     }
 }
 
+/**
+ * @brief Разбивает текст на токены с применением фильтров.
+ * @param text Входной текст.
+ * @param fileId Идентификатор файла.
+ * @param callback Функция обратного вызова для обработки отфильтрованных токенов.
+ */
 void tokenizer::tokenizeFiltered(const std::string &text, FileId fileId, std::function<void(Token)> callback) {
     tokenizeRaw(text, fileId, [this, &callback](Token token) {
         std::string filteredToken = applyFilters(token.getBody());
@@ -59,17 +75,28 @@ void tokenizer::tokenizeFiltered(const std::string &text, FileId fileId, std::fu
     });
 }
 
+/**
+ * @brief Применяет фильтры к токену.
+ * @param token Исходный токен.
+ * @return Отфильтрованный токен или пустая строка.
+ *
+ */
 std::string tokenizer::applyFilters(const std::string &token) {
-    std::string result = token; // Одна копия
+    std::string *result = const_cast<std::string*>(&token);
+
     for (const auto &filter : filters) {
-        result = std::move(filter->process(std::move(result)));
-        if (result.empty()) {
+        *result = filter->process(*result);
+        if (result->empty()) {
             return "";
         }
     }
-    return std::move(result);
+    return *result;
 }
 
+/**
+ * @brief Добавляет фильтр в список применяемых фильтров.
+ * @param filter Указатель на объект фильтра.
+ */
 void tokenizer::addFilter(Base* filter) {
     filters.push_back(filter);
 }
