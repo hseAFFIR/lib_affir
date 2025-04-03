@@ -4,6 +4,8 @@
 #include <vector>
 #include <cassert>
 #include <fstream>
+#include "logger/logger.h"
+#include "storages/indexes/multi/multiFileIndexStorage.h"
 
 #include "processing/encodingHandler/encodingHandler.h"
 

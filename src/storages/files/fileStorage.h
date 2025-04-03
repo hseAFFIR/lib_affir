@@ -5,7 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <unordered_map>
-#include "../common.h"
+#include "../../common.h"
 
 // Struct to hold metadata about a file.
 struct DataStruct {

@@ -4,9 +4,12 @@ project(lib_affir)
 set(CMAKE_CXX_STANDARD 20)
 
 set(STORAGE_FILES
-        src/storages/fileStorage.cpp
-        src/storages/fileStorage.h
-        src/storages/iIndexStorage.h)
+        src/storages/files/fileStorage.cpp
+        src/storages/files/fileStorage.h
+        src/storages/indexes/iIndexStorage.h
+        src/storages/indexes/multi/multiFileIndexStorage.h
+        src/storages/indexes/multi/multiFileIndexStorage.cpp
+)
 
 set(MODEL_FILES
         src/models/token.h
@@ -63,7 +66,9 @@ set(SOURCE_FILES
         src/main.cpp
         src/common.h
         src/logger/logger.h
-        src/logger/logger.cpp)
+        src/logger/logger.cpp
+        src/tokenizer/Tokenizer.cpp
+        src/tokenizer/Tokenizer.h)
 
 
 add_executable(lib_affir ${SOURCE_FILES})
