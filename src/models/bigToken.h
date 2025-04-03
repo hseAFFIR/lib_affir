@@ -82,6 +82,8 @@ public:
      */
     ~BigToken();
 
+
+    explicit BigToken(std::string body, unsigned long fileId, TokenInfo info);
 };
 
 

@@ -29,7 +29,7 @@ void Indexer::addToken(const Token &token) {
         BigToken newBT(body);
         newBT.addPosition(fileId, info);
 
-        const size_t newSize = buffer[body].calculateSize();
+        const size_t newSize = newBT.calculateSize();
         currentSizeInBytes += newSize;
 
         Logger::debug("Indexer::addToken", "{} sizeInBytes {}",token.getBody(),currentSizeInBytes);
@@ -38,19 +38,35 @@ void Indexer::addToken(const Token &token) {
             saveTo();
         }
 
-        buffer.emplace(body, std::move(newBT));
+//        buffer.emplace(body, std::move(newBT));
+        buffer[body] = newBT;
     } else {
         BigToken &bt = it->second;
         const size_t oldSize = bt.calculateSize();
 
-        const size_t newSize = bt.calculateSize();
-        currentSizeInBytes += (newSize - oldSize);
+        size_t newSize = oldSize;
 
-        Logger::debug("Indexer::addToken", "{} sizeInBytes {}",token.getBody(),currentSizeInBytes);
+        auto btIt = bt.getFilePositions().find(fileId);
+
+        if (btIt == bt.getFilePositions().end()) {
+            newSize += sizeof(unsigned long)*3;
+        } else {
+            newSize += sizeof(unsigned  long)*2;
+        }
+
+        currentSizeInBytes += (newSize - oldSize);
 
         if (currentSizeInBytes > maxBufferSizeInBytes) {
             saveTo();
+
+            buffer[body] = BigToken(body, fileId, info);
+            currentSizeInBytes+=buffer[body].calculateSize();
+
+            Logger::debug("Indexer::addToken", "{} sizeInBytes {}",token.getBody(),currentSizeInBytes);
+            return;
         }
+
+        Logger::debug("Indexer::addToken", "{} sizeInBytes {}",token.getBody(),currentSizeInBytes);
 
         bt.addPosition(fileId, info);
     }
