@@ -6,7 +6,7 @@
  * @brief Конструктор Tokenizer.
  * @param filters Вектор указателей на объекты фильтров, применяемых к токенам.
  */
-tokenizer::tokenizer(std::vector<Base*> filters)
+Tokenizer::Tokenizer(std::vector<Base*> filters)
     : filters(std::move(filters)), htmlPattern(R"(<\/?\w+.*?>)") {}
 
 /**
@@ -15,7 +15,7 @@ tokenizer::tokenizer(std::vector<Base*> filters)
  * @param fileId Идентификатор файла, откуда взят текст.
  * @param callback Функция обратного вызова для обработки каждого найденного токена.
  */
-void tokenizer::tokenizeRaw(const std::string &text, FileId fileId, std::function<void(Token)> callback) {
+void Tokenizer::tokenizeRaw(const std::string &text, FileId fileId, std::function<void(Token)> callback) {
     size_t currentPos = 0;
     size_t index = 0;
 
@@ -66,7 +66,7 @@ void tokenizer::tokenizeRaw(const std::string &text, FileId fileId, std::functio
  * @param fileId Идентификатор файла.
  * @param callback Функция обратного вызова для обработки отфильтрованных токенов.
  */
-void tokenizer::tokenizeFiltered(const std::string &text, FileId fileId, std::function<void(Token)> callback) {
+void Tokenizer::tokenizeFiltered(const std::string &text, FileId fileId, std::function<void(Token)> callback) {
     tokenizeRaw(text, fileId, [this, &callback](Token token) {
         std::string filteredToken = applyFilters(token.getBody());
         if (!filteredToken.empty()) {
@@ -81,7 +81,7 @@ void tokenizer::tokenizeFiltered(const std::string &text, FileId fileId, std::fu
  * @return Отфильтрованный токен или пустая строка.
  *
  */
-std::string tokenizer::applyFilters(const std::string &token) {
+std::string Tokenizer::applyFilters(const std::string &token) {
     std::string *result = const_cast<std::string*>(&token);
 
     for (const auto &filter : filters) {
@@ -97,6 +97,6 @@ std::string tokenizer::applyFilters(const std::string &token) {
  * @brief Добавляет фильтр в список применяемых фильтров.
  * @param filter Указатель на объект фильтра.
  */
-void tokenizer::addFilter(Base* filter) {
+void Tokenizer::addFilter(Base* filter) {
     filters.push_back(filter);
 }
