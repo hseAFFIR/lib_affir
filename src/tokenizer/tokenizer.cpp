@@ -2,10 +2,10 @@
 #include <cctype>
 #include <iostream>
 
-Tokenizer::Tokenizer(std::vector<Base*> filters)
+tokenizer::tokenizer(std::vector<Base*> filters)
     : filters(std::move(filters)), htmlPattern(R"(<\/?\w+.*?>)") {}
 
-void Tokenizer::tokenizeRaw(const std::string &text, FileId fileId, std::function<void(Token)> callback) {
+void tokenizer::tokenizeRaw(const std::string &text, FileId fileId, std::function<void(Token)> callback) {
     size_t currentPos = 0;
     size_t index = 0;
 
@@ -50,7 +50,7 @@ void Tokenizer::tokenizeRaw(const std::string &text, FileId fileId, std::functio
     }
 }
 
-void Tokenizer::tokenizeFiltered(const std::string &text, FileId fileId, std::function<void(Token)> callback) {
+void tokenizer::tokenizeFiltered(const std::string &text, FileId fileId, std::function<void(Token)> callback) {
     tokenizeRaw(text, fileId, [this, &callback](Token token) {
         std::string filteredToken = applyFilters(token.getBody());
         if (!filteredToken.empty()) {
@@ -59,17 +59,17 @@ void Tokenizer::tokenizeFiltered(const std::string &text, FileId fileId, std::fu
     });
 }
 
-std::string Tokenizer::applyFilters(const std::string &token) {
-    std::string result = token;
+std::string tokenizer::applyFilters(const std::string &token) {
+    std::string result = token; // Одна копия
     for (const auto &filter : filters) {
-        result = filter->process(result);
+        result = std::move(filter->process(std::move(result)));
         if (result.empty()) {
             return "";
         }
     }
-    return result;
+    return std::move(result);
 }
 
-void Tokenizer::addFilter(Base* filter) {
+void tokenizer::addFilter(Base* filter) {
     filters.push_back(filter);
 }

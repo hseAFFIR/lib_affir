@@ -7,9 +7,9 @@
 #include "filters/base.h"
 #include "../models/Token.h"
 
-class Tokenizer {
+class tokenizer {
 public:
-    explicit Tokenizer(std::vector<Base*> filters);
+    explicit tokenizer(std::vector<Base*> filters);
 
     void tokenizeRaw(const std::string &text, FileId fileId, std::function<void(Token)> callback);
 
