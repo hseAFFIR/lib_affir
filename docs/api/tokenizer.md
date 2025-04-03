@@ -45,8 +45,12 @@ int main() {
 To use filtering, pass a list of filters to the `Tokenizer` constructor:
 ```cpp
 #include "tokenizer/filters/filters.h"
+#include "tokenizer/tokenizer.h"
+#include "models/token.h"
 #include <vector>
 #include <iostream>
+
+
 
 int main() {
     std::vector<Base*> filters = {new Lowercaser(), new Htmler(), new Punctuator(),
