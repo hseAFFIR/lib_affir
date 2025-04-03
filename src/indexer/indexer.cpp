@@ -38,8 +38,7 @@ void Indexer::addToken(const Token &token) {
             saveTo();
         }
 
-//        buffer.emplace(body, std::move(newBT));
-        buffer[body] = newBT;
+        buffer.emplace(body, std::move(newBT));
     } else {
         BigToken &bt = it->second;
         const size_t oldSize = bt.calculateSize();
