@@ -1,60 +1,72 @@
-//
-// Created by amenk on 22.03.2025.
-//
-
 #include "search.h"
-#include <iostream>
-#include "../logger/logger.h"
-#include <cctype> // для ispunct
-#include <algorithm> // для remove_if
 #include <sstream>
-
-std::string removePunctuation(const std::string& text) {
-    std::string result = text;
-    // Удаляем знаки препинания
-    result.erase(std::remove_if(result.begin(), result.end(), ::ispunct), result.end());
-    return result;
-}
+#include <algorithm>
+#include <iterator>
+#include "../logger/logger.h"
 
 Search::Search(Indexer& indexer, StemFilter& stemFilter)
         : indexer(indexer), stemFilter(stemFilter) {
-    Logger::warn("Search", "Search module initialized");
+    Logger::info("Search", "Initialized");
 }
-std::vector<std::pair<unsigned long, unsigned long>> Search::find(const std::string& text) {
-    Logger::debug("Search", "Starting search for text: {}", text);
-    std::vector<std::pair<unsigned long, unsigned long>> results;
 
-    // Удаляем знаки препинания из текста
-    std::string cleanedText = removePunctuation(text);
+std::vector<std::string> Search::splitIntoWords(const std::string& phrase) const {
+    std::string noQuotes = phrase.substr(1, phrase.size() - 2); // Удаляем кавычки
+    std::istringstream iss(noQuotes);
+    return {std::istream_iterator<std::string>{iss},
+            std::istream_iterator<std::string>{}};
+}
 
-    // Разбиваем текст на токены
-    std::vector<std::string> tokens;
-    std::istringstream stream(cleanedText);
-    std::string token;
-    while (stream >> token) {
-        tokens.push_back(token);
+
+std::vector<std::string> Search::processTokens(const std::vector<std::string>& tokens) const {
+    std::vector<std::string> stemmedTokens;
+    for (const auto& token : tokens) {
+        stemmedTokens.push_back(stemFilter.process(token));
+        Logger::debug("Search", "Стемминг: '{}' → '{}'", token, stemmedTokens.back());
     }
-    if (text.empty()){
-        Logger::error("Search", "Empty search text provided!");
+    return stemmedTokens;
+}
+
+bool Search::isPhrase(const std::string& text) const {
+    return text.starts_with('"') && text.ends_with('"');
+}
+
+// search.cpp
+std::unordered_map<unsigned long, std::vector<TokenInfo>> Search::find(const std::string& text) {
+    std::unordered_map<unsigned long, std::vector<TokenInfo>> results;
+    if (text.empty()) {
+        Logger::error("Search", "Empty query");
+        return results;
     }
 
-    // Обрабатываем каждый токен с помощью StemFilter
-    for (const std::string& token : tokens) {
-        std::string stemmedToken = stemFilter.process(token);
 
-        // Ищем обработанный токен в индексе
-        const BigToken& bigToken = indexer.getTokenInfo(stemmedToken);
+    if (isPhrase(text)) { // Фраза в кавычках
+        std::vector<std::string> words = splitIntoWords(text);
+        std::vector<std::string> stemmedWords = processTokens(words); // Используем наш новый метод
 
-        // Получаем информацию о позициях токена в файлах
-        const auto& filePositions = bigToken.getFilePositions();
+        // Ищем все слова в индексе
+        std::vector<BigToken> stemmedTokens;
+        for (const auto& word : stemmedWords) {
+            stemmedTokens.push_back(indexer.getTokenInfo(word));
+        }
 
-        // Добавляем все найденные позиции в результаты
-        for (const auto& [fileId, positions] : filePositions) {
-            for (const TokenInfo& info : positions) {
-                results.emplace_back(fileId, info.pos);
+        // Проверяем, что все слова есть в одних файлах
+        for (const auto& [fileId, positions] : stemmedTokens[0].getFilePositions()) {
+            bool allFound = true;
+            for (size_t i = 1; i < stemmedTokens.size(); ++i) {
+                if (!stemmedTokens[i].getFilePositions().count(fileId)) {
+                    allFound = false;
+                    break;
+                }
+            }
+            if (allFound) {
+                results[fileId] = positions; // Добавляем позиции первого слова
             }
         }
+    } else {
+        // Обработка одиночного слова
+        std::string stemmed = stemFilter.process(text);
+        results = indexer.getTokenInfo(stemmed).getFilePositions();
     }
-    Logger::info("Search", "Search completed successfully");
+
     return results;
 }
