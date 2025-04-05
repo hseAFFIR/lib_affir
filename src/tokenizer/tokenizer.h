@@ -5,7 +5,7 @@
 #include <regex>
 #include <functional>
 #include "filters/base.h"
-#include "../models/Token.h"
+#include "../models/token.h"
 
 /**
  * @class Tokenizer
