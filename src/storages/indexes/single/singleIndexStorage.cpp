@@ -4,7 +4,9 @@
 const std::string SingleIndexStorage::STORAGE_FILENAME_PATH = "index_storage.bin";
 const std::string SingleIndexStorage::META_FILENAME_PATH = "index_storage_metadata.bin";
 bool SingleIndexStorage::isStorageLoaded = false;
-uint32_t currentBlockPos = 0;
+std::unordered_map<std::string, IndexPos> SingleIndexStorage::indexMap;
+std::map<uint32_t, uint32_t> SingleIndexStorage::freeBlockPoses;
+uint32_t SingleIndexStorage::currentBlockPos = 0;
 
 SingleIndexStorage::SingleIndexStorage() {
     Logger::info("SingleFileStorage", "Init storage");
@@ -15,14 +17,21 @@ SingleIndexStorage::SingleIndexStorage() {
 void SingleIndexStorage::createIndex(std::unordered_map<std::string, BigToken> &data) {
     for (const auto& [key, value] : data) {
         uint32_t incomingIndexSize = value.getPosesSize();
+        Logger::debug("SingleFileStorage", "Key: {}, Value count: {}, incomingIndexSize: {}",
+                      key, value.getFilePositions().size(), incomingIndexSize);
         // Already exists
         if (indexMap.find(key) != indexMap.end()) {
+            Logger::debug("SingleFileStorage", "Token body already exist in map. Appending...");
             IndexPos curIndexPos = indexMap[key];
             BlockMask neededMask = getMask(curIndexPos.bytesSize + incomingIndexSize);
+            Logger::debug("SingleFileStorage", "Current index pos: {},\nNeeded mask: {}",
+                          to_str_indexpos(curIndexPos), (int)neededMask);
             // New mask is short, we need larger
             if(curIndexPos.blockMask != neededMask) {
+                Logger::debug("SingleFileStorage", "Mask is short. Getting the bigger one...");
                 // Save old position
                 IndexPos oldIndexPos = indexMap[key];
+                Logger::debug("SingleFileStorage", "Saved old IndexPos: {}", to_str_indexpos(oldIndexPos));
                 // Save the new one
                 markBlockAvailable(curIndexPos.blockStart, toBaseBlocks(curIndexPos.blockMask));
                 indexMap[key] = getNewBlock(curIndexPos.bytesSize + incomingIndexSize);
@@ -33,24 +42,25 @@ void SingleIndexStorage::createIndex(std::unordered_map<std::string, BigToken> &
         // Find available pos for the completely new item
         else
             indexMap[key] = getNewBlock(incomingIndexSize);
+        Logger::debug("SingleFileStorage", "IndexPos for {} is {}", key, to_str_indexpos(indexMap[key]));
         updateStorageFile(indexMap[key], value.getFilePositions());
     }
 }
 
 void SingleIndexStorage::copyBytes(const IndexPos from, IndexPos& to) {
     std::vector<char> buffer(COPY_BLOCK_SIZE);
-    // Move the read position to 'from'
-    indexStream.seekg(blockToPos(from));
-    // Move the write position to 'to'
-    indexStream.seekp(blockToPos(to));
+    std::streampos readPos = blockToPos(from);
+    std::streampos writePos = blockToPos(to);
 
     size_t bytesToCopy = from.bytesSize;
     while (bytesToCopy > 0) {
         size_t bytesToRead = std::min(bytesToCopy, COPY_BLOCK_SIZE);
         // Read data into buffer
-        indexStream.read(buffer.data(), (long)bytesToRead);
+        indexStream.seekg(readPos);
+        readPos = indexStream.read(buffer.data(), (long)bytesToRead).tellg();
         // Write the data from buffer
-        indexStream.write(buffer.data(), (long)bytesToRead);
+        indexStream.seekp(writePos);
+        writePos = indexStream.write(buffer.data(), (long)bytesToRead).tellp();
         // Decrease the remaining byte count and increase 'to' struct
         bytesToCopy -= bytesToRead;
         to.bytesSize += bytesToRead;
@@ -61,11 +71,11 @@ void SingleIndexStorage::updateStorageFile(IndexPos &indexPos, const PosMap& pos
     indexStream.seekp(blockToPos(indexPos));
     for (const auto& [fileId, tokens] : positions) {
         for (const auto& token : tokens) {
-            indexStream.write(reinterpret_cast<const char*>(fileId), sizeof(fileId));
+            indexStream.write(reinterpret_cast<const char*>(&fileId), sizeof(fileId));
             indexStream.write(reinterpret_cast<const char*>(&token.pos), sizeof(token.pos));
             indexStream.write(reinterpret_cast<const char*>(&token.wordPos), sizeof(token.wordPos));
+            indexPos.bytesSize += ROW_SIZE;
         }
-        indexPos.bytesSize += ROW_SIZE;
     }
 }
 

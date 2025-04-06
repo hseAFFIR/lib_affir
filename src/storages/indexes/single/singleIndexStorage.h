@@ -60,6 +60,11 @@ private:
     static const int MASK_MULTIPLE = 16;
     static const int ROW_SIZE = sizeof(TokenInfo) + sizeof(FileId);
 
+    std::string to_str_indexpos(const IndexPos& indexPos) const {
+        return "(mask: " + std::to_string(indexPos.blockMask)
+                + ", start: " + std::to_string(indexPos.blockStart)
+                + ", size: " + std::to_string(indexPos.bytesSize) + ")"; }
+
     // Block number, block count (available space)
     static std::map<uint32_t, uint32_t> freeBlockPoses;
 
