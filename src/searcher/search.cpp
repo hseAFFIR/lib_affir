@@ -1,71 +1,147 @@
 #include "search.h"
-#include <sstream>
 #include <algorithm>
-#include <iterator>
-#include "../logger/logger.h"
+#include <unordered_set>
 
-Search::Search(Indexer& indexer, StemFilter& stemFilter)
-        : indexer(indexer), stemFilter(stemFilter) {
-    Logger::info("Search", "Initialized");
-}
+PhraseSearcher::PhraseSearcher(MultiFileIndexStorage& storage, Indexer& indexer)
+        : storage(storage), indexer(indexer) {}
 
-std::vector<std::string> Search::splitIntoWords(const std::string& phrase) const {
-    std::string noQuotes = phrase.substr(1, phrase.size() - 2); // Удаляем кавычки
-    std::istringstream iss(noQuotes);
-    return {std::istream_iterator<std::string>{iss},
-            std::istream_iterator<std::string>{}};
-}
+std::vector<std::string> PhraseSearcher::splitIntoWords(const std::string& phrase) {
+    std::vector<std::string> words;
+    std::istringstream iss(phrase);
+    std::string word;
 
-
-std::vector<std::string> Search::processTokens(const std::vector<std::string>& tokens) const {
-    std::vector<std::string> stemmedTokens;
-    for (const auto& token : tokens) {
-        stemmedTokens.push_back(stemFilter.process(token));
-        Logger::debug("Search", "Стемминг: '{}' → '{}'", token, stemmedTokens.back());
+    while (iss >> word) {
+        if (!word.empty() && ispunct(word.back())) {
+            word.pop_back();
+        }
+        if (!word.empty()) {
+            words.push_back(word);
+        }
     }
-    return stemmedTokens;
+    return words;
 }
 
-bool Search::isPhrase(const std::string& text) const {
-    return text.starts_with('"') && text.ends_with('"');
+bool PhraseSearcher::areWordsConsecutive(const std::vector<WordMatch>& words) {
+    for (size_t i = 1; i < words.size(); ++i) {
+        if (words[i].wordSequencePos != words[i-1].wordSequencePos + 1) {
+            return false;
+        }
+    }
+    return true;
 }
 
-// search.cpp
-std::unordered_map<unsigned long, std::vector<TokenInfo>> Search::find(const std::string& text) {
-    std::unordered_map<unsigned long, std::vector<TokenInfo>> results;
-    if (text.empty()) {
-        Logger::error("Search", "Empty query");
+std::vector<WordMatch> PhraseSearcher::searchWord(const std::string& word) {
+    std::vector<WordMatch> results;
+    BigToken token = indexer.getTokenInfo(word);
+
+    for (const auto& [fileId, positions] : token.getFilePositions()) {
+        for (const auto& posInfo : positions) {
+            results.push_back({
+                                      word,
+                                      posInfo.pos,
+                                      posInfo.wordPos,
+                                      fileId
+                              });
+        }
+    }
+
+    std::sort(results.begin(), results.end(), [](const WordMatch& a, const WordMatch& b) {
+        return std::tie(a.fileId, a.wordSequencePos) < std::tie(b.fileId, b.wordSequencePos);
+    });
+
+    return results;
+}
+
+std::vector<PhraseMatch> PhraseSearcher::searchPhrase(const std::string& phrase) {
+    std::vector<PhraseMatch> results;
+    auto words = splitIntoWords(phrase);
+
+    if (words.size() < 2) {
         return results;
     }
 
+    // 1. Собираем BigToken для каждого слова фразы
+    std::vector<BigToken> phraseTokens;
+    for (const auto& word : words) {
+        phraseTokens.push_back(indexer.getTokenInfo(word));
+    }
 
-    if (isPhrase(text)) { // Фраза в кавычках
-        std::vector<std::string> words = splitIntoWords(text);
-        std::vector<std::string> stemmedWords = processTokens(words); // Используем наш новый метод
+    // 2. Находим общие файлы для всех слов
+    std::unordered_set<int> commonFiles;
+    bool firstWord = true;
 
-        // Ищем все слова в индексе
-        std::vector<BigToken> stemmedTokens;
-        for (const auto& word : stemmedWords) {
-            stemmedTokens.push_back(indexer.getTokenInfo(word));
+    for (const auto& token : phraseTokens) {
+        std::unordered_set<int> currentFiles;
+        for (const auto& [fileId, _] : token.getFilePositions()) {
+            currentFiles.insert(fileId);
         }
 
-        // Проверяем, что все слова есть в одних файлах
-        for (const auto& [fileId, positions] : stemmedTokens[0].getFilePositions()) {
-            bool allFound = true;
-            for (size_t i = 1; i < stemmedTokens.size(); ++i) {
-                if (!stemmedTokens[i].getFilePositions().count(fileId)) {
-                    allFound = false;
+        if (firstWord) {
+            commonFiles = currentFiles;
+            firstWord = false;
+        } else {
+            std::unordered_set<int> intersection;
+            for (int fileId : commonFiles) {
+                if (currentFiles.count(fileId)) {
+                    intersection.insert(fileId);
+                }
+            }
+            commonFiles = intersection;
+        }
+
+        if (commonFiles.empty()) break;
+    }
+
+    // 3. Проверяем последовательность в общих файлах
+    for (int fileId : commonFiles) {
+        // Для каждого слова собираем его позиции в файле
+        std::vector<std::vector<WordMatch>> allWordPositions;
+
+        for (size_t i = 0; i < phraseTokens.size(); ++i) {
+            const auto& positions = phraseTokens[i].getFilePositions().at(fileId);
+            std::vector<WordMatch> wordMatches;
+
+            for (const auto& posInfo : positions) {
+                wordMatches.push_back({
+                                              words[i],
+                                              posInfo.pos,
+                                              posInfo.wordPos,
+                                              fileId
+                                      });
+            }
+            allWordPositions.push_back(wordMatches);
+        }
+
+        // 4. Ищем последовательные вхождения
+        for (const auto& firstWordPos : allWordPositions[0]) {
+            std::vector<WordMatch> potentialPhrase = {firstWordPos};
+            bool isComplete = true;
+
+            for (size_t i = 1; i < allWordPositions.size(); ++i) {
+                bool found = false;
+                size_t expectedPos = firstWordPos.wordSequencePos + i;
+
+                for (const auto& wordPos : allWordPositions[i]) {
+                    if (wordPos.wordSequencePos == expectedPos) {
+                        potentialPhrase.push_back(wordPos);
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    isComplete = false;
                     break;
                 }
             }
-            if (allFound) {
-                results[fileId] = positions; // Добавляем позиции первого слова
+
+            if (isComplete) {
+                results.push_back({
+                                          potentialPhrase,
+                                          fileId
+                                  });
             }
         }
-    } else {
-        // Обработка одиночного слова
-        std::string stemmed = stemFilter.process(text);
-        results = indexer.getTokenInfo(stemmed).getFilePositions();
     }
 
     return results;

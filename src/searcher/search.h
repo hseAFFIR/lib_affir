@@ -1,28 +1,40 @@
-#include <unordered_map>
+#ifndef SEARCH_H
+#define SEARCH_H
+
+#include "../tokenizer/tokenizer.h"
+#include "../storages/indexes/multi/multiFileIndexStorage.h"
+#include "../indexer/indexer.h"
 #include <vector>
 #include <string>
-#include "../indexer/indexer.h"
-#include "../tokenizer/filters/stemFilter.h"
+#include <unordered_set>
+#include <sstream>
 
-class Search {
+
+
+struct WordMatch {
+    std::string word;
+    size_t absolutePos;
+    size_t wordSequencePos;
+    int fileId;
+};
+
+struct PhraseMatch {
+    std::vector<WordMatch> words;
+    int fileId;
+};
+
+class PhraseSearcher {
 public:
-    Search(Indexer& indexer, StemFilter& stemFilter);
+    PhraseSearcher(MultiFileIndexStorage& storage, Indexer& indexer);
 
-    /**
-     * @brief Поиск словосочетаний или отдельных слов.
-     * @param text Текст для поиска (может быть фразой).
-     * @return Хешмапу, где:
-     *   - Ключ: fileId.
-     *   - Значение: вектор пар (абсолютная позиция, относительная позиция).
-     */
-    std::unordered_map<unsigned long, std::vector<TokenInfo>> find(const std::string& text);
+    std::vector<WordMatch> searchWord(const std::string& word);
+    std::vector<PhraseMatch> searchPhrase(const std::string& phrase);
 
 private:
+    MultiFileIndexStorage& storage;
     Indexer& indexer;
-    StemFilter& stemFilter;
 
-    // Разбивает текст на токены (слова или фразы в кавычках).
-    std::vector<std::string> splitIntoWords(const std::string& phrase) const;
-    std::vector<std::string> processTokens(const std::vector<std::string>& tokens) const;
-    bool isPhrase(const std::string& text) const;
+    std::vector<std::string> splitIntoWords(const std::string& phrase);
+    bool areWordsConsecutive(const std::vector<WordMatch>& words);
 };
+#endif

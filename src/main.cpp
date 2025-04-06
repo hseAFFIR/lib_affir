@@ -1,56 +1,54 @@
-#include <iostream>
 #include "searcher/search.h"
-#include "indexer/indexer.h"
-#include "tokenizer/filters/stemFilter.h"
+#include "tokenizer/tokenizer.h"
 #include "logger/logger.h"
-#include "storages/indexes/multi/multiFileIndexStorage.h"
+#include <filesystem>
+#include <iostream>
 
 int main() {
-    // Настройка
     system("chcp 65001");
     Logger::init("logs/log.txt");
     Logger::info("Main", "Запуск");
 
+
+    // удаление index_files (убрать!)
+    std::string folderPath = "index_files";
+    try {
+        std::filesystem::remove_all(folderPath);
+    } catch (const  std::filesystem::filesystem_error& e) {
+        std::cerr << "Ошибка при удалении папки: " << e.what() << std::endl;
+        return 1;
+    }
+
     MultiFileIndexStorage storage;
     Indexer indexer(1024, storage);
-    StemFilter stemFilter;
+    PhraseSearcher searcher(storage, indexer);
 
-    // Добавляем токены
-    indexer.addToken(Token("полковник", 100, 1, 1));  // pos=100, wordPos=1, fileId=1
-    indexer.addToken(Token("ива", 110, 2, 1)); // pos=110, wordPos=2
-    indexer.addToken(Token("ы", 200, 3, 1));
-    indexer.addToken(Token("иваны", 300, 1, 2)); // Другая форма в fileId=2
 
-    // Сохраняем
+    indexer.addToken(Token("не", 100, 1, 1));  // pos=100, wordPos=1, fileId=1
+    indexer.addToken(Token("иван", 110, 3, 1)); // pos=110, wordPos=2
+    indexer.addToken(Token("ы", 200, 4, 1));
+    indexer.addToken(Token("саша", 105, 2, 1));
+
+
     indexer.saveTo();
     storage.saveMetadata();
 
-    // Проверка индекса
-    std::string searchWord = "полковник";
-    BigToken bt = indexer.getTokenInfo(searchWord);
-    std::cout << "Токен " <<searchWord<< "найден в " << bt.getFilePositions().size() << " файлах\n";
 
-    // Поиск
-    Search search(indexer, stemFilter);
+// Поиск слова
+    auto wordResults = searcher.searchWord("иван");
+    for (const auto& match : wordResults) {
+        std::cout << "Found '" << match.word << "' in file " << match.fileId
+                  << " at position " << match.absolutePos << std::endl;
+    }
 
-    auto results = search.find("\"полковники иваны\"");
-    if (results.empty()) {
-        std::cout << "Фраза не найдена" << std::endl;
-    } else {
-        std::cout << "\n=== Результаты поиска фразы ===" << std::endl;
-        for (const auto& [fileId, positions] : results) {
-            std::cout << "Файл ID: " << fileId << std::endl;
-            std::cout << "Найденные позиции:" << std::endl;
-
-            for (const auto& info : positions) {
-                std::cout << "  - Абсолютная позиция: " << info.pos
-                          << ", Относительная позиция: " << info.wordPos << std::endl;
-            }
-
-            // Если нужно вывести само содержимое из файла:
-            // std::string fileContent = storage.getFileContent(fileId);
-            // std::cout << "Контекст: " << fileContent.substr(info.pos, 50) << "..." << std::endl;
+// Поиск фразы
+    auto phraseResults = searcher.searchPhrase("саша иван");
+    for (const auto& phrase : phraseResults) {
+        std::cout << "Found phrase in file " << phrase.fileId << " at positions: ";
+        for (const auto& word : phrase.words) {
+            std::cout << word.absolutePos << " ";
         }
+        std::cout << std::endl;
     }
     return 0;
 }
