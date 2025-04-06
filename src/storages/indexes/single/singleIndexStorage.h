@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include "../../../common.h"
 #include <map>
+#include <sstream>
 
 enum BlockMask : uint8_t {
     P_16 = 1 << 0,
@@ -64,6 +65,16 @@ private:
         return "(mask: " + std::to_string(indexPos.blockMask)
                 + ", start: " + std::to_string(indexPos.blockStart)
                 + ", size: " + std::to_string(indexPos.bytesSize) + ")"; }
+
+    static std::string to_str_map(const std::map<uint32_t, uint32_t> &map) {
+        std::ostringstream oss;
+        oss << "[";
+        for (const auto &[blockNum, blockCount]:map) {
+            oss << "(" << blockNum << ", " << blockCount << "), ";
+        }
+        oss << "]";
+        return oss.str();
+    }
 
     // Block number, block count (available space)
     static std::map<uint32_t, uint32_t> freeBlockPoses;

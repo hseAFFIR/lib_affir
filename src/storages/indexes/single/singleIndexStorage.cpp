@@ -104,6 +104,7 @@ BlockMask SingleIndexStorage::getMask(size_t size) {
 }
 
 void SingleIndexStorage::markBlockAvailable(const uint32_t blockStart, const uint32_t blockCount) {
+    Logger::debug("SingleFileStorage (markBlockAvailable)", "freeBlockPoses (before): {}", to_str_map(freeBlockPoses));
     auto lower_it = freeBlockPoses.lower_bound(blockStart);
     if(lower_it->first == blockStart)
         throw std::runtime_error("Block pos already exists in treeBlockPoses.");
@@ -125,6 +126,7 @@ void SingleIndexStorage::markBlockAvailable(const uint32_t blockStart, const uin
     }
 
     freeBlockPoses[newBlockPos] = newBlockCount;
+    Logger::debug("SingleFileStorage (markBlockAvailable)", "freeBlockPoses (after): {}", to_str_map(freeBlockPoses));
 }
 
 IndexPos SingleIndexStorage::getNewBlock(uint32_t indexSize) {
@@ -143,6 +145,7 @@ IndexPos SingleIndexStorage::getNewBlock(uint32_t indexSize) {
     }
     // We should remove reserved space from map
     if(availableBlocks) {
+        Logger::debug("SingleFileStorage", "There are availableBlocks: start {}, count {}", indexPos.blockStart, availableBlocks);
         // Remove from freeBlocks == reserve it
         freeBlockPoses.erase(indexPos.blockStart);
         uint32_t newFreeIndexPos = indexPos.blockStart + requiredBlocks;
@@ -150,6 +153,7 @@ IndexPos SingleIndexStorage::getNewBlock(uint32_t indexSize) {
     }
     // Otherwise there is no such pos, then we must allocate new one
     else {
+        Logger::debug("SingleFileStorage", "There are no availableBlocks, create the new one at: {}", currentBlockPos);
         indexPos = IndexPos(requiredBlockMask, currentBlockPos, 0);
         currentBlockPos++;
     }
