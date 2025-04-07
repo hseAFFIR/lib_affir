@@ -18,14 +18,10 @@ private:
     std::string storageDir = "index_files";
     std::string metadataFile = storageDir + "/metadata.idx";
     unsigned int fileCounter = 0;
+    static bool isMetadataLoaded;
 
     /// In-memory metadata storage: token -> vector of (filename, offset)
     std::unordered_map<std::string, std::vector<std::pair<std::string, size_t>>> metadata;
-
-    /**
-     * @brief Loads metadata from disk to memory
-     */
-    std::unordered_map<std::string, std::vector<std::pair<std::string, size_t>>> loadMetadata();
 
     /**
      * @brief Converts PosMap to compact JSON format
@@ -39,16 +35,22 @@ private:
 
 public:
     MultiFileIndexStorage();
-    ~MultiFileIndexStorage();
 
     /**
      * @brief Flushes in-memory metadata to disk
      */
-    void saveMetadata();
+    void saveStorageMeta() override;
+
+    /**
+     * @brief Loads metadata from disk to memory
+     */
+    void loadStorageMeta() override;
 
 
     void createIndex(std::unordered_map<std::string, BigToken>& data) override;
     void getRawIndex(const std::string& body, std::vector<PosMap>& output) override;
+
+    void close() override;
 };
 
 #endif //LIB_AFFIR_MULTIFILEINDEXSTORAGE_H
