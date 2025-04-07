@@ -10,9 +10,9 @@ int main(){
     std::vector<Base*> filters = {new Lowercaser(), new Htmler(), new Punctuator(), 
         new StopWords(), new StemFilter()};
     MultiFileIndexStorage storage;
-    // DataHandler dh(filters, 100, storage);
-    DataHandler dh(100, storage);
-    std::string text = "This is a test text. <b>Hello<\b> World!";
+    DataHandler dh(filters, 100, storage);
+    // DataHandler dh(100, storage);
+    std::string text = "This is a test text. <b>Hello<\b> World! Versailles";
     std::string filename = "test_output.txt";
     dh.processText(text, filename);
     for (auto filter : filters) {

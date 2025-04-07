@@ -36,5 +36,5 @@ void DataHandler::processText(const std::string &text, const std::string &filena
     }
     FileStorage::saveStorageMeta();
     ind.saveTo();
-    //indexStorage.saveMetadata();
+    indexStorage.saveStorageMeta();
 }   
