@@ -1,4 +1,4 @@
-#include "StopWords.h"
+#include "stopWords.h"
 #include <fstream>
 #include <filesystem>
 #include <string>
