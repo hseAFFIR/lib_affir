@@ -29,7 +29,7 @@ void Indexer::addToken(const Token &token) {
         BigToken newBT(body);
         newBT.addPosition(fileId, info);
 
-        const size_t newSize = newBT.calculateSize();
+        const size_t newSize = newBT.getSize();
         currentSizeInBytes += newSize;
 
         Logger::debug("Indexer::addToken", "{} sizeInBytes {}",token.getBody(),currentSizeInBytes);
@@ -41,7 +41,7 @@ void Indexer::addToken(const Token &token) {
         buffer.emplace(body, std::move(newBT));
     } else {
         BigToken &bt = it->second;
-        const size_t oldSize = bt.calculateSize();
+        const size_t oldSize = bt.getSize();
 
         size_t newSize = oldSize;
 
@@ -59,7 +59,7 @@ void Indexer::addToken(const Token &token) {
             saveTo();
 
             buffer[body] = BigToken(body, fileId, info);
-            currentSizeInBytes+=buffer[body].calculateSize();
+            currentSizeInBytes+=buffer[body].getSize();
 
             Logger::debug("Indexer::addToken", "{} sizeInBytes {}",token.getBody(),currentSizeInBytes);
             return;

@@ -34,8 +34,6 @@ public:
 
     const PosMap &getFilePositions() const;
 
-    void setFilePositions(const PosMap &filePositions);
-
     /**
      * @brief Constructs a BigToken with an empty body and no file positions.
      */
@@ -53,8 +51,9 @@ public:
      *
      * @return The size in bytes.
      */
-    size_t getSize() const;
-    size_t getPosesSize() const;
+
+    size_t getSize() const { return body.size() + posMapSize; };
+    size_t getPosesSize() const { return posMapSize; };
 
     /**
      * @brief Adds a new position to the token for a given file ID.

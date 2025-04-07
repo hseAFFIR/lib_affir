@@ -10,11 +10,12 @@ uint32_t SingleIndexStorage::currentBlockPos = 0;
 
 SingleIndexStorage::SingleIndexStorage() {
     Logger::info("SingleFileStorage", "Init storage");
-    loadStorageMeta();
     open();
 }
 
 void SingleIndexStorage::createIndex(std::unordered_map<std::string, BigToken> &data) {
+    loadStorageMeta();
+
     for (const auto& [key, value] : data) {
         uint32_t incomingIndexSize = value.getPosesSize();
         Logger::debug("SingleFileStorage", "Key: {}, Value count: {}, incomingIndexSize: {}",
@@ -79,8 +80,8 @@ void SingleIndexStorage::updateStorageFile(IndexPos &indexPos, const PosMap& pos
     }
 }
 
-void SingleIndexStorage::getRawIndex(const std::string& body, std::vector<PosMap &> &vector) {
-
+void SingleIndexStorage::getRawIndex(const std::string& body, std::vector<PosMap> &vector) {
+    loadStorageMeta();
 }
 
 void SingleIndexStorage::open() {
@@ -175,6 +176,7 @@ uint32_t SingleIndexStorage::toBaseBlocks(BlockMask blockMask) {
 
 void SingleIndexStorage::loadStorageMeta() {
     if (isStorageLoaded) return;
+    isStorageLoaded = true;
 
     std::ifstream metaFileIn(SingleIndexStorage::META_FILENAME_PATH, std::ios::binary);
     if (!metaFileIn.is_open()) {
@@ -213,7 +215,6 @@ void SingleIndexStorage::loadStorageMeta() {
     }
 
     metaFileIn.close();
-    isStorageLoaded = true;
 }
 
 void SingleIndexStorage::saveStorageMeta() {

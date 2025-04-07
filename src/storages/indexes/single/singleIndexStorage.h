@@ -48,7 +48,7 @@ public:
 
     void createIndex(std::unordered_map<std::string, BigToken> &data) override;
 
-    void getRawIndex(const std::string& body, std::vector<PosMap &> &vector) override;
+    void getRawIndex(const std::string& body, std::vector<PosMap> &vector) override;
 
     void close() override;
 
@@ -103,12 +103,12 @@ private:
     /**
  * @brief Loads metadata for the storage system.
  */
-    static void loadStorageMeta();
+    void loadStorageMeta() override;
     /**
      * @brief Saves metadata for the storage system.
      * @note It has to be called before exit!
      */
-    static void saveStorageMeta();
+    void saveStorageMeta() override;
 };
 
 
