@@ -79,6 +79,10 @@ public:
      * @return Стеммированное слово.
      */
     std::string process(const std::string &token) const override;
+
+    FilterOrder getOrder() const override {
+        return FilterOrder::RussianPorterStemmer;
+    }
 };
 
 #endif // RUSSIAN_PORTER_STEMMER_H

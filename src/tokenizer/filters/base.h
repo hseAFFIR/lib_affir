@@ -6,6 +6,7 @@
 #define BASE_H
 
 #include <string>
+#include "../../processing/filterOrder.h"
 
 /**
  * @class Base
@@ -26,6 +27,8 @@ public:
      * @return Строка, содержащая результат обработки.
      */
     virtual std::string process(const std::string &token) const = 0;
+
+    virtual FilterOrder getOrder() const = 0;
 };
 
 #endif // BASE_H
