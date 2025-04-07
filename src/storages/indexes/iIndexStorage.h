@@ -24,14 +24,22 @@ public:
     /**
      * @brief Retrieves the raw index from the files by given token bodies.
      *
-     * @param body A string for the body of token.
+     * @param bodies A string representing the body of token.
      * @param[out] output A vector of references to PosMap where results will be stored.
      */
-    virtual void getRawIndex(const std::string& body, std::vector<PosMap&>&) = 0;
-
+    virtual void getRawIndex(const std::string& body, std::vector<PosMap>&) = 0;
+    /**
+    * @brief Closes all file streams and flush data.
+    */
     virtual void close() = 0;
-protected:
-
+    /**
+    * @brief Save static index metadata into files.
+    */
+    virtual void saveStorageMeta() = 0;
+    /**
+    * @brief Load static index metadata into internal structures.
+    */
+    virtual void loadStorageMeta() = 0;
 };
 
 
