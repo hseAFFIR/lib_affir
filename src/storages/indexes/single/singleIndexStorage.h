@@ -52,6 +52,16 @@ public:
 
     void close() override;
 
+    /**
+     * @brief Loads metadata for the storage system.
+     */
+    void loadStorageMeta() override;
+    /**
+     * @brief Saves metadata for the storage system.
+     * @note It has to be called before exit!
+     */
+    void saveStorageMeta() override;
+
 private:
     static std::unordered_map<std::string, IndexPos> indexMap;
     const static std::string STORAGE_FILENAME_PATH;
@@ -94,21 +104,11 @@ private:
 
     static uint32_t toBaseBlocks(BlockMask blockMask);
 
-    std::streampos blockToPos(const IndexPos &indexPos) const;
+    std::streampos blockToPos(const IndexPos &indexPos, bool withSize = false) const;
 
     void open();
 
     void createIndexFile();
-
-    /**
- * @brief Loads metadata for the storage system.
- */
-    void loadStorageMeta() override;
-    /**
-     * @brief Saves metadata for the storage system.
-     * @note It has to be called before exit!
-     */
-    void saveStorageMeta() override;
 };
 
 
