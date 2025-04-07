@@ -47,6 +47,10 @@ public:
      * @return Стеммированное слово.
      */
     std::string process(const std::string &token) const override;
+
+    FilterOrder getOrder() const override {
+        return FilterOrder::StemFilter;
+    }
 };
 
 #endif // STEM_FILTER_H
