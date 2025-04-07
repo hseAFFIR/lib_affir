@@ -9,7 +9,10 @@
 ## Overview
 A module that is used to fully process the initial input text from a string. 
 It automatically passes the data through the [File Storage](fileStorage.md), [Tokenizer](tokenizer.md) with the needed filters,
-and the [Indexer](indexer.md) that itself uses [Multifile Index Storage](multiFileIndexStorage.md) to save the index.
+and the [Indexer](indexer.md) that itself uses [Multifile Index Storage](multiFileIndexStorage.md) or
+Singlefile Index Storage to save the index, passed as a parameter by the user.
+
+Can be used with or without Tokenizer filters specified.
 
 ## How to use
 
@@ -17,6 +20,7 @@ and the [Indexer](indexer.md) that itself uses [Multifile Index Storage](multiFi
 ```c++
 #include "tokenizer/filters/filters.h"
 #include "processing/dataHandler.h"
+#include "storages/indexes/multi/multiFileIndexStorage.h"
 #include <vector>
 
 ...
@@ -25,9 +29,12 @@ int main(){
     // Create a vector with all the needed filters
     std::vector<Base*> filters = {new Lowercaser(), new Htmler(), new Punctuator(), 
         new StopWords(), new StemFilter()};
+
+    // Initialize MFIS (or SFIS)
+    MultiFileIndexStorage storage;
     
-    // Initialize DataHandler with filters and bufferSize, used by Indexer
-    DataHandler dh(filters, 100);
+    // Initialize DataHandler with filters, bufferSize and indexStorage, used by Indexer
+    DataHandler dh(filters, 100, storage);
 
     std::string text = "This is a test text. <b>Hello<\b> World!";
     

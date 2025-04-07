@@ -7,6 +7,7 @@
 #include "../tokenizer/filters/base.h"
 #include "../tokenizer/tokenizer.h"
 #include "../common.h"
+#include "../storages/indexes/iIndexStorage.h"
 
 /**
  * @brief The DataHandler class is responsible for processing input text by applying a set of filters,
@@ -26,8 +27,17 @@ public:
      * 
      * @param filters A constant reference to a vector of pointers to filter objects.
      * @param buffer The size of the buffer used by the Indexer.
+     * @param indStor Instance of MFIS or SFIS
      */
-    DataHandler(const std::vector<Base*> &filters, const size_t buffer);
+    DataHandler(const std::vector<Base*> &filters, const size_t buffer, IIndexStorage &indStor);
+
+    /**
+     * @brief Construct a new DataHandler object.
+     * 
+     * @param buffer The size of the buffer used by the Indexer.
+     * @param indStor Instance of MFIS or SFIS
+     */
+    DataHandler(const size_t buffer, IIndexStorage &indStor);
 
     /**
      * @brief Processes the given text by writing it to a file, tokenizing it, and indexing the tokens.
@@ -49,8 +59,9 @@ public:
      */
     const std::vector<Base*>& getFilters() const { return filters; };
 private:
-    std::vector<Base*> filters; /**< The collection of filter objects (derived from Base) applied to the text. */
-    size_t buffer; /**< The buffer size used by the Indexer. */
+    std::vector<Base*> filters; /** The collection of filter objects (derived from Base) applied to the text. */
+    size_t buffer; /** The buffer size used by the Indexer. */
+    IIndexStorage &indexStorage; /** Ref to indexStorage. */
 };
 
 #endif
