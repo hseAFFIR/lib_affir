@@ -5,13 +5,13 @@
 #include <filesystem>
 #include "../../../logger/logger.h"
 
+bool MultiFileIndexStorage::isMetadataLoaded = false;
+
 MultiFileIndexStorage::MultiFileIndexStorage() {
     Logger::debug("MultiFileIndexStorage", "MultiFileIndexStorage module initialized");
     if (!std::filesystem::exists(storageDir)) {
         std::filesystem::create_directory(storageDir);
     }
-
-    metadata = loadMetadata();
 
     fileCounter = 0;
     for (const auto &entry: std::filesystem::directory_iterator(storageDir)) {
@@ -25,9 +25,9 @@ MultiFileIndexStorage::MultiFileIndexStorage() {
     }
 }
 
-MultiFileIndexStorage::~MultiFileIndexStorage() {}
-
 void MultiFileIndexStorage::createIndex(std::unordered_map<std::string, BigToken> &data) {
+    loadStorageMeta();
+
     std::string filename = storageDir + "/index_" + std::to_string(fileCounter++) + ".json";
     std::ofstream outFile(filename, std::ios::binary);
 
@@ -46,6 +46,8 @@ void MultiFileIndexStorage::createIndex(std::unordered_map<std::string, BigToken
 }
 
 void MultiFileIndexStorage::getRawIndex(const std::string &body, std::vector<PosMap> &output) {
+    loadStorageMeta();
+
     auto it = metadata.find(body);
     if (it == metadata.end()) return;
 
@@ -61,7 +63,7 @@ void MultiFileIndexStorage::getRawIndex(const std::string &body, std::vector<Pos
     }
 }
 
-void MultiFileIndexStorage::saveMetadata() {
+void MultiFileIndexStorage::saveStorageMeta() {
     std::ofstream outFile(metadataFile);
     for (const auto &[token, entries]: metadata) {
         outFile << token;
@@ -72,8 +74,12 @@ void MultiFileIndexStorage::saveMetadata() {
     }
 }
 
-std::unordered_map<std::string, std::vector<std::pair<std::string, size_t>>> MultiFileIndexStorage::loadMetadata() {
-    std::unordered_map<std::string, std::vector<std::pair<std::string, size_t>>> result;
+void MultiFileIndexStorage::loadStorageMeta() {
+    if(isMetadataLoaded)
+        return;
+    isMetadataLoaded = true;
+
+    metadata.clear();
 
     std::ifstream inFile(metadataFile);
     std::string line;
@@ -92,11 +98,9 @@ std::unordered_map<std::string, std::vector<std::pair<std::string, size_t>>> Mul
         }
 
         if (!entries.empty()) {
-            result[token] = entries;
+            metadata[token] = entries;
         }
     }
-
-    return result;
 }
 
 std::string MultiFileIndexStorage::posMapToJson(const PosMap &posMap) {
@@ -158,4 +162,8 @@ PosMap MultiFileIndexStorage::jsonToPosMap(const std::string &jsonStr) {
     }
 
     return posMap;
+}
+
+void MultiFileIndexStorage::close() {
+
 }
