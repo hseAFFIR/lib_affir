@@ -33,7 +33,7 @@ int main() {
     indexer.saveTo();
 
 
-    storage.saveMetadata();
+    storage.saveStorageMeta();
 
     std::cout << "\nПолучаем индекс для 'example':" << std::endl;
     std::vector<PosMap> results;
