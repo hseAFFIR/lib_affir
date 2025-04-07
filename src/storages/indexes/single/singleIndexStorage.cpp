@@ -21,10 +21,10 @@ void SingleIndexStorage::createIndex(std::unordered_map<std::string, BigToken> &
                       key, value.getFilePositions().size(), incomingIndexSize);
         // Already exists
         if (indexMap.find(key) != indexMap.end()) {
-            Logger::debug("SingleFileStorage", "Token body already exist in map. Appending...");
+            Logger::debug("SingleFileStorage", "Token body already exists in map. Appending...");
             IndexPos curIndexPos = indexMap[key];
             BlockMask neededMask = getMask(curIndexPos.bytesSize + incomingIndexSize);
-            Logger::debug("SingleFileStorage", "Current index pos: {},\nNeeded mask: {}",
+            Logger::debug("SingleFileStorage", "Current index pos: {},\n\tNeeded mask: {}",
                           to_str_indexpos(curIndexPos), (int)neededMask);
             // New mask is short, we need larger
             if(curIndexPos.blockMask != neededMask) {
@@ -42,8 +42,8 @@ void SingleIndexStorage::createIndex(std::unordered_map<std::string, BigToken> &
         // Find available pos for the completely new item
         else
             indexMap[key] = getNewBlock(incomingIndexSize);
-        Logger::debug("SingleFileStorage", "IndexPos for {} is {}", key, to_str_indexpos(indexMap[key]));
         updateStorageFile(indexMap[key], value.getFilePositions());
+        Logger::debug("SingleFileStorage", "IndexPos for {} is {}", key, to_str_indexpos(indexMap[key]));
     }
 }
 
@@ -68,7 +68,8 @@ void SingleIndexStorage::copyBytes(const IndexPos from, IndexPos& to) {
 }
 
 void SingleIndexStorage::updateStorageFile(IndexPos &indexPos, const PosMap& positions) {
-    indexStream.seekp(blockToPos(indexPos));
+    indexStream.seekp(blockToPos(indexPos, true));
+    std::cout << indexStream.tellp() << " ";
     for (const auto& [fileId, tokens] : positions) {
         for (const auto& token : tokens) {
             indexStream.write(reinterpret_cast<const char*>(&fileId), sizeof(fileId));
@@ -76,11 +77,27 @@ void SingleIndexStorage::updateStorageFile(IndexPos &indexPos, const PosMap& pos
             indexStream.write(reinterpret_cast<const char*>(&token.wordPos), sizeof(token.wordPos));
             indexPos.bytesSize += ROW_SIZE;
         }
+        std::cout << indexStream.tellp() << " ";
     }
+    std::cout << to_str_indexpos(indexPos) << "\n";
 }
 
 void SingleIndexStorage::getRawIndex(const std::string& body, std::vector<PosMap> &vector) {
+    IndexPos indexPos = indexMap[body];
+    indexStream.seekg(blockToPos(indexPos));
+    PosMap posMap;
+    for (size_t i = 0; i < indexPos.bytesSize; i += ROW_SIZE) {
+        FileId fileId;
+        Pos pos;
+        Pos wordPos;
 
+        indexStream.read(reinterpret_cast<char*>(&fileId), sizeof(fileId));
+        indexStream.read(reinterpret_cast<char*>(&pos), sizeof(pos));
+        indexStream.read(reinterpret_cast<char*>(&wordPos), sizeof(wordPos));
+
+        posMap[fileId].emplace_back(pos, wordPos);
+    }
+    vector.push_back(posMap);
 }
 
 void SingleIndexStorage::open() {
@@ -104,23 +121,23 @@ BlockMask SingleIndexStorage::getMask(size_t size) {
 }
 
 void SingleIndexStorage::markBlockAvailable(const uint32_t blockStart, const uint32_t blockCount) {
+    if(blockCount <= 0) return;
     Logger::debug("SingleFileStorage (markBlockAvailable)", "freeBlockPoses (before): {}", to_str_map(freeBlockPoses));
-    auto lower_it = freeBlockPoses.lower_bound(blockStart);
-    if(lower_it->first == blockStart)
-        throw std::runtime_error("Block pos already exists in treeBlockPoses.");
+    // -1 to avoid self finding
+    auto lower_it = freeBlockPoses.lower_bound(blockStart - 1);
 
     uint32_t newBlockPos = blockStart;
     uint32_t newBlockCount = blockCount;
 
     // Merged with prev block
-    if(lower_it->first + lower_it->second == blockStart) {
+    if(lower_it->second > 0 && lower_it->first + lower_it->second == blockStart) {
         newBlockPos = lower_it->first;
         newBlockCount = lower_it->second + blockCount;
         freeBlockPoses.erase(lower_it);
     }
     auto upper_it = freeBlockPoses.upper_bound(blockStart);
     // Merged with next block
-    if(upper_it->first == blockStart + blockCount) {
+    if(upper_it->second > 0 && upper_it->first == blockStart + blockCount) {
         newBlockCount += upper_it->second;
         freeBlockPoses.erase(upper_it);
     }
@@ -137,7 +154,7 @@ IndexPos SingleIndexStorage::getNewBlock(uint32_t indexSize) {
     uint32_t availableBlocks = 0;
     // Finding first available pos, which free bytes are greater or equal our indexSize
     for (const auto& pair : freeBlockPoses) {
-        if(pair.second <= requiredBlocks) {
+        if(pair.second >= requiredBlocks) {
             indexPos = IndexPos(requiredBlockMask, pair.first, 0);
             availableBlocks = pair.second;
             break;
@@ -147,15 +164,17 @@ IndexPos SingleIndexStorage::getNewBlock(uint32_t indexSize) {
     if(availableBlocks) {
         Logger::debug("SingleFileStorage", "There are availableBlocks: start {}, count {}", indexPos.blockStart, availableBlocks);
         // Remove from freeBlocks == reserve it
+        Logger::debug("SingleFileStorage", "Delete this block sequence.");
         freeBlockPoses.erase(indexPos.blockStart);
         uint32_t newFreeIndexPos = indexPos.blockStart + requiredBlocks;
+        Logger::debug("SingleFileStorage", "Adding left sequence ({}, {})...", newFreeIndexPos, availableBlocks - requiredBlocks);
         markBlockAvailable(newFreeIndexPos, availableBlocks - requiredBlocks);
     }
     // Otherwise there is no such pos, then we must allocate new one
     else {
-        Logger::debug("SingleFileStorage", "There are no availableBlocks, create the new one at: {}", currentBlockPos);
+        Logger::debug("SingleFileStorage", "There are NO availableBlocks, create the new one at: {}", currentBlockPos);
         indexPos = IndexPos(requiredBlockMask, currentBlockPos, 0);
-        currentBlockPos++;
+        currentBlockPos += requiredBlocks;
     }
     return indexPos;
 }
@@ -165,8 +184,10 @@ void SingleIndexStorage::close() {
 }
 
 // Return startPos for startBlock
-std::streampos SingleIndexStorage::blockToPos(const IndexPos &indexPos) const {
-    return MASK_MULTIPLE * ROW_SIZE * indexPos.blockStart;
+std::streampos SingleIndexStorage::blockToPos(const IndexPos &indexPos, bool withSize) const {
+    uint32_t size = 0;
+    if(withSize) size = indexPos.bytesSize;
+    return MASK_MULTIPLE * ROW_SIZE * indexPos.blockStart + size;
 }
 
 uint32_t SingleIndexStorage::toBaseBlocks(BlockMask blockMask) {
@@ -186,6 +207,9 @@ void SingleIndexStorage::loadStorageMeta() {
         Logger::warn("SingleFileStorage", "Cannot open file: {}", std::string(strerror(errno)));
         return;
     }
+
+    // Load current block pos
+    metaFileIn.read(reinterpret_cast<char*>(&currentBlockPos), sizeof(currentBlockPos));
 
     // Load freeBlockPoses
     size_t freeBlockSize;
@@ -220,8 +244,10 @@ void SingleIndexStorage::loadStorageMeta() {
 void SingleIndexStorage::saveStorageMeta() {
     std::ofstream metaFileOut(SingleIndexStorage::META_FILENAME_PATH, std::ios::binary);
 
-    size_t freeBlockCount = freeBlockPoses.size();
+    // Save current block pos
+    metaFileOut.write(reinterpret_cast<const char*>(&currentBlockPos), sizeof(currentBlockPos));
     // Save free block map
+    size_t freeBlockCount = freeBlockPoses.size();
     metaFileOut.write(reinterpret_cast<const char*>(&freeBlockCount), sizeof(freeBlockCount));
     for (const auto& [key, val] : freeBlockPoses) {
         metaFileOut.write(reinterpret_cast<const char*>(&key), sizeof(key));
