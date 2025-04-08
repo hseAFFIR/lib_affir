@@ -8,6 +8,7 @@
 #include "../tokenizer/tokenizer.h"
 #include "../common.h"
 #include "encodingHandler/encodingHandler.h"
+#include "../storages/indexes/iIndexStorage.h"
 
 /**
  * @brief The DataHandler class is responsible for processing input text by applying a set of filters,
@@ -17,6 +18,8 @@
  * used by the Indexer. It ensures input text is converted to UTF-8, sorts the filters based on 
  * a predefined order, processes the text by writing it to a file, tokenizing it, and passing 
  * the tokens to an indexer.
+ * used by the Indexer. It sorts the filters based on a predefined order and then processes the 
+ * text by writing it to a file, tokenizing it, and passing the tokens to an indexer.
  */
 class DataHandler {
 public:
@@ -25,25 +28,31 @@ public:
      * 
      * The constructor accepts a vector of pointers to filter objects (derived from Base)
      * and sorts them according to their order (as defined by their getOrder() method).
-     * Initializes encoding processor for UTF-8 handling.
      * 
      * @param filters A constant reference to a vector of pointers to filter objects.
      * @param buffer The size of the buffer used by the Indexer.
+     * @param indStor Instance of MFIS or SFIS
      */
-    DataHandler(const std::vector<Base*> &filters, const size_t buffer);
+    DataHandler(const std::vector<Base*> &filters, const size_t buffer, IIndexStorage &indStor);
+
+    /**
+     * @brief Construct a new DataHandler object.
+     * 
+     * @param buffer The size of the buffer used by the Indexer.
+     * @param indStor Instance of MFIS or SFIS
+     */
+    DataHandler(const size_t buffer, IIndexStorage &indStor);
 
     /**
      * @brief Processes the given text by writing it to a file, tokenizing it, and indexing the tokens.
      * 
      * This function performs several operations in sequence:
-     * 1. Converts the text to UTF-8 if necessary.
-     * 2. Creates a FileStorage object and writes the text into the file.
-     * 3. Initializes a Tokenizer with the sorted filters to process the text.
-     * 4. Creates an Indexer with the specified buffer size and passes each generated token to it.
+     * 1. Creates a FileStorage object and writes the text into the file.
+     * 2. Initializes a Tokenizer with the sorted filters to process the text.
+     * 3. Creates an Indexer with the specified buffer size and passes each generated token to it.
      * 
      * @param text The input text to be processed.
      * @param filename The name of the file where the text will be stored.
-     * @throws std::runtime_error If text encoding conversion fails.
      */
     void processText(const std::string &text, const std::string &filename);
 
@@ -54,9 +63,10 @@ public:
      */
     const std::vector<Base*>& getFilters() const { return filters; };
 private:
-    std::vector<Base*> filters; /**< The collection of filter objects (derived from Base) applied to the text. */
-    size_t buffer; /**< The buffer size used by the Indexer. */
     EncodingHandler encodingHandler; /**< Handles text encoding conversion and validation. */
+    std::vector<Base*> filters; /** The collection of filter objects (derived from Base) applied to the text. */
+    size_t buffer; /** The buffer size used by the Indexer. */
+    IIndexStorage &indexStorage; /** Ref to indexStorage. */
 };
 
 #endif

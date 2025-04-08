@@ -34,6 +34,7 @@ public:
      * @brief Constructs an Indexer instance with a specified buffer size limit.
      *
      * @param bufferSize Maximum buffer size (in bytes) before flushing to storage.
+     * @param indStor Instance of object MFIS or SFIS
      */
     explicit Indexer(unsigned long bufferSize, IIndexStorage &indStor);
 
