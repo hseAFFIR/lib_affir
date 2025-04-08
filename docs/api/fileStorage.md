@@ -20,7 +20,7 @@ A path to the structure describing metadata of the text is defined in `META_FILE
 loading metadata from `META_FILENAME_PATH` is launched once automatically. 
 ### To save data
 ```c++
-#include <storages/fileStorage.h>
+#include "storages/files/fileStorage.h"
 #include <fstream>
 #include <vector>
 #include "logger/logger.h"
@@ -55,7 +55,7 @@ FileStorage::saveStorageMeta();
 
 ### To read data
 ```c++
-#include <storages/fileStorage.h>
+#include "storages/files/fileStorage.h"
 
 ...
 // Some file id that you will get from IndexStorage

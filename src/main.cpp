@@ -18,4 +18,5 @@ int main(){
     for (auto filter : filters) {
         delete filter;
     }
+    return 0;
 }

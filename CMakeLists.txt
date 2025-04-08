@@ -9,6 +9,8 @@ set(STORAGE_FILES
         src/storages/indexes/iIndexStorage.h
         src/storages/indexes/multi/multiFileIndexStorage.h
         src/storages/indexes/multi/multiFileIndexStorage.cpp
+        src/storages/indexes/single/singleIndexStorage.cpp
+        src/storages/indexes/single/singleIndexStorage.h
 )
 
 set(MODEL_FILES
