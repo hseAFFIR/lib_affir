@@ -30,4 +30,8 @@ int main(){
     
     std::string filename = "test_output.txt";
     dh.processText(text, filename);
+    for (auto filter : filters) {
+        delete filter;
+    }
+    return 0;
 }

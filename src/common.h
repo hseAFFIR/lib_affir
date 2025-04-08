@@ -8,11 +8,14 @@
 
 #include <unordered_map>
 #include <vector>
-#include "models/tokenInfo.h"
+#include <cstdint>
 
 // Type alias for FileId to represent file identifier.
-typedef unsigned long FileId;
-typedef unsigned long Pos;
-typedef std::unordered_map<unsigned long, std::vector<TokenInfo>> PosMap;
-
+typedef uint64_t FileId;
+typedef uint64_t Pos;
+struct TokenInfo {
+    Pos pos;    ///< The absolute position in the data stream.
+    Pos wordPos;///< The position within a word or sentence.
+};
+typedef std::unordered_map<FileId, std::vector<TokenInfo>> PosMap;
 #endif //LIB_AFFIR_COMMON_H
