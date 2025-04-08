@@ -12,6 +12,7 @@
 #include <map>
 #include <sstream>
 
+// Mask indicating the block size in tokens
 enum BlockMask : uint8_t {
     P_16 = 1 << 0,
     P_64 = 1 << 1,
@@ -34,7 +35,7 @@ constexpr BlockMask allBlockMasks[] = {
         BlockMask::P_65k,
         BlockMask::P_262k
 };
-
+// Information for defining index position in file
 struct IndexPos {
     BlockMask blockMask;
     uint32_t blockStart{};
@@ -63,8 +64,8 @@ public:
     void saveStorageMeta() override;
 
 private:
-    static std::unordered_map<std::string, IndexPos> indexMap;
-    const static std::string STORAGE_FILENAME_PATH;
+    static std::unordered_map<std::string, IndexPos> indexMap; ///< Path to the reverse index file.
+    const static std::string STORAGE_FILENAME_PATH; ///< Path to the single index file.
     const static std::string META_FILENAME_PATH; ///< Path to the metadata file.
     std::fstream indexStream;
     static bool isStorageLoaded;
