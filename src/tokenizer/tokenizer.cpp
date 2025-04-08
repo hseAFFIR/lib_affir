@@ -97,7 +97,7 @@ void Tokenizer::tokenizeRaw(const std::string &text, FileId fileId, std::functio
                 if (isCyrillicChar(text, i)) {
                     token += text[i + 1];
                     i += 2;
-                    currentPos += 2;
+                    currentPos++;
                 } else {
                     ++i;
                     ++currentPos;
