@@ -19,19 +19,20 @@ DataHandler::DataHandler(const size_t buffer, IIndexStorage &indStor)
     : filters({}), indexStorage(indStor), buffer(buffer) {}
 
 void DataHandler::processText(const std::string &text, const std::string &filename) {
-    FileStorage fs(filename, text.size());
+    std::string utf8Text = encodingHandler.processInput(text);
+    FileStorage fs(filename, utf8Text.size());
     FileId id = fs.getId();
-    fs.write(text);
+    fs.write(utf8Text);
     Tokenizer tk(filters);
     Indexer ind(buffer, indexStorage);
     if(!filters.empty()) {
-        tk.tokenizeFiltered(text, id, [&ind](Token token) {
+        tk.tokenizeFiltered(utf8Text, id, [&ind](Token token) {
             std::cout << "Token: " << token.getBody() << " | Pos: " << token.getPos() << std::endl;
             ind.addToken(token);
         });
     }
     else {
-        tk.tokenizeRaw(text, id, [&ind](Token token) {
+        tk.tokenizeRaw(utf8Text, id, [&ind](Token token) {
             std::cout << "Token: " << token.getBody() << " | Pos: " << token.getPos() << std::endl;
             ind.addToken(token);
         });
