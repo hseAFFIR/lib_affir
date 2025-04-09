@@ -46,7 +46,7 @@ int main() {
 
 
     indexer.saveTo();
-    storage.saveMetadata();
+    storage.saveStorageMeta();
 
 
     Search Search(indexer);

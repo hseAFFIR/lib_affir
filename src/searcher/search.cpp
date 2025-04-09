@@ -141,10 +141,9 @@ std::vector<Search::SearchResult> Search::search(const std::string& query) const
     Logger::info("Search", "Searching for: {}", query);
 
     Tokenizer tokenizer({});
-    FileId fileId = 1; // убрать потом.
     std::vector<Token> tokens;
     
-    tokenizer.tokenizeRaw(query, fileId, [&tokens](Token token) {
+    tokenizer.tokenizeRaw(query, [&tokens](Token token) {
         tokens.push_back(token);
         Logger::debug("Search", "pushed token: {}", token.getBody());
     });

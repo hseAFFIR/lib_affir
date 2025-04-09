@@ -1,9 +1,11 @@
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
 
+#include <optional>
 #include <vector>
 #include <regex>
 #include <functional>
+#include <optional>
 #include "filters/base.h"
 #include "../models/token.h"
 
