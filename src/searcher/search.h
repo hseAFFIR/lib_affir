@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef LIB_AFFIR_SEARCH_H
+#define LIB_AFFIR_SEARCH_H
 #include "../indexer/indexer.h"
 #include <vector>
 #include <string>
@@ -78,3 +78,4 @@ private:
      */
     static void validateQuery(const std::string& query);
 };
+#endif // LIB_AFFIR_SEARCH_H
