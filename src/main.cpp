@@ -1,6 +1,8 @@
 #include "searcher/search.h"
 #include "tokenizer/tokenizer.h"
 #include "logger/logger.h"
+#include "storages/indexes/multi/multiFileIndexStorage.h"
+#include "indexer/indexer.h"
 #include <filesystem>
 #include <iostream>
 
@@ -21,34 +23,48 @@ int main() {
 
     MultiFileIndexStorage storage;
     Indexer indexer(1024, storage);
-    PhraseSearcher searcher(storage, indexer);
 
-
-    indexer.addToken(Token("не", 100, 1, 1));  // pos=100, wordPos=1, fileId=1
-    indexer.addToken(Token("иван", 110, 3, 1)); // pos=110, wordPos=2
-    indexer.addToken(Token("ы", 200, 4, 1));
-    indexer.addToken(Token("саша", 105, 2, 1));
+    indexer.addToken(Token("not", 100, 1, 1));  // pos=100, wordPos=1, fileId=1
+    indexer.addToken(Token("ivan", 104, 2, 1)); // pos=110, wordPos=2
+    indexer.addToken(Token("carevich", 105, 3, 1));
+    indexer.addToken(Token("cried", 106, 4, 1));
+    indexer.addToken(Token("ivan", 104, 2, 2)); // pos=110, wordPos=2
+    indexer.addToken(Token("ivan", 104, 3, 2)); // pos=110, wordPos=2
+    indexer.addToken(Token("ivan", 104, 2, 4)); // pos=110, wordPos=2
 
 
     indexer.saveTo();
     storage.saveMetadata();
 
 
-// Поиск слова
-    auto wordResults = searcher.searchWord("иван");
-    for (const auto& match : wordResults) {
-        std::cout << "Found '" << match.word << "' in file " << match.fileId
-                  << " at position " << match.absolutePos << std::endl;
-    }
+    Searcher searcher(storage, indexer);
+    std::vector<Searcher::SearchResult> results = searcher.search("ivan");
+    searcher.printSearchResults(results);
 
-// Поиск фразы
-    auto phraseResults = searcher.searchPhrase("саша иван");
-    for (const auto& phrase : phraseResults) {
-        std::cout << "Found phrase in file " << phrase.fileId << " at positions: ";
-        for (const auto& word : phrase.words) {
-            std::cout << word.absolutePos << " ";
-        }
-        std::cout << std::endl;
-    }
+std::vector<Searcher::SearchResult> results2 = searcher.search("ivan carevich");
+    searcher.printSearchResults(results2);
+
+std::vector<Searcher::SearchResult> results3 = searcher.search(""); // not found
+    searcher.printSearchResults(results3);
+
+    std::vector<Searcher::SearchResult> results4 = searcher.search("ivan ivan"); // not found
+    searcher.printSearchResults(results4);
+
+    std::vector<Searcher::SearchResult> results5 = searcher.search("русские."); // garbage error (fantom tokens) чзх?????
+    searcher.printSearchResults(results5);
+
+
+
+    // std::string searchText = "2. Blow ye the trumpet in Zion, and sound an alarm in my holy mountain: let all the inhabitants of the land tremble: for the day of the Lord cometh, for it is nigh at hand;2 A day of darkness and of gloominess, a day of clouds and of thick darkness, as the morning spread upon the mountains: a great people and a strong; there hath not been ever the like, neither shall be any more after it, even to the years of many generations.";
+
+    // std::string searchText = "курсовая работа";
+    // Tokenizer tokenizer({});
+    // FileId fileId = 1;
+
+    // tokenizer.tokenizeRaw(searchText, fileId, [](Token token) {
+    //     std::cout << "Token: " << token.getBody() << " | Pos: " << token.getPos() << std::endl;
+    // });
+
+
     return 0;
 }
