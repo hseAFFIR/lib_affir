@@ -5,7 +5,7 @@
 #include <algorithm>
 
 DataHandler::DataHandler(const std::vector<Base*> &filters, const size_t buffer, IIndexStorage &indStor)
-    : filters(filters), indexStorage(indStor)
+    : filters(filters), indexStorage(indStor), buffer(buffer)
 {
     std::sort(this->filters.begin(), this->filters.end(), 
         [](const Base* a, const Base* b) {
@@ -14,7 +14,7 @@ DataHandler::DataHandler(const std::vector<Base*> &filters, const size_t buffer,
 }
 
 DataHandler::DataHandler(const size_t buffer, IIndexStorage &indStor)
-    : filters({}), indexStorage(indStor) {}
+    : filters({}), indexStorage(indStor), buffer(buffer) {}
 
 void DataHandler::processText(const std::string &text, const std::string &filename) {
     FileStorage fs(filename, text.size());

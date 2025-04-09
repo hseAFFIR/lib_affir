@@ -13,6 +13,8 @@ MultiFileIndexStorage::MultiFileIndexStorage() {
         std::filesystem::create_directory(storageDir);
     }
 
+    loadStorageMeta();
+
     fileCounter = 0;
     for (const auto &entry: std::filesystem::directory_iterator(storageDir)) {
         std::string filename = entry.path().filename().string();
@@ -26,8 +28,6 @@ MultiFileIndexStorage::MultiFileIndexStorage() {
 }
 
 void MultiFileIndexStorage::createIndex(std::unordered_map<std::string, BigToken> &data) {
-    loadStorageMeta();
-
     std::string filename = storageDir + "/index_" + std::to_string(fileCounter++) + ".json";
     std::ofstream outFile(filename, std::ios::binary);
 
@@ -46,8 +46,6 @@ void MultiFileIndexStorage::createIndex(std::unordered_map<std::string, BigToken
 }
 
 void MultiFileIndexStorage::getRawIndex(const std::string &body, std::vector<PosMap> &output) {
-    loadStorageMeta();
-
     auto it = metadata.find(body);
     if (it == metadata.end()) return;
 

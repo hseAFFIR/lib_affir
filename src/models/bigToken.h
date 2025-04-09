@@ -26,18 +26,13 @@ private:
      * objects describing the token's occurrences in that file.
      */
     PosMap filePositions;
+    uint32_t posMapSize{};
 public:
-    const std::string &getBody() const {
-        return body;
-    }
+    const std::string &getBody() const { return body; }
 
-    void setBody(const std::string &b) {
-        BigToken::body = b;
-    }
+    void setBody(const std::string &b) { BigToken::body = b; }
 
     const PosMap &getFilePositions() const;
-
-    void setFilePositions(const PosMap &filePositions);
 
     /**
      * @brief Constructs a BigToken with an empty body and no file positions.
@@ -49,14 +44,16 @@ public:
      *
      * @param body The text content of the token.
      */
-    explicit BigToken(std::string  body) : body(std::move(body)) {}
+    explicit BigToken(std::string body) : body(std::move(body)) { }
 
     /**
      * @brief Calculates the memory size occupied by this BigToken.
      *
      * @return The size in bytes.
      */
-    size_t calculateSize() const;
+
+    size_t getSize() const { return body.size() + posMapSize; };
+    size_t getPosesSize() const { return posMapSize; };
 
     /**
      * @brief Adds a new position to the token for a given file ID.
@@ -64,9 +61,7 @@ public:
      * @param fileId The ID of the file where the token appears.
      * @param info The TokenInfo structure containing position details.
      */
-    void addPosition(unsigned long long fileId, const TokenInfo& info) {
-        filePositions[fileId].push_back(info);
-    }
+    void addPosition(FileId fileId, const TokenInfo& info);
 
     /**
     * @brief Merges new file position data into the existing structure.

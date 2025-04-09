@@ -34,7 +34,7 @@ public:
      * @return FilterOrder The order of the stopWords filter.
      */
     FilterOrder getOrder() const override {
-        return FilterOrder::EnglishStemmer;
+        return FilterOrder::StopWords;
     }
 private:
     static std::unordered_set<std::string> stopWordsRu;  ///< Set of Russian stop words.
