@@ -9,6 +9,8 @@ set(STORAGE_FILES
         src/storages/indexes/iIndexStorage.h
         src/storages/indexes/multi/multiFileIndexStorage.h
         src/storages/indexes/multi/multiFileIndexStorage.cpp
+        src/storages/indexes/single/singleIndexStorage.cpp
+        src/storages/indexes/single/singleIndexStorage.h
 )
 
 set(MODEL_FILES
@@ -16,6 +18,12 @@ set(MODEL_FILES
         src/models/token.cpp
         src/models/bigToken.h
         src/models/bigToken.cpp
+)
+
+set(PROCESSING_FILES
+        src/processing/filterOrder.h
+        src/processing/dataHandler.h
+        src/processing/dataHandler.cpp
 )
 
 set(INDEXER_FILES
@@ -35,13 +43,24 @@ set(FILTERS
         src/tokenizer/filters/russianPorterStemmer.cpp
         src/tokenizer/filters/russianPorterStemmer.h
         src/tokenizer/filters/englishStemmer.cpp
-        src/tokenizer/filters/englishStemmer.h)
+        src/tokenizer/filters/englishStemmer.h
+        src/tokenizer/filters/htmler.cpp
+        src/tokenizer/filters/htmler.h
+        src/tokenizer/filters/lowercaser.cpp
+        src/tokenizer/filters/lowercaser.h
+        src/tokenizer/filters/punctuator.h
+        src/tokenizer/filters/punctuator.cpp
+        src/tokenizer/filters/stopWords.h
+        src/tokenizer/filters/stopWords.cpp
+        src/tokenizer/tokenizer.h
+        src/tokenizer/filters/filters.h)
 
 set(SOURCE_FILES
         ${STORAGE_FILES}
         ${MODEL_FILES}
         ${FILTERS}
         ${INDEXER_FILES}
+        ${PROCESSING_FILES}
         ${SEARCHER_FILES}
         src/main.cpp
         src/common.h
