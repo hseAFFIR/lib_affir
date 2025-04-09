@@ -79,7 +79,8 @@ std::vector<Search::SearchResult> Search::searchPhrase(const std::vector<std::st
     
     std::vector<SearchResult> results;
     
-    for (const auto& firstWord : firstWordResults) {
+    if (!firstWordResults.empty()) {
+        const auto& firstWord = firstWordResults[0];
         PosMap phrasePositions;
         
         for (const auto& [fileId, firstInfos] : firstWord.posMap) {
@@ -140,7 +141,7 @@ std::vector<Search::SearchResult> Search::search(const std::string& query) const
     Logger::info("Search", "Searching for: {}", query);
 
     Tokenizer tokenizer({});
-    FileId fileId = 1;
+    FileId fileId = 1; // убрать потом.
     std::vector<Token> tokens;
     
     tokenizer.tokenizeRaw(query, fileId, [&tokens](Token token) {
