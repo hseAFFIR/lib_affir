@@ -48,10 +48,11 @@ bool isAlnumCustom(const std::string& text, size_t index) {
  * @param fileId Идентификатор файла, откуда взят текст.
  * @param callback Функция обратного вызова для обработки каждого найденного токена.
  */
-void Tokenizer::tokenizeRaw(const std::string &text, FileId fileId, std::function<void(Token)> callback) {
+void Tokenizer::tokenizeRaw(const std::string &text, std::function<void(Token)> callback, std::optional<FileId> fileId) {
     size_t currentPos = 0;
     size_t index = 0;
     size_t i = 0;
+    FileId actualFileId = fileId.value_or(0);
 
     while (i < text.size()) {
         // Пропускаем пробельные символы
@@ -105,7 +106,7 @@ void Tokenizer::tokenizeRaw(const std::string &text, FileId fileId, std::functio
             }
         }
 
-        callback(Token(token, startPos, index++, fileId));
+        callback(Token(token, startPos, index++, actualFileId));
     }
 }
 
@@ -115,13 +116,13 @@ void Tokenizer::tokenizeRaw(const std::string &text, FileId fileId, std::functio
  * @param fileId Идентификатор файла.
  * @param callback Функция обратного вызова для обработки отфильтрованных токенов.
  */
-void Tokenizer::tokenizeFiltered(const std::string &text, FileId fileId, std::function<void(Token)> callback) {
-    tokenizeRaw(text, fileId, [this, &callback](Token token) {
+void Tokenizer::tokenizeFiltered(const std::string &text, std::function<void(Token)> callback, std::optional<FileId> fileId) {
+    tokenizeRaw(text, [this, &callback](Token token) {
         std::string filteredToken = applyFilters(token.getBody());
         if (!filteredToken.empty()) {
             callback(Token(filteredToken, token.getPos(), token.getIndex(), token.getFileId()));
         }
-    });
+    }, fileId);
 }
 
 /**
