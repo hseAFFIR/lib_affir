@@ -53,10 +53,16 @@ bool Search::areWordsAdjacent(const std::vector<TokenInfo>& firstInfos,
         return false;
     }
     
-    const auto& lastFirstPos = firstInfos.back();
-    const auto& lastSecondPos = secondInfos.back();
+    // Check all possible combinations of positions
+    for (const auto& firstPos : firstInfos) {
+        for (const auto& secondPos : secondInfos) {
+            if (secondPos.wordPos - firstPos.wordPos == 1) {
+                return true;
+            }
+        }
+    }
     
-    return lastSecondPos.wordPos - lastFirstPos.wordPos == 1;
+    return false;
 }
 
 std::vector<Search::SearchResult> Search::searchPhrase(const std::vector<std::string>& words) const {
@@ -77,25 +83,43 @@ std::vector<Search::SearchResult> Search::searchPhrase(const std::vector<std::st
         PosMap phrasePositions;
         
         for (const auto& [fileId, firstInfos] : firstWord.posMap) {
-            bool foundPhrase = true;
-            
-            for (size_t i = 1; i < words.size(); ++i) {
-                auto nextWordResults = searchSingleWord(words[i]);
-                if (nextWordResults.empty()) {
-                    foundPhrase = false;
-                    break;
+            for (const auto& firstInfo : firstInfos) {
+                std::vector<TokenInfo> currentPhrasePositions = {firstInfo};
+                bool foundPhrase = true;
+                
+                for (size_t i = 1; i < words.size(); ++i) {
+                    auto nextWordResults = searchSingleWord(words[i]);
+                    if (nextWordResults.empty()) {
+                        foundPhrase = false;
+                        break;
+                    }
+                    
+                    auto it = nextWordResults[0].posMap.find(fileId);
+                    if (it == nextWordResults[0].posMap.end()) {
+                        foundPhrase = false;
+                        break;
+                    }
+                    
+                    // Find the next word's position that is adjacent to the last position in current phrase
+                    bool foundNext = false;
+                    for (const auto& nextPos : it->second) {
+                        if (nextPos.wordPos - currentPhrasePositions.back().wordPos == 1) {
+                            currentPhrasePositions.push_back(nextPos);
+                            foundNext = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!foundNext) {
+                        foundPhrase = false;
+                        break;
+                    }
                 }
                 
-                auto it = nextWordResults[0].posMap.find(fileId);
-                if (it == nextWordResults[0].posMap.end() || 
-                    !areWordsAdjacent(firstInfos, it->second)) {
-                    foundPhrase = false;
-                    break;
+                if (foundPhrase) {
+                    // Only add the first position of the complete phrase
+                    phrasePositions[fileId] = {currentPhrasePositions[0]};
                 }
-            }
-            
-            if (foundPhrase) {
-                phrasePositions[fileId] = firstInfos;
             }
         }
         

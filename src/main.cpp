@@ -9,7 +9,7 @@
 int main() {
     system("chcp 65001");
     Logger::init("logs/log.txt");
-    Logger::info("Main", "Запуск");
+    Logger::info("Main", "Starting");
 
 
     // удаление index_files (убрать!)
@@ -17,7 +17,7 @@ int main() {
     try {
         std::filesystem::remove_all(folderPath);
     } catch (const  std::filesystem::filesystem_error& e) {
-        std::cerr << "Ошибка при удалении папки: " << e.what() << std::endl;
+        std::cerr << "Can't remove index_files folder: " << e.what() << std::endl;
         return 1;
     }
 
@@ -31,14 +31,18 @@ int main() {
     indexer.addToken(Token("carevich", 105, 3, 1));
     indexer.addToken(Token("cried", 106, 4, 1));
 
+
+    indexer.addToken(Token("not", 0, 1, 2)); // pos=110, wordPos=2
     indexer.addToken(Token("ivan", 4, 2, 2)); // pos=110, wordPos=2
     indexer.addToken(Token("ivan", 9, 3, 2)); // pos=110, wordPos=2
+    indexer.addToken(Token("hey", 14, 4, 2)); // pos=110, wordPos=2
+
     
     indexer.addToken(Token("blow", 109, 10, 4)); // pos=110, wordPos=2
     indexer.addToken(Token("ye", 115, 11, 4)); // pos=110, wordPos=2
-    indexer.addToken(Token("trumpet", 120,12, 4)); // pos=110, wordPos=2
+    indexer.addToken(Token("trumpet", 130,12, 4)); // pos=110, wordPos=2
 
-    indexer.addToken(Token("thick", 104,12, 3)); // pos=110, wordPos=2
+    indexer.addToken(Token("thick", 130,12, 3)); // pos=110, wordPos=2
 
 
     indexer.saveTo();
@@ -46,16 +50,16 @@ int main() {
 
 
     Search Search(indexer);
-    std::vector<Search::SearchResult> results = Search.search("ivan");
+    std::vector<Search::SearchResult> results = Search.search("not ivan");
     Search.printSearchResults(results);
 
-std::vector<Search::SearchResult> results2 = Search.search("ivan carevich");
+std::vector<Search::SearchResult> results2 = Search.search("not ivan carevich cried");
     Search.printSearchResults(results2);
 
 // std::vector<Search::SearchResult> results3 = Search.search(""); // EXCEPTION!
     // Search.printSearchResults(results3);
 
-    std::vector<Search::SearchResult> results4 = Search.search("ivan ivan"); // not found
+    std::vector<Search::SearchResult> results4 = Search.search("ivan ivan hey");
     Search.printSearchResults(results4);
 
     // std::vector<Search::SearchResult> results5 = Search.search("русские."); // garbage error (fantom tokens) чзх?????
@@ -64,7 +68,7 @@ std::vector<Search::SearchResult> results2 = Search.search("ivan carevich");
 
 
     // std::string searchText = "2. Blow ye the trumpet in Zion, and sound an alarm in my holy mountain: let all the inhabitants of the land tremble: for the day of the Lord cometh, for it is nigh at hand;2 A day of darkness and of gloominess, a day of clouds and of thick darkness, as the morning spread upon the mountains: a great people and a strong; there hath not been ever the like, neither shall be any more after it, even to the years of many generations.";
-    std::string searchText = "blow ye";
+    std::string searchText = "blow ye trumpet";
     std::vector<Search::SearchResult> searchResults = Search.search(searchText);
     Search.printSearchResults(searchResults);
 

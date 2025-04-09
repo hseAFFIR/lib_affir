@@ -1,17 +1,19 @@
-# Search
+# Searcher
 ## Table of Contents
 <!-- TOC -->
-* [Search](#search)
+* [Searcher](#searcher)
     * [Table of Contents](#table-of-contents)
     * [Overview](#overview)
     * [How to use](#how-to-use)
+        * [Initialization](#initialization)
         * [Searching for single words](#searching-for-single-words)
         * [Searching for exact phrases](#searching-for-exact-phrases)
+    * [Class Structure](#class-structure)
     * [Notes](#notes)
 <!-- TOC -->
 
 ## Overview
-A module for searching indexed tokens and phrases across multiple files. It provides:
+The `Searcher` class is responsible for performing search operations on indexed data. It provides:
 - Single word search with positional information
 - Exact phrase search (consecutive words)
 - Results with file IDs and word positions
@@ -27,47 +29,59 @@ The search operates on pre-indexed data through `Indexer` and `MultiFileIndexSto
 #include "search/search.h"
 
 MultiFileIndexStorage storage;
-Indexer indexer(1024, storage);  // Buffer size 1024
-PhraseSearcher searcher(storage, indexer);
+Indexer indexer;
+Searcher searcher(indexer);
 ```
 
 ### Searching for single words
 ```cpp
-// Search for all occurrences of a word
-auto wordResults = searcher.searchWord("example");
+// Search for a single word
+auto results = searcher.search("fox");
 
-// Process results
-for (const auto& match : wordResults) {
-    std::cout << "Found '" << match.word 
-              << "' in file " << match.fileId
-              << " at position " << match.absolutePos
-              << " (word #" << match.wordSequencePos << ")\n";
-}
+// Print results using built-in function
+searcher.printSearchResults(results);
 ```
 
 ### Searching for exact phrases
 ```cpp
 // Search for exact phrase (words must appear consecutively)
-auto phraseResults = searcher.searchPhrase("quick brown fox");
+auto results = searcher.search("quick brown fox");
 
-// Process results
-for (const auto& phrase : phraseResults) {
-    std::cout << "Found phrase in file " << phrase.fileId << ":\n";
-    for (const auto& word : phrase.words) {
-        std::cout << "- " << word.word 
-                  << " at position " << word.absolutePos << "\n";
-    }
-}
+// Print results using built-in function
+searcher.printSearchResults(results);
 ```
 
+## Class Structure
+
+### SearchResult Structure
+```cpp
+struct SearchResult {
+    std::string query;       // Original search query
+    PosMap posMap;           // Position map in files
+    bool isPhrase;          // Whether the result is a phrase search
+};
+```
+
+### Public Methods
+- Constructor `Searcher(const MultiFileIndexStorage& storage, Indexer& indexer)` 
+- Main Search method `std::vector<SearchResult> search(const std::string& query) const` 
+- Print Results `void printSearchResults(const std::vector<SearchResult>& results) const`
+
+### Private Methods
+- Word Adjacency Check `bool areWordsAdjacent(FileId fileId, const std::vector<TokenInfo>& firstInfos, const std::vector<TokenInfo>& secondInfos) const`
+- Single Word Search`std::vector<SearchResult> searchSingleWord(const std::string& word) const`
+- Phrase Search `std::vector<SearchResult> searchPhrase(const std::vector<std::string>& words) const` 
+
 ## Notes
-Ensure all tokens are indexed and saved before searching:
+Ensure all tokens are indexed before searching:
 ```cpp
 indexer.saveTo();
 storage.saveMetadata();
 ```
 
 Phrase search requires:
-1. All words to exist in the same file
-2. Words to appear in the exact given order
-3. No gaps between words
+1. All words to exist in the same file.
+2. Words to appear in the exact given order.
+3. **No gaps between words.**
+
+The class maintains references to storage and indexer components for efficient search operations.
