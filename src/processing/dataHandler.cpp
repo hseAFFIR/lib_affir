@@ -23,16 +23,16 @@ void DataHandler::processText(const std::string &text, const std::string &filena
     Tokenizer tk(filters);
     Indexer ind(buffer, indexStorage);
     if(!filters.empty()) {
-        tk.tokenizeFiltered(text, id, [&ind](Token token) {
-            std::cout << "Token: " << token.getBody() << " | Pos: " << token.getPos() << std::endl;
+        tk.tokenizeFiltered(text, [&ind](Token token) {
+            std::cout << "Token: " << token.getBody() << " | Pos: " << token.getPos() << " | Ind: " <<token.getIndex()<< std::endl;
             ind.addToken(token);
-        });
+        }, id);
     }
     else {
-        tk.tokenizeRaw(text, id, [&ind](Token token) {
+        tk.tokenizeRaw(text, [&ind](Token token) {
             std::cout << "Token: " << token.getBody() << " | Pos: " << token.getPos() << std::endl;
             ind.addToken(token);
-        });
+        }, id);
     }
     FileStorage::saveStorageMeta();
     ind.saveTo();
