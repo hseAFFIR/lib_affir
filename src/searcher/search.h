@@ -1,14 +1,13 @@
 #pragma once
 
 #include "../indexer/indexer.h"
-#include "../storages/indexes/multi/multiFileIndexStorage.h"
 #include <vector>
 #include <string>
 
 /**
- * @brief Class for performing index search
+ * @brief Class for performing index search operations
  */
-class Searcher {
+class Search {
 public:
     /**
      * @brief Structure for storing search results
@@ -21,15 +20,15 @@ public:
 
     /**
      * @brief Constructor
-     * @param storage Reference to storage
      * @param indexer Reference to indexer
      */
-    Searcher(const MultiFileIndexStorage& storage, Indexer& indexer);
+    Search(Indexer& indexer);
 
     /**
      * @brief Main search method
      * @param query Query text (can be a single word or phrase)
      * @return Vector of search results
+     * @throws std::invalid_argument if query is empty or too long
      */
     std::vector<SearchResult> search(const std::string& query) const;
 
@@ -40,17 +39,15 @@ public:
     void printSearchResults(const std::vector<SearchResult>& results) const;
 
 private:
-    const MultiFileIndexStorage& storage;    /// Reference to storage
-    Indexer& indexer;                        /// Reference to indexer
+    Indexer& indexer;                        ///< Reference to indexer
 
     /**
      * @brief Checks if words are adjacent in correct order
-     * @param firstPos Position of first word
-     * @param secondPos Position of second word
+     * @param firstInfos Vector of token info for first word
+     * @param secondInfos Vector of token info for second word
      * @return true if words are adjacent in correct order
      */
-    bool areWordsAdjacent(FileId fileId, 
-                         const std::vector<TokenInfo>& firstInfos,
+    bool areWordsAdjacent(const std::vector<TokenInfo>& firstInfos,
                          const std::vector<TokenInfo>& secondInfos) const;
 
     /**
@@ -66,4 +63,18 @@ private:
      * @return Vector of search results
      */
     std::vector<SearchResult> searchPhrase(const std::vector<std::string>& words) const;
+
+    /**
+     * @brief Combines words into a phrase string
+     * @param words Vector of words
+     * @return Combined phrase string
+     */
+    static std::string combinePhrase(const std::vector<std::string>& words);
+
+    /**
+     * @brief Validates search query
+     * @param query Query to validate
+     * @throws std::invalid_argument if query is invalid
+     */
+    static void validateQuery(const std::string& query);
 };

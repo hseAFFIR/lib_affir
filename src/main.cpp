@@ -24,39 +24,52 @@ int main() {
     MultiFileIndexStorage storage;
     Indexer indexer(1024, storage);
 
+    
+
     indexer.addToken(Token("not", 100, 1, 1));  // pos=100, wordPos=1, fileId=1
     indexer.addToken(Token("ivan", 104, 2, 1)); // pos=110, wordPos=2
     indexer.addToken(Token("carevich", 105, 3, 1));
     indexer.addToken(Token("cried", 106, 4, 1));
-    indexer.addToken(Token("ivan", 104, 2, 2)); // pos=110, wordPos=2
-    indexer.addToken(Token("ivan", 104, 3, 2)); // pos=110, wordPos=2
-    indexer.addToken(Token("ivan", 104, 2, 4)); // pos=110, wordPos=2
+
+    indexer.addToken(Token("ivan", 4, 2, 2)); // pos=110, wordPos=2
+    indexer.addToken(Token("ivan", 9, 3, 2)); // pos=110, wordPos=2
+    
+    indexer.addToken(Token("blow", 109, 10, 4)); // pos=110, wordPos=2
+    indexer.addToken(Token("ye", 115, 11, 4)); // pos=110, wordPos=2
+    indexer.addToken(Token("trumpet", 120,12, 4)); // pos=110, wordPos=2
+
+    indexer.addToken(Token("thick", 104,12, 3)); // pos=110, wordPos=2
 
 
     indexer.saveTo();
     storage.saveMetadata();
 
 
-    Searcher searcher(storage, indexer);
-    std::vector<Searcher::SearchResult> results = searcher.search("ivan");
-    searcher.printSearchResults(results);
+    Search Search(indexer);
+    std::vector<Search::SearchResult> results = Search.search("ivan");
+    Search.printSearchResults(results);
 
-std::vector<Searcher::SearchResult> results2 = searcher.search("ivan carevich");
-    searcher.printSearchResults(results2);
+std::vector<Search::SearchResult> results2 = Search.search("ivan carevich");
+    Search.printSearchResults(results2);
 
-std::vector<Searcher::SearchResult> results3 = searcher.search(""); // not found
-    searcher.printSearchResults(results3);
+// std::vector<Search::SearchResult> results3 = Search.search(""); // EXCEPTION!
+    // Search.printSearchResults(results3);
 
-    std::vector<Searcher::SearchResult> results4 = searcher.search("ivan ivan"); // not found
-    searcher.printSearchResults(results4);
+    std::vector<Search::SearchResult> results4 = Search.search("ivan ivan"); // not found
+    Search.printSearchResults(results4);
 
-    std::vector<Searcher::SearchResult> results5 = searcher.search("русские."); // garbage error (fantom tokens) чзх?????
-    searcher.printSearchResults(results5);
+    // std::vector<Search::SearchResult> results5 = Search.search("русские."); // garbage error (fantom tokens) чзх?????
+    // Search.printSearchResults(results5);
 
 
 
     // std::string searchText = "2. Blow ye the trumpet in Zion, and sound an alarm in my holy mountain: let all the inhabitants of the land tremble: for the day of the Lord cometh, for it is nigh at hand;2 A day of darkness and of gloominess, a day of clouds and of thick darkness, as the morning spread upon the mountains: a great people and a strong; there hath not been ever the like, neither shall be any more after it, even to the years of many generations.";
+    std::string searchText = "blow ye";
+    std::vector<Search::SearchResult> searchResults = Search.search(searchText);
+    Search.printSearchResults(searchResults);
 
+
+    // // пример того, что на русском токенизатор не работает.
     // std::string searchText = "курсовая работа";
     // Tokenizer tokenizer({});
     // FileId fileId = 1;
