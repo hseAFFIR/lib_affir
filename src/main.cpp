@@ -2,6 +2,7 @@
 #include "tokenizer/filters/filters.h"
 #include "processing/dataHandler.h"
 #include "storages/indexes/multi/multiFileIndexStorage.h"
+#include "logger/logger.h"
 #include <vector>
 #include <cassert>
 #include <fstream>
@@ -10,6 +11,8 @@
 
 
 int main(){
+    Logger::init("logs/log.txt");
+    Logger::info("Main", "Application started");
     MultiFileIndexStorage storage;
     std::vector<Base*> filters = {new Lowercaser(), new Htmler(), new Punctuator(), 
         new StopWords(), new StemFilter()};
@@ -24,12 +27,13 @@ int main(){
     std::string utf8test = encodingHandler.processInput(testtexttt);
     std::cout << rps.process(utf8test);
     std::string testtext = "漢";
+    testtext = "Hello, World!";
     std::string utf8Text = encodingHandler.processInput(testtext);
     std::cout << utf8Text << "\n";
     std::cout << utf8Text;
     
     std::string filename = "test_output.txt";
-    dh.processText(text, filename);
+    dh.processText(utf8Text, filename);
     for (auto filter : filters) {
         delete filter;
     }
