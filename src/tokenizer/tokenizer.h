@@ -6,6 +6,7 @@
 #include <functional>
 #include "filters/base.h"
 #include "../models/token.h"
+#include <optional>
 
 /**
  * @class Tokenizer
@@ -34,7 +35,7 @@ public:
      * Этот метод проходит по строке, идентифицирует токены (слова, символы, HTML-теги) и
      * вызывает callback для каждого токена с информацией о его позиции и типе.
      */
-    void tokenizeRaw(const std::string &text, FileId fileId, std::function<void(Token)> callback);
+    void tokenizeRaw(const std::string &text, std::function<void(Token)> callback, std::optional<FileId> fileId = std::nullopt);
 
     /**
      * @brief Разбивает текст на токены с применением фильтров.
@@ -45,7 +46,7 @@ public:
      * Этот метод вызывает `tokenizeRaw`, а затем применяет фильтры к каждому токену, передавая
      * отфильтрованные токены в callback.
      */
-    void tokenizeFiltered(const std::string &text, FileId fileId, std::function<void(Token)> callback);
+    void tokenizeFiltered(const std::string &text, std::function<void(Token)> callback, std::optional<FileId> fileId = std::nullopt);
 
     /**
      * @brief Добавляет фильтр в список фильтров.
