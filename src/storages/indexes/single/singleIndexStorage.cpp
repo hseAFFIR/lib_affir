@@ -69,7 +69,6 @@ void SingleIndexStorage::copyBytes(const IndexPos from, IndexPos& to) {
 
 void SingleIndexStorage::updateStorageFile(IndexPos &indexPos, const PosMap& positions) {
     indexStream.seekp(blockToPos(indexPos, true));
-    std::cout << indexStream.tellp() << " ";
     for (const auto& [fileId, tokens] : positions) {
         for (const auto& token : tokens) {
             indexStream.write(reinterpret_cast<const char*>(&fileId), sizeof(fileId));
@@ -77,9 +76,7 @@ void SingleIndexStorage::updateStorageFile(IndexPos &indexPos, const PosMap& pos
             indexStream.write(reinterpret_cast<const char*>(&token.wordPos), sizeof(token.wordPos));
             indexPos.bytesSize += ROW_SIZE;
         }
-        std::cout << indexStream.tellp() << " ";
     }
-    std::cout << to_str_indexpos(indexPos) << "\n";
 }
 
 void SingleIndexStorage::getRawIndex(const std::string& body, std::vector<PosMap> &vector) {
@@ -115,7 +112,7 @@ void SingleIndexStorage::createIndexFile() {
 
 BlockMask SingleIndexStorage::getMask(size_t size) {
     for(auto mask : allBlockMasks)
-        if(size <= mask * mask * MASK_MULTIPLE * ROW_SIZE)
+        if(size <= mask * mask * mask * MASK_MULTIPLE * ROW_SIZE)
             return mask;
     throw std::runtime_error("There is no suitable mask for the size = " + std::to_string(size));
 }
@@ -191,7 +188,7 @@ std::streampos SingleIndexStorage::blockToPos(const IndexPos &indexPos, bool wit
 }
 
 uint32_t SingleIndexStorage::toBaseBlocks(BlockMask blockMask) {
-    return (blockMask * blockMask) / (BlockMask::P_16 * BlockMask::P_16);
+    return (blockMask * blockMask * blockMask);
 }
 
 void SingleIndexStorage::loadStorageMeta() {
