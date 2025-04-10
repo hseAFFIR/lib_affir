@@ -1,6 +1,10 @@
-//
-// Created by amenk on 22.03.2025.
-//
+/**
+ * @file logger.h
+ * @brief Header file for the Logger class that provides logging functionality.
+ *
+ * This file defines the Logger class which implements logging capabilities using spdlog.
+ * It supports multiple log levels and outputs logs to both console and file.
+ */
 
 #ifndef LIB_AFFIR_LOGGER_H
 #define LIB_AFFIR_LOGGER_H
@@ -18,11 +22,23 @@
  * This class supports logging messages at different levels (trace, debug, info, warn, error, critical)
  * and outputs them to both the console and a log file. The log level can be controlled via the
  * DEBUG environment variable.
+ *
+ * Usage example:
+ * @code
+ * Logger::init("path/to/log.txt");
+ * Logger::info("MyClass", "This is an info message");
+ * Logger::debug("MyClass", "This is a debug message");
+ * @endcode
  */
 class Logger {
 public:
     /**
      * @brief Initializes the logger with a specified log file path.
+     *
+     * This method sets up the logger with both console and file output. The log level is determined
+     * by the DEBUG environment variable:
+     * - If DEBUG=false: Only info and higher level messages are logged
+     * - Otherwise: All messages including trace and debug are logged
      *
      * @param logFilePath The path to the log file. Defaults to "logs/log.txt".
      */
@@ -30,6 +46,8 @@ public:
 
     /**
      * @brief Logs a trace-level message.
+     *
+     * Trace level is the most detailed logging level, used for very detailed debugging information.
      *
      * @tparam Args Types of the message arguments.
      * @param className The name of the class generating the log message.
@@ -44,6 +62,8 @@ public:
     /**
      * @brief Logs a debug-level message.
      *
+     * Debug level is used for detailed debugging information that is useful during development.
+     *
      * @tparam Args Types of the message arguments.
      * @param className The name of the class generating the log message.
      * @param fmt The format string for the message.
@@ -56,6 +76,8 @@ public:
 
     /**
      * @brief Logs an info-level message.
+     *
+     * Info level is used for general operational messages that highlight the progress of the application.
      *
      * @tparam Args Types of the message arguments.
      * @param className The name of the class generating the log message.
@@ -70,6 +92,8 @@ public:
     /**
      * @brief Logs a warn-level message.
      *
+     * Warning level is used for potentially harmful situations that are not errors.
+     *
      * @tparam Args Types of the message arguments.
      * @param className The name of the class generating the log message.
      * @param fmt The format string for the message.
@@ -83,6 +107,8 @@ public:
     /**
      * @brief Logs an error-level message.
      *
+     * Error level is used for error events that might still allow the application to continue running.
+     *
      * @tparam Args Types of the message arguments.
      * @param className The name of the class generating the log message.
      * @param fmt The format string for the message.
@@ -95,6 +121,8 @@ public:
 
     /**
      * @brief Logs a critical-level message.
+     *
+     * Critical level is used for very severe error events that will presumably lead the application to abort.
      *
      * @tparam Args Types of the message arguments.
      * @param className The name of the class generating the log message.

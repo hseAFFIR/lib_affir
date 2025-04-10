@@ -1,60 +1,187 @@
-//
-// Created by amenk on 22.03.2025.
-//
-
 #include "search.h"
-#include <iostream>
 #include "../logger/logger.h"
-#include <cctype> // для ispunct
-#include <algorithm> // для remove_if
-#include <sstream>
+#include "../tokenizer/tokenizer.h"
+#include <iostream>
+#include <stdexcept>
 
-std::string removePunctuation(const std::string& text) {
-    std::string result = text;
-    // Удаляем знаки препинания
-    result.erase(std::remove_if(result.begin(), result.end(), ::ispunct), result.end());
+constexpr size_t MAX_QUERY_LENGTH = 1000;
+
+void Search::validateQuery(const std::string& query) {
+    if (query.empty()) {
+        throw std::invalid_argument("Query cannot be empty");
+    }
+    if (query.length() > MAX_QUERY_LENGTH) {
+        throw std::invalid_argument("Query is too long");
+    }
+}
+
+std::string Search::combinePhrase(const std::vector<std::string>& words) {
+    std::string result;
+    for (size_t i = 0; i < words.size(); ++i) {
+        if (i > 0) result += " ";
+        result += words[i];
+    }
     return result;
 }
 
-Search::Search(Indexer& indexer, StemFilter& stemFilter)
-        : indexer(indexer), stemFilter(stemFilter) {
-    Logger::warn("Search", "Search module initialized");
+Search::Search(Indexer& indexer) 
+    : indexer(indexer) {
 }
-std::vector<std::pair<unsigned long, unsigned long>> Search::find(const std::string& text) {
-    Logger::debug("Search", "Starting search for text: {}", text);
-    std::vector<std::pair<unsigned long, unsigned long>> results;
 
-    // Удаляем знаки препинания из текста
-    std::string cleanedText = removePunctuation(text);
+std::vector<Search::SearchResult> Search::searchSingleWord(const std::string& word) const {
+    std::vector<SearchResult> results;
+    
+    BigToken token = indexer.getTokenInfo(word);
+    PosMap positions = token.getFilePositions();
 
-    // Разбиваем текст на токены
-    std::vector<std::string> tokens;
-    std::istringstream stream(cleanedText);
-    std::string token;
-    while (stream >> token) {
-        tokens.push_back(token);
+    Logger::debug("Search", "appearances: {} for word {}", positions.size(), word);
+    
+    if (!positions.empty()) {
+        results.push_back({
+            word,
+            positions,
+            false  // isPhrase = false for single word
+        });
     }
-    if (text.empty()){
-        Logger::error("Search", "Empty search text provided!");
+    
+    return results;
+}
+
+bool Search::areWordsAdjacent(const std::vector<TokenInfo>& firstInfos,
+                            const std::vector<TokenInfo>& secondInfos) const {
+    if (firstInfos.empty() || secondInfos.empty()) {
+        return false;
     }
-
-    // Обрабатываем каждый токен с помощью StemFilter
-    for (const std::string& token : tokens) {
-        std::string stemmedToken = stemFilter.process(token);
-
-        // Ищем обработанный токен в индексе
-        const BigToken& bigToken = indexer.getTokenInfo(stemmedToken);
-
-        // Получаем информацию о позициях токена в файлах
-        const auto& filePositions = bigToken.getFilePositions();
-
-        // Добавляем все найденные позиции в результаты
-        for (const auto& [fileId, positions] : filePositions) {
-            for (const TokenInfo& info : positions) {
-                results.emplace_back(fileId, info.pos);
+    
+    // Check all possible combinations of positions
+    for (const auto& firstPos : firstInfos) {
+        for (const auto& secondPos : secondInfos) {
+            if (secondPos.wordPos - firstPos.wordPos == 1) {
+                return true;
             }
         }
     }
-    Logger::info("Search", "Search completed successfully");
+    
+    return false;
+}
+
+std::vector<Search::SearchResult> Search::searchPhrase(const std::vector<std::string>& words) const {
+    if (words.empty()) {
+        return {};
+    }
+    
+    std::string fullPhrase = combinePhrase(words);
+    auto firstWordResults = searchSingleWord(words[0]);
+    
+    if (firstWordResults.empty()) {
+        return {};
+    }
+    
+    std::vector<SearchResult> results;
+    
+    if (!firstWordResults.empty()) {
+        const auto& firstWord = firstWordResults[0];
+        PosMap phrasePositions;
+        
+        for (const auto& [fileId, firstInfos] : firstWord.posMap) {
+            for (const auto& firstInfo : firstInfos) {
+                std::vector<TokenInfo> currentPhrasePositions = {firstInfo};
+                bool foundPhrase = true;
+                
+                for (size_t i = 1; i < words.size(); ++i) {
+                    auto nextWordResults = searchSingleWord(words[i]);
+                    if (nextWordResults.empty()) {
+                        foundPhrase = false;
+                        break;
+                    }
+                    
+                    auto it = nextWordResults[0].posMap.find(fileId);
+                    if (it == nextWordResults[0].posMap.end()) {
+                        foundPhrase = false;
+                        break;
+                    }
+                    
+                    // Find the next word's position that is adjacent to the last position in current phrase
+                    bool foundNext = false;
+                    for (const auto& nextPos : it->second) {
+                        if (nextPos.wordPos - currentPhrasePositions.back().wordPos == 1) {
+                            currentPhrasePositions.push_back(nextPos);
+                            foundNext = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!foundNext) {
+                        foundPhrase = false;
+                        break;
+                    }
+                }
+                
+                if (foundPhrase) {
+                    // Only add the first position of the complete phrase
+                    phrasePositions[fileId] = {currentPhrasePositions[0]};
+                }
+            }
+        }
+        
+        if (!phrasePositions.empty()) {
+            results.push_back({
+                fullPhrase,
+                phrasePositions,
+                true
+            });
+        }
+    }
+    
     return results;
+}
+
+std::vector<Search::SearchResult> Search::search(const std::string& query) const {
+    validateQuery(query);
+    Logger::info("Search", "Searching for: {}", query);
+
+    Tokenizer tokenizer({});
+    std::vector<Token> tokens;
+    
+    tokenizer.tokenizeRaw(query, [&tokens](Token token) {
+        tokens.push_back(token);
+        Logger::debug("Search", "pushed token: {}", token.getBody());
+    });
+
+    if (tokens.empty()) {
+        Logger::warn("Search", "Empty vector after tokenization!");
+        return {};
+    }
+
+    if (tokens.size() == 1) {
+        Logger::info("Search", "Searching for single word: {}", tokens[0].getBody());
+        return searchSingleWord(tokens[0].getBody());
+    }
+    
+    std::vector<std::string> words;
+    words.reserve(tokens.size());
+    for (const auto& token : tokens) {
+        words.push_back(token.getBody());
+    }
+    return searchPhrase(words);
+}
+
+void Search::printSearchResults(const std::vector<SearchResult>& results) const {
+    if (results.empty()) {
+        Logger::warn("Search", "No results found!");
+        return;
+    }
+
+    for (const auto& result : results) {
+        std::cout << "--------------------------------" << std::endl;
+        Logger::info("Search", "Found results for query {}:", result.query);
+        for (const auto& [fileId, tokenInfos] : result.posMap) {
+            std::cout << "File ID: " << fileId << std::endl;
+            std::cout << "  Positions: ";
+            for (const auto& info : tokenInfos) {
+                std::cout << "(pos=" << info.pos << ", wordPos=" << info.wordPos << ") ";
+            }
+            std::cout << std::endl;
+        }
+    }
 }
