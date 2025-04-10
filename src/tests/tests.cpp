@@ -49,7 +49,7 @@ void runTestProcessingWithoutReadTime(const std::string& folderPath, size_t buff
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = end - start;
 
-    std::cout << "Total processing time (buffer - "<< buffer <<" bites}): "
+    std::cout << "Total processing time (buffer - "<< buffer <<" bytes): "
               << diff.count() << " seconds\n";
 
 }
@@ -96,7 +96,7 @@ void runTestTokIndIndStor(const std::string& folderPath, size_t buffer ,std::vec
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = end - start;
 
-    std::cout << "Total Tokenizer+Indexer+IndexStorage time (buffer - "<< buffer <<" bites}): "
+    std::cout << "Total Tokenizer+Indexer+IndexStorage time (buffer - "<< buffer <<" bytes): "
               << diff.count() << " seconds\n";
 
 }
