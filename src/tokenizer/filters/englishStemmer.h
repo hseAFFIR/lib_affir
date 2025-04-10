@@ -58,9 +58,9 @@ private:
      * the first non-vowel following a vowel in R1. Special handling is applied for certain prefixes.
      *
      * @param word The word for which regions are to be determined.
-     * @return std::pair<std::string, std::string> A pair containing R1 and R2.
+     * @return std::pair<long long, long long> A pair containing R1 and R2.
      */
-    std::pair<std::string, std::string> english_set_regions(const std::string &word) const;
+    std::pair<long long, long long> english_set_regions(const std::string &word) const;
     
     /**
      * @brief Applies suffix replacement rules to the input word.
@@ -71,7 +71,7 @@ private:
      * @param word The word to process for suffix replacement.
      * @return std::string The word after suffix replacement.
      */
-    std::string english_replace_suffixes(const std::string &word) const;
+    std::string english_replace_suffixes(std::string &word) const;
     
     /**
      * @brief Checks if the word is considered "short" based on its syllable structure and region R1.
@@ -80,7 +80,7 @@ private:
      * @param R1 The region R1 of the word.
      * @return true if the word is short, false otherwise.
      */
-    bool english_is_short(const std::string &word, const std::string &R1) const;
+    bool english_is_short(const std::string &word, const long long &R1) const;
 
     /**
      * @brief Determines if a given word segment forms a short syllable.
@@ -99,7 +99,7 @@ private:
      * @param R1 The region R1 of the word.
      * @return std::string The word after processing step 2.
      */
-    std::string step2(const std::string &word, const std::string &R1) const;
+    std::string step2(std::string &word, const long long &R1) const;
 
     /**
      * @brief Executes step 3 of the Porter2 algorithm for suffix replacement.
@@ -109,7 +109,7 @@ private:
      * @param R2 The region R2 of the word.
      * @return std::string The word after processing step 3.
      */
-    std::string step3(const std::string &word, const std::string &R1, const std::string &R2) const;
+    std::string step3(std::string &word, const long long &R1, const long long &R2) const;
 
     /**
      * @brief Executes step 4 of the Porter2 algorithm for suffix removal.
@@ -118,7 +118,7 @@ private:
      * @param R2 The region R2 of the word.
      * @return std::string The word after processing step 4.
      */
-    std::string step4(const std::string &word, const std::string &R2) const;
+    std::string step4(std::string &word, const long long &R2) const;
 
     /**
      * @brief Executes step 5 of the Porter2 algorithm for final adjustments.
@@ -130,7 +130,7 @@ private:
      * @param R2 The region R2 of the word.
      * @return std::string The final stemmed word after processing step 5.
      */
-    std::string step5(const std::string &word, const std::string &R1, const std::string &R2) const;
+    std::string step5(std::string &word, const long long &R1, const long long &R2) const;
 
     /**
      * @brief Checks if the string ends with the given suffix.

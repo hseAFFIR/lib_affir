@@ -6,6 +6,7 @@
 #include <functional>
 #include "filters/base.h"
 #include "../models/token.h"
+#include <optional>
 
 /**
  * @class Tokenizer
