@@ -11,20 +11,23 @@
 #include "../indexer/indexer.h"
 
 namespace fs = std::filesystem;
+
 /**
- * @brief Time test for DataHandler::processText
+ * @brief Time test for DataHandler::processText без учета загрузки файлов
  *
  * @param folderPath path to test data
  * @param buffer Maximum buffer size (in bytes) before flushing to storage.
+ * @param filters фильтры для токенизатора
  * @param storage Instance of object MFIS or SFIS
  */
-void runTestProcessingWithoutReadTime(const std::string& folderPath, size_t buffer ,std::vector<Base*> &filters, IIndexStorage& storage) {
+void runTestProcessingWithoutReadTime(const std::string &folderPath, size_t buffer, std::vector<Base *> &filters,
+                                      IIndexStorage &storage) {
     DataHandler dh(filters, buffer, storage);
 
     // Загружаем все файлы заранее, чтобы не учитывать время чтения
     std::unordered_map<std::string, std::string> fileContents;
 
-    for (const auto& entry : fs::directory_iterator(folderPath)) {
+    for (const auto &entry: fs::directory_iterator(folderPath)) {
         if (entry.is_regular_file()) {
             std::ifstream file(entry.path());
             if (!file) {
@@ -42,24 +45,32 @@ void runTestProcessingWithoutReadTime(const std::string& folderPath, size_t buff
     // Засекаем только время обработки
     auto start = std::chrono::high_resolution_clock::now();
 
-    for (const auto& [filename, text] : fileContents) {
+    for (const auto &[filename, text]: fileContents) {
         dh.processText(text, filename);
     }
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = end - start;
 
-    std::cout << "Total processing time (buffer - "<< buffer <<" bytes): "
+    std::cout << "Total processing time (buffer - " << buffer << " bytes): "
               << diff.count() << " seconds\n";
 
 }
 
-
-void runTestTokIndIndStor(const std::string& folderPath, size_t buffer ,std::vector<Base*> &filters, IIndexStorage& storage) {
+/**
+ * @brief Тест на время для пайплайна обработки без учета загрузки файлов и fileStorage
+ *
+ * @param folderPath path to test data
+ * @param buffer Maximum buffer size (in bytes) before flushing to storage.
+ * @param filters фильтры для токенизатора
+ * @param storage Instance of object MFIS or SFIS
+ */
+void runTestTokIndIndStor(const std::string &folderPath, size_t buffer, std::vector<Base *> &filters,
+                          IIndexStorage &storage) {
     // Загружаем все файлы заранее, чтобы не учитывать время чтения
     std::unordered_map<std::string, std::string> fileContents;
 
-    for (const auto& entry : fs::directory_iterator(folderPath)) {
+    for (const auto &entry: fs::directory_iterator(folderPath)) {
         if (entry.is_regular_file()) {
             std::ifstream file(entry.path());
             if (!file) {
@@ -78,7 +89,7 @@ void runTestTokIndIndStor(const std::string& folderPath, size_t buffer ,std::vec
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    for (const auto& [filename, text] : fileContents) {
+    for (const auto &[filename, text]: fileContents) {
         Tokenizer tk(filters);
         Indexer ind(buffer, storage);
 
@@ -96,12 +107,21 @@ void runTestTokIndIndStor(const std::string& folderPath, size_t buffer ,std::vec
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = end - start;
 
-    std::cout << "Total Tokenizer+Indexer+IndexStorage time (buffer - "<< buffer <<" bytes): "
+    std::cout << "Total Tokenizer+Indexer+IndexStorage time (buffer - " << buffer << " bytes): "
               << diff.count() << " seconds\n";
 
 }
 
-void runTestGetTokenInCreatedIndex(std::string &text, size_t buffer ,std::vector<Base*> &filters, IIndexStorage& storage) {
+/**
+ * @brief Тест на время getTokenInfo в уже созданном индексе
+ *
+ * @param text слово для поиска
+ * @param buffer Maximum buffer size (in bytes) before flushing to storage.
+ * @param filters фильтры для токенизатора
+ * @param storage Instance of object MFIS or SFIS
+ */
+void
+runTestGetTokenInCreatedIndex(std::string &text, size_t buffer, std::vector<Base *> &filters, IIndexStorage &storage) {
     Tokenizer tk(filters);
     Indexer ind(buffer, storage);
 
@@ -117,21 +137,27 @@ void runTestGetTokenInCreatedIndex(std::string &text, size_t buffer ,std::vector
 
 #if defined(_WIN32)
 #include <windows.h>
-    #include <psapi.h>
-
-    void printPeakMemoryUsage() {
-        PROCESS_MEMORY_COUNTERS pmc;
-        if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
-            std::cout << "Peak memory usage: "
-                      << pmc.PeakWorkingSetSize / 1024 << " KB (Windows)" << std::endl;
-        } else {
-            std::cerr << "Failed to get memory info on Windows" << std::endl;
-        }
+#include <psapi.h>
+/**
+* @brief Вывод использованной в пике RAM
+*/
+void printPeakMemoryUsage() {
+    PROCESS_MEMORY_COUNTERS pmc;
+    if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
+        std::cout << "Peak memory usage: "
+                  << pmc.PeakWorkingSetSize / 1024 << " KB (Windows)" << std::endl;
+    } else {
+        std::cerr << "Failed to get memory info on Windows" << std::endl;
     }
+}
 
 #elif defined(__unix__) || defined(__APPLE__)
+
 #include <sys/resource.h>
 
+/**
+ * @brief Вывод использованной в пике RAM
+ */
 void printPeakMemoryUsage() {
     struct rusage usage;
     if (getrusage(RUSAGE_SELF, &usage) == 0) {
@@ -155,9 +181,7 @@ void printPeakMemoryUsage() {
 #endif
 
 
-
-
-size_t countOccurrences(const std::string& text, const std::string& word) {
+size_t countOccurrences(const std::string &text, const std::string &word) {
     size_t count = 0;
     size_t pos = 0;
     while ((pos = text.find(word, pos)) != std::string::npos) {
@@ -167,7 +191,13 @@ size_t countOccurrences(const std::string& text, const std::string& word) {
     return count;
 }
 
-void searchWordInFiles(const std::string& folderPath, const std::string& word) {
+/**
+ * @brief Нативный поиск
+ *
+ * @param folderPath путь к папке с датасетом
+ * @param word слово для поиска
+ */
+void searchWordInFiles(const std::string &folderPath, const std::string &word) {
     std::unordered_map<std::string, std::string> fileContents;
 
     // Загрузка всех файлов заранее
