@@ -32,39 +32,40 @@ EnglishStemmer::EnglishStemmer()
       english_doubles({"bb", "dd", "ff", "gg", "mm", "nn", "pp", "rr", "tt"}),
       english_valid_li_endings("cdeghkmnrt"),
       english_exceptions1({
-          {"skis", "ski"}, {"skies", "sky"}, {"dying", "die"}, {"lying", "lie"},
+          {"skies", "sky"}, {"dying", "die"}, {"lying", "lie"},
           {"tying", "tie"}, {"idly", "idl"}, {"gently", "gentl"}, {"ugly", "ugli"},
           {"early", "earli"}, {"only", "onli"}, {"singly", "singl"}, {"sky", "sky"},
           {"news", "news"}, {"howe", "howe"}, {"atlas", "atlas"}, {"cosmos", "cosmos"},
           {"bias", "bias"}, {"andes", "andes"}
       }),
       english_exceptions2({"inning", "outing", "herring", "canning", "earring",
-                            "proceed", "exceed", "succeed"}) {}
+                            "evening", "proceed", "exceed", "succeed"}) {}
 
 // Определение регионов R1 и R2 согласно алгоритму
-std::pair<std::string, std::string> EnglishStemmer::english_set_regions(const std::string &word) const {
-    std::string R1, R2;
+std::pair<long long, long long> EnglishStemmer::english_set_regions(const std::string &word) const {
+    long long wordSize = word.size();
+    long long R1 = -1, R2 = -1;
     // Находим R1: первая позиция, где символ не-гласный следует за гласным
-    for (size_t i = 1; i < word.size(); ++i) {
+    for (long long i = 1; i < wordSize; ++i) {
         if (english_vowels.find(word[i]) == std::string::npos &&
             english_vowels.find(word[i - 1]) != std::string::npos) {
-            R1 = (i + 1 < word.size()) ? word.substr(i + 1) : "";
+            R1 = (i + 1 < wordSize) ? (i + 1) : -1; 
             break;
         }
     }
     // Особые случаи
     if (word.rfind("commun", 0) == 0) {
-        R1 = (word.size() > 6) ? word.substr(6) : "";
+        R1 = (wordSize > 6) ? 6 : -1;
     }
     if (word.rfind("arsen", 0) == 0 || word.rfind("gener", 0) == 0) {
-        R1 = (word.size() > 5) ? word.substr(5) : "";
+        R1 = (wordSize > 5) ? 5 : -1;
     }
     // Находим R2 в пределах R1
-    if (!R1.empty()) {
-        for (size_t i = 1; i < R1.size(); ++i) {
-            if (english_vowels.find(R1[i]) == std::string::npos &&
-                english_vowels.find(R1[i - 1]) != std::string::npos) {
-                R2 = (i + 1 < R1.size()) ? R1.substr(i + 1) : "";
+    if (R1 != -1) {
+        for (long long i = R1; i < wordSize; ++i) {
+            if (english_vowels.find(word[i]) == std::string::npos &&
+                english_vowels.find(word[i - 1]) != std::string::npos) {
+                R2 = (i + 1 < wordSize) ? (i + 1) : -1;
                 break;
             }
         }
@@ -73,8 +74,8 @@ std::pair<std::string, std::string> EnglishStemmer::english_set_regions(const st
 }
 
 // Реализация шага замены суффиксов (часть шагов 0, 1a и 1c)
-std::string EnglishStemmer::english_replace_suffixes(const std::string &word) const {
-    std::string res = word;
+std::string EnglishStemmer::english_replace_suffixes(std::string &res) const {
+    // std::string res = word;
 
     // Шаг 0: удаляем окончания "'s" или "'s'"
     if (res.size() >= 3 && ends_with(res, "'s'"))
@@ -86,19 +87,24 @@ std::string EnglishStemmer::english_replace_suffixes(const std::string &word) co
     auto regions = english_set_regions(res);
 
     // Шаг 1a: заменяем "sses" на "ss"
-    if (ends_with(res, "sses"))
-        res = res.substr(0, res.size() - 4) + "ss";
-    regions = english_set_regions(res);
+    if (ends_with(res, "sses")){
+        res.replace(res.size()-4, 4, "ss");
+        regions = english_set_regions(res);
+    }
 
     // Шаг 1a: обрабатываем окончания "ied" и "ies"
     if (ends_with(res, "ied") || ends_with(res, "ies")) {
         // Если основа слова длиннее 1 символа, заменяем на "i", иначе – на "ie"
-        if (res.size() - 3 > 1)
-            res = res.substr(0, res.size() - 3) + "i";
-        else
-            res = res.substr(0, res.size() - 3) + "ie";
+        if (res.size() - 3 > 1){
+            res.replace(res.size()-3, 3, "i");
+            regions = english_set_regions(res);
+        }
+        else{
+            res.replace(res.size()-3, 3, "ie");
+            regions = english_set_regions(res);
+        }
     }
-    regions = english_set_regions(res);
+    
 
     // Шаг 1a: если слово оканчивается на "s", но не на "us" или "ss"
     if (ends_with(res, "s") && !ends_with(res, "us") && !ends_with(res, "ss")) {
@@ -118,15 +124,16 @@ std::string EnglishStemmer::english_replace_suffixes(const std::string &word) co
     for (const auto &suff : suffixes1) {
         if (ends_with(res, suff)) {
             // Определяем позицию начала R1
-            size_t r1_start = res.size() - english_set_regions(res).first.size();
+            // long long r1_start = res.size() - english_set_regions(res).first.size();
+            long long r1_start = regions.first;
             if (res.size() >= suff.size() && (res.size() - suff.size() >= r1_start)) {
-                res = res.substr(0, res.size() - suff.size()) + "ee";
+                res.replace(res.size() - suff.size(), suff.size(), "ee");
                 regions = english_set_regions(res);
             }
             if (res.size() > 2 &&
                 (res.back() == 'y' || res.back() == 'Y') &&
                 (english_vowels.find(res[res.size() - 2]) == std::string::npos)) {
-                res = res.substr(0, res.size() - 1) + "i";
+                res.back() = 'i';
             }
             return res;
         }
@@ -169,14 +176,14 @@ std::string EnglishStemmer::english_replace_suffixes(const std::string &word) co
     if (res.size() > 2 &&
         (res.back() == 'y' || res.back() == 'Y') &&
         (english_vowels.find(res[res.size() - 2]) == std::string::npos)) {
-        res = res.substr(0, res.size() - 1) + "i";
+        res.back() = 'i';
     }
 
     return res;
 }
 
-bool EnglishStemmer::english_is_short(const std::string &word, const std::string &R1) const {
-    return english_is_short_syllable(word) && R1.empty();
+bool EnglishStemmer::english_is_short(const std::string &word, const long long &R1) const {
+    return english_is_short_syllable(word) && (R1 == -1);
 }
 
 bool EnglishStemmer::english_is_short_syllable(const std::string &word) const {
@@ -194,9 +201,8 @@ bool EnglishStemmer::english_is_short_syllable(const std::string &word) const {
     return false;
 }
 
-std::string EnglishStemmer::step2(const std::string &word, const std::string &R1) const {
-    std::string res = word;
-    if (!R1.empty()) {
+std::string EnglishStemmer::step2(std::string &res, const long long &R1) const {
+    if (R1 != -1) {
         // Список суффиксов и замен
         std::vector<std::pair<std::string, std::string>> suffixes = {
             {"ational", "ate"}, {"tional", "tion"}, {"enci", "ence"}, {"anci", "ance"},
@@ -206,21 +212,20 @@ std::string EnglishStemmer::step2(const std::string &word, const std::string &R1
             {"iveness", "ive"},  {"iviti", "ive"}, {"biliti", "ble"}, {"bli", "ble"},
             {"ogi", "og"},       {"fulli", "ful"}, {"lessli", "less"}, {"li", ""}
         };
-        size_t r1_start = res.size() - R1.size();
-        for (const auto &p : suffixes) {
+        for (const auto &p : suffixes) { // MIGHT break smth
             const std::string &suff = p.first;
             const std::string &repl = p.second;
             if (ends_with(res, suff)) {
-                if (res.size() - suff.size() >= r1_start) {
+                if (res.size() - suff.size() >= R1) {
                     if (suff == "ogi" && res.size() > 3 && res[res.size() - 4] == 'l') {
-                        res = res.substr(0, res.size() - suff.size()) + repl;
+                        res.replace(res.size() - suff.size(), suff.size(), repl);
                     }
                     else if (suff == "li" && res.size() > 2 &&
                              english_valid_li_endings.find(res[res.size() - 3]) == std::string::npos) {
                         break;
                     }
                     else {
-                        res = res.substr(0, res.size() - suff.size()) + repl;
+                        res.replace(res.size() - suff.size(), suff.size(), repl);
                     }
                     break;
                 }
@@ -233,27 +238,24 @@ std::string EnglishStemmer::step2(const std::string &word, const std::string &R1
     return res;
 }
 
-std::string EnglishStemmer::step3(const std::string &word, const std::string &R1, const std::string &R2) const {
-    std::string res = word;
-    if (!R1.empty()) {
+std::string EnglishStemmer::step3(std::string &res, const long long &R1, const long long &R2) const {
+    if (R1 != -1) {
         std::vector<std::pair<std::string, std::string>> suffixes = {
             {"ational", "ate"}, {"tional", "tion"}, {"alize", "al"}, {"icate", "ic"},
             {"iciti", "ic"},    {"ical", "ic"},   {"ful", ""},   {"ness", ""},
             {"ative", ""}
         };
-        size_t r1_start = res.size() - R1.size();
-        size_t r2_start = res.size() - R2.size();
         for (const auto &p : suffixes) {
             const std::string &suff = p.first;
             const std::string &repl = p.second;
             if (ends_with(res, suff)) {
-                if (res.size() - suff.size() >= r1_start) {
+                if (res.size() - suff.size() >= R1) {
                     if (suff == "ative") {
-                        if (res.size() - suff.size() >= r2_start)
-                            res = res.substr(0, res.size() - suff.size()) + repl;
+                        if (res.size() - suff.size() >= R2)
+                            res.replace(res.size() - suff.size(), suff.size(), repl);
                         break;
                     }
-                    res = res.substr(0, res.size() - suff.size()) + repl;
+                    res.replace(res.size() - suff.size(), suff.size(), repl);
                     break;
                 }
                 else {
@@ -265,21 +267,19 @@ std::string EnglishStemmer::step3(const std::string &word, const std::string &R1
     return res;
 }
 
-std::string EnglishStemmer::step4(const std::string &word, const std::string &R2) const {
-    std::string res = word;
+std::string EnglishStemmer::step4(std::string &res, const long long &R2) const {
     std::vector<std::string> suffixes = {"al", "ance", "ence", "er", "ic", "able",
                                          "ible", "ant", "ement", "ment", "ent", "ism",
                                          "ate", "iti", "ous", "ive", "ize", "ion"};
-    size_t r2_start = res.size() - R2.size();
     for (const auto &suff : suffixes) {
         if (ends_with(res, suff)) {
-            if (res.size() - suff.size() >= r2_start) {
+            if (res.size() - suff.size() >= R2) {
                 if (suff == "ion" && res.size() > 3 &&
                     (res[res.size() - 4] == 's' || res[res.size() - 4] == 't')) {
-                    res = res.substr(0, res.size() - 3);
+                    res.resize(res.size() - 3);
                 }
                 else if (suff != "ion") {
-                    res = res.substr(0, res.size() - suff.size());
+                    res.resize(res.size() - suff.size());
                 }
             }
             break;
@@ -288,8 +288,7 @@ std::string EnglishStemmer::step4(const std::string &word, const std::string &R2
     return res;
 }
 
-std::string EnglishStemmer::step5(const std::string &word, const std::string &R1, const std::string &R2) const {
-    std::string res = word;
+std::string EnglishStemmer::step5(std::string &res, const long long &R1, const long long &R2) const {
     bool e_flag = false, l_flag = false;
     if (!res.empty()) {
         if (res.back() == 'e')
@@ -297,18 +296,16 @@ std::string EnglishStemmer::step5(const std::string &word, const std::string &R1
         else if (res.back() == 'l')
             l_flag = true;
     }
-    size_t r2_start = res.size() - R2.size();
-    size_t r1_start = res.size() - R1.size();
     if (e_flag) {
-        if (res.size() - 1 >= r2_start) {
+        if (res.size() - 1 >= R2) {
             res.resize(res.size() - 1);
         }
-        else if (res.size() - 1 >= r1_start && !english_is_short_syllable(res.substr(0, res.size() - 1))) {
+        else if (res.size() - 1 >= R1 && !english_is_short_syllable(res.substr(0, res.size() - 1))) {
             res.resize(res.size() - 1);
         }
     }
     if (l_flag && res.size() > 1 && res[res.size() - 2] == 'l') {
-        if (res.size() - 1 >= r2_start)
+        if (res.size() - 1 >= R2)
             res.resize(res.size() - 1);
     }
     return res;
@@ -325,19 +322,19 @@ std::string EnglishStemmer::process(const std::string &inputWord) const {
         word[0] = 'Y';
 
     // Замена строчных "y" на "Y", если они после гласной
-    for (size_t i = 1; i < word.size(); ++i) {
+    for (long long i = 1; i < word.size(); ++i) {
         if ((word[i] == 'y') && (english_vowels.find(word[i - 1]) != std::string::npos))
             word[i] = 'Y';
     }
 
-    auto regions = english_set_regions(word);
-    std::string R1 = regions.first;
-    std::string R2 = regions.second;
+    // auto regions = english_set_regions(word);
+    // std::string R1 = regions.first;
+    // std::string R2 = regions.second;
 
     word = english_replace_suffixes(word);
-    regions = english_set_regions(word);
-    R1 = regions.first;
-    R2 = regions.second;
+    auto regions = english_set_regions(word);
+    long long R1 = regions.first;
+    long long R2 = regions.second;
 
     word = step2(word, R1);
     regions = english_set_regions(word);
