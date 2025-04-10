@@ -199,7 +199,7 @@ void searchWordInFiles(const std::string& folderPath, const std::string& word) {
     std::chrono::duration<double, std::milli> elapsed = end - start;
 
     std::cout << "Total occurrences of \"" << word << "\": " << totalOccurrences << '\n';
-    std::cout << "Search time: " << elapsed.count() << " seconds\n";
+    std::cout << "Search time: " << elapsed.count() << " ms\n";
 }
 
 
