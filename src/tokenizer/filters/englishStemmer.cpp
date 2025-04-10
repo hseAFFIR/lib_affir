@@ -75,7 +75,6 @@ std::pair<long long, long long> EnglishStemmer::english_set_regions(const std::s
 
 // Реализация шага замены суффиксов (часть шагов 0, 1a и 1c)
 std::string EnglishStemmer::english_replace_suffixes(std::string &res) const {
-    // std::string res = word;
 
     // Шаг 0: удаляем окончания "'s" или "'s'"
     if (res.size() >= 3 && ends_with(res, "'s'"))
@@ -124,7 +123,6 @@ std::string EnglishStemmer::english_replace_suffixes(std::string &res) const {
     for (const auto &suff : suffixes1) {
         if (ends_with(res, suff)) {
             // Определяем позицию начала R1
-            // long long r1_start = res.size() - english_set_regions(res).first.size();
             long long r1_start = regions.first;
             if (res.size() >= suff.size() && (res.size() - suff.size() >= r1_start)) {
                 res.replace(res.size() - suff.size(), suff.size(), "ee");
@@ -212,7 +210,7 @@ std::string EnglishStemmer::step2(std::string &res, const long long &R1) const {
             {"iveness", "ive"},  {"iviti", "ive"}, {"biliti", "ble"}, {"bli", "ble"},
             {"ogi", "og"},       {"fulli", "ful"}, {"lessli", "less"}, {"li", ""}
         };
-        for (const auto &p : suffixes) { // MIGHT break smth
+        for (const auto &p : suffixes) {
             const std::string &suff = p.first;
             const std::string &repl = p.second;
             if (ends_with(res, suff)) {
@@ -326,10 +324,6 @@ std::string EnglishStemmer::process(const std::string &inputWord) const {
         if ((word[i] == 'y') && (english_vowels.find(word[i - 1]) != std::string::npos))
             word[i] = 'Y';
     }
-
-    // auto regions = english_set_regions(word);
-    // std::string R1 = regions.first;
-    // std::string R2 = regions.second;
 
     word = english_replace_suffixes(word);
     auto regions = english_set_regions(word);
