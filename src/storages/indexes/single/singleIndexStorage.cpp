@@ -79,10 +79,9 @@ void SingleIndexStorage::updateStorageFile(IndexPos &indexPos, const PosMap& pos
     }
 }
 
-void SingleIndexStorage::getRawIndex(const std::string& body, std::vector<PosMap> &vector) {
+void SingleIndexStorage::getRawIndex(const std::string& body, PosMap &output) {
     IndexPos indexPos = indexMap[body];
     indexStream.seekg(blockToPos(indexPos));
-    PosMap posMap;
     for (size_t i = 0; i < indexPos.bytesSize; i += ROW_SIZE) {
         FileId fileId;
         Pos pos;
@@ -92,9 +91,8 @@ void SingleIndexStorage::getRawIndex(const std::string& body, std::vector<PosMap
         indexStream.read(reinterpret_cast<char*>(&pos), sizeof(pos));
         indexStream.read(reinterpret_cast<char*>(&wordPos), sizeof(wordPos));
 
-        posMap[fileId].emplace_back(pos, wordPos);
+        output[fileId].emplace_back(pos, wordPos);
     }
-    vector.push_back(posMap);
 }
 
 void SingleIndexStorage::open() {

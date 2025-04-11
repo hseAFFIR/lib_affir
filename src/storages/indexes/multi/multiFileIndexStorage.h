@@ -33,7 +33,7 @@ private:
     /**
      * @brief Parses compact JSON to PosMap
      */
-    PosMap jsonToPosMap(const std::string& jsonStr);
+    void jsonToPosMap(const std::string& jsonStr, PosMap &posMap);
 
 public:
     MultiFileIndexStorage();
@@ -50,7 +50,7 @@ public:
 
 
     void createIndex(std::unordered_map<std::string, BigToken>& data) override;
-    void getRawIndex(const std::string& body, std::vector<PosMap>& output) override;
+    void getRawIndex(const std::string& body, PosMap& output) override;
 
     void close() override;
 };

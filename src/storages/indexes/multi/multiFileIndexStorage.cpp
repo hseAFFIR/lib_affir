@@ -35,7 +35,7 @@ void MultiFileIndexStorage::createIndex(std::unordered_map<std::string, BigToken
     }
 }
 
-void MultiFileIndexStorage::getRawIndex(const std::string &body, std::vector<PosMap> &output) {
+void MultiFileIndexStorage::getRawIndex(const std::string &body, PosMap &output) {
     auto it = metadata.find(body);
     if (it == metadata.end()) return;
 
@@ -46,7 +46,7 @@ void MultiFileIndexStorage::getRawIndex(const std::string &body, std::vector<Pos
         inFile.seekg(offset);
         std::string line;
         if (std::getline(inFile, line)) {
-            output.push_back(jsonToPosMap(line));
+            jsonToPosMap(line, output);
         }
     }
 }
@@ -133,8 +133,7 @@ std::string MultiFileIndexStorage::posMapToJson(const PosMap &posMap) {
     return json.str();
 }
 
-PosMap MultiFileIndexStorage::jsonToPosMap(const std::string &jsonStr) {
-    PosMap posMap;
+void MultiFileIndexStorage::jsonToPosMap(const std::string &jsonStr, PosMap &posMap) {
     size_t pos = 0;
 
     while (pos < jsonStr.size()) {
@@ -148,7 +147,6 @@ PosMap MultiFileIndexStorage::jsonToPosMap(const std::string &jsonStr) {
         if (pos == std::string::npos) break;
         pos++;
 
-        std::vector<TokenInfo> positions;
         while (pos < jsonStr.size() && jsonStr[pos] != ']') {
             while (pos < jsonStr.size() && !isdigit(jsonStr[pos]) && jsonStr[pos] != '-') pos++;
             size_t endNum = pos;
@@ -162,16 +160,12 @@ PosMap MultiFileIndexStorage::jsonToPosMap(const std::string &jsonStr) {
             unsigned long wordPosValue = std::stoul(jsonStr.substr(pos, endNum - pos));
             pos = endNum;
 
-            positions.emplace_back(TokenInfo{posValue, wordPosValue});
+            posMap[fileId].emplace_back(TokenInfo{posValue, wordPosValue});
 
             while (pos < jsonStr.size() && (jsonStr[pos] == ',' || isspace(jsonStr[pos]))) pos++;
         }
-
-        posMap[fileId] = positions;
         pos = jsonStr.find("]", pos) + 1;
     }
-
-    return posMap;
 }
 
 void MultiFileIndexStorage::close() {
