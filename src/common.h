@@ -1,8 +1,3 @@
-//
-// Created by Shon on 14.03.2025.
-//
-
-
 #ifndef LIB_AFFIR_COMMON_H
 #define LIB_AFFIR_COMMON_H
 
@@ -18,4 +13,5 @@ struct TokenInfo {
     Pos wordPos;///< The position within a word or sentence.
 };
 typedef std::unordered_map<FileId, std::vector<TokenInfo>> PosMap;
+
 #endif //LIB_AFFIR_COMMON_H
