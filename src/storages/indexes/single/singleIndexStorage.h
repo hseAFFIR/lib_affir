@@ -14,26 +14,25 @@
 
 // Mask indicating the block size in tokens
 enum BlockMask : uint8_t {
-    P_16 = 1 << 0,
-    P_64 = 1 << 1,
-    P_256 = 1 << 2,
-    P_1k = 1 << 3,
-    P_4k = 1 << 4,
-    P_16k = 1 << 5,
-    P_65k = 1 << 6,
-    P_262k = 1 << 7,
-    P_inf = 0
+    P_512 = 1 << 0,
+    P_4k = 1 << 1,
+    P_32k = 1 << 2,
+    P_262k = 1 << 3,
+    P_2b = 1 << 4,
+    P_16b = 1 << 5,
+    P_134b = 1 << 6,
+    P_1t = 1 << 7
 };
 
 constexpr BlockMask allBlockMasks[] = {
-        BlockMask::P_16,
-        BlockMask::P_64,
-        BlockMask::P_256,
-        BlockMask::P_1k,
+        BlockMask::P_512,
         BlockMask::P_4k,
-        BlockMask::P_16k,
-        BlockMask::P_65k,
-        BlockMask::P_262k
+        BlockMask::P_32k,
+        BlockMask::P_262k,
+        BlockMask::P_2b,
+        BlockMask::P_16b,
+        BlockMask::P_134b,
+        BlockMask::P_1t
 };
 // Information for defining index position in file
 struct IndexPos {
@@ -69,7 +68,7 @@ private:
     const static std::string META_FILENAME_PATH; ///< Path to the metadata file.
     std::fstream indexStream;
     static bool isStorageLoaded;
-    static const int MASK_MULTIPLE = 16;
+    static const int MASK_MULTIPLE = 512;
     static const int ROW_SIZE = sizeof(TokenInfo) + sizeof(FileId);
 
     std::string to_str_indexpos(const IndexPos& indexPos) const {
