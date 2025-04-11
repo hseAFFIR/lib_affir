@@ -15,6 +15,8 @@
  */
 class MultiFileIndexStorage : public IIndexStorage {
 private:
+    const char metaChar = ':'; /// Char indicates meta data in file such as file number.
+
     std::string storageDir = "index_files";
     std::string metadataFile = storageDir + "/metadata.idx";
     unsigned int fileCounter = 0;
