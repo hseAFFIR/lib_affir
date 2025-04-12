@@ -52,8 +52,8 @@ public:
      * @return The size in bytes.
      */
 
-    size_t getSize() const { return body.size() + posMapSize; };
-    size_t getPosesSize() const { return posMapSize; };
+    size_t getPosesSize() const { return posMapSize * sizeof(TokenInfo) + filePositions.size() * sizeof(FileId); };
+    size_t getFullPosesSize() const { return posMapSize * (sizeof(FileId) + sizeof(TokenInfo)); };
 
     /**
      * @brief Adds a new position to the token for a given file ID.
@@ -78,7 +78,7 @@ public:
     ~BigToken();
 
 
-    explicit BigToken(std::string body, unsigned long fileId, TokenInfo info);
+    explicit BigToken(const Token &token);
 };
 
 

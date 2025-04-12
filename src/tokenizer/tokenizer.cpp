@@ -3,13 +3,6 @@
 #include <iostream>
 
 /**
- * @brief Конструктор Tokenizer.
- * @param filters Вектор указателей на объекты фильтров, применяемых к токенам.
- */
-Tokenizer::Tokenizer(std::vector<Base*> filters)
-    : filters(std::move(filters)), htmlPattern(R"(<\/?\w+.*?>)") {}
-
-/**
  * @brief Проверяет, является ли символ кириллическим (UTF-8).
  */
 bool isCyrillicChar(const std::string& text, size_t index) {
@@ -69,7 +62,7 @@ void Tokenizer::tokenizeRaw(const std::string &text, std::function<void(Token)> 
         // Проверяем на HTML-тег
         if (text[i] == '<') {
             std::smatch match;
-            std::string remainingText = text.substr(i);
+            std::string remainingText = text.substr(i, htmlPatternLimit);
 
             if (std::regex_search(remainingText, match, htmlPattern) && match.position() == 0) {
                 token = match.str();
@@ -106,7 +99,7 @@ void Tokenizer::tokenizeRaw(const std::string &text, std::function<void(Token)> 
             }
         }
 
-        callback(Token(token, startPos, index++, actualFileId));
+        callback(Token(token, {startPos, index++} , actualFileId));
     }
 }
 
@@ -116,12 +109,13 @@ void Tokenizer::tokenizeRaw(const std::string &text, std::function<void(Token)> 
  * @param fileId Идентификатор файла.
  * @param callback Функция обратного вызова для обработки отфильтрованных токенов.
  */
-void Tokenizer::tokenizeFiltered(const std::string &text, std::function<void(Token)> callback, std::optional<FileId> fileId) {
+void Tokenizer::tokenize(const std::string &text, std::function<void(Token)> callback, std::optional<FileId> fileId) {
     tokenizeRaw(text, [this, &callback](Token token) {
-        std::string filteredToken = applyFilters(token.getBody());
-        if (!filteredToken.empty()) {
-            callback(Token(filteredToken, token.getPos(), token.getIndex(), token.getFileId()));
-        }
+        applyFilters(token.body);
+
+        if (!token.body.empty())
+            callback(Token(token.body, token.info, token.fileId));
+
     }, fileId);
 }
 
@@ -130,13 +124,9 @@ void Tokenizer::tokenizeFiltered(const std::string &text, std::function<void(Tok
  * @param token Исходный токен.
  * @return Отфильтрованный токен или пустая строка.
  */
-std::string Tokenizer::applyFilters(const std::string &token) {
-    std::string *result = const_cast<std::string*>(&token);
-
+void Tokenizer::applyFilters(std::string &token) {
     for (const auto &filter : filters) {
-        *result = filter->process(*result);
-        if (result->empty()) break;
+        filter->process(token);
+        if (token.empty()) break;
     }
-
-    return *result;
 }

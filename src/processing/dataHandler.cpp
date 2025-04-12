@@ -9,37 +9,28 @@ DataHandler::DataHandler(const std::vector<Base*> &filters, const size_t buffer,
     : filters(filters), indexStorage(indStor), buffer(buffer)
 {
     Logger::info("DataHandler", "DataHandler module initialized");
-    std::sort(this->filters.begin(), this->filters.end(), 
+    std::sort(this->filters.begin(), this->filters.end(),
         [](const Base* a, const Base* b) {
-            return static_cast<int>(a->getOrder()) < static_cast<int>(b->getOrder());
+            return a->getOrder() < b->getOrder();
         });
 }
 
-DataHandler::DataHandler(const size_t buffer, IIndexStorage &indStor)
-    : filters({}), indexStorage(indStor), buffer(buffer) 
-{
-    Logger::info("DataHandler", "DataHandler module initialized");
-}
-
 void DataHandler::processText(const std::string &text, const std::string &filename) {
-    FileStorage fs(filename, text.size());
-    FileId id = fs.getId();
-    fs.write(text);
-    Tokenizer tk(filters);
-    Indexer ind(buffer, indexStorage);
-    if(!filters.empty()) {
-        tk.tokenizeFiltered(text, [&ind](Token token) {
-            Logger::debug("dataHandler::processText","Token: {} | Pos: {}", token.getBody(), token.getPos());
-            ind.addToken(token);
-        }, id);
-    }
-    else {
-        tk.tokenizeRaw(text, [&ind](Token token) {
-            Logger::debug("dataHandler::processText","Token: {} | Pos: {}", token.getBody(), token.getPos());
-            ind.addToken(token);
-        }, id);
-    }
+    FileStorage fileStorage(filename, text.size());
+
+    FileId fileId = fileStorage.getId();
+    fileStorage.write(text);
     FileStorage::saveStorageMeta();
-    ind.saveTo();
+
+    Tokenizer tokenizer(filters);
+    Indexer indexer(buffer, indexStorage);
+
+    tokenizer.tokenize(text, [&indexer](Token token) {
+        Logger::debug("dataHandler::processText","Token: {} | Pos: {}", token.body, token.info.pos);
+        indexer.addToken(token);
+    }, fileId);
+
+    indexer.saveTo();
+
     indexStorage.saveStorageMeta();
 }   

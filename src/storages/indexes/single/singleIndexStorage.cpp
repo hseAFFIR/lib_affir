@@ -16,7 +16,7 @@ SingleIndexStorage::SingleIndexStorage() {
 
 void SingleIndexStorage::createIndex(std::unordered_map<std::string, BigToken> &data) {
     for (const auto& [key, value] : data) {
-        uint32_t incomingIndexSize = value.getPosesSize();
+        uint32_t incomingIndexSize = value.getFullPosesSize();
         Logger::debug("SingleFileStorage", "Key: {}, Value count: {}, incomingIndexSize: {}",
                       key, value.getFilePositions().size(), incomingIndexSize);
         // Already exists
@@ -79,7 +79,8 @@ void SingleIndexStorage::updateStorageFile(IndexPos &indexPos, const PosMap& pos
     }
 }
 
-void SingleIndexStorage::getRawIndex(const std::string& body, PosMap &output) {
+PosMap SingleIndexStorage::getRawIndex(const std::string& body) {
+    PosMap output;
     IndexPos indexPos = indexMap[body];
     indexStream.seekg(blockToPos(indexPos));
     for (size_t i = 0; i < indexPos.bytesSize; i += ROW_SIZE) {
@@ -93,6 +94,7 @@ void SingleIndexStorage::getRawIndex(const std::string& body, PosMap &output) {
 
         output[fileId].emplace_back(pos, wordPos);
     }
+    return std::move(output);
 }
 
 void SingleIndexStorage::open() {

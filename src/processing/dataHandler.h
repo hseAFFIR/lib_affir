@@ -37,7 +37,7 @@ public:
      * @param buffer The size of the buffer used by the Indexer.
      * @param indStor Instance of MFIS or SFIS
      */
-    DataHandler(const size_t buffer, IIndexStorage &indStor);
+    DataHandler(const size_t buffer, IIndexStorage &indStor) : DataHandler({}, buffer, indStor) { };
 
     /**
      * @brief Processes the given text by writing it to a file, tokenizing it, and indexing the tokens.

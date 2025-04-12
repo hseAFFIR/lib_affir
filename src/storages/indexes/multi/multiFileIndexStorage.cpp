@@ -35,9 +35,11 @@ void MultiFileIndexStorage::createIndex(std::unordered_map<std::string, BigToken
     }
 }
 
-void MultiFileIndexStorage::getRawIndex(const std::string &body, PosMap &output) {
+PosMap MultiFileIndexStorage::getRawIndex(const std::string &body) {
+    PosMap output;
+
     auto it = metadata.find(body);
-    if (it == metadata.end()) return;
+    if (it == metadata.end()) return std::move(output);
 
     for (const auto &[file, offset]: it->second) {
         std::ifstream inFile(file, std::ios::binary);
@@ -49,6 +51,7 @@ void MultiFileIndexStorage::getRawIndex(const std::string &body, PosMap &output)
             jsonToPosMap(line, output);
         }
     }
+    return std::move(output);
 }
 
 void MultiFileIndexStorage::saveStorageMeta() {

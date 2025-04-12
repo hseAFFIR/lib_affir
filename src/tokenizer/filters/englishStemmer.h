@@ -24,7 +24,7 @@ public:
      * @param word The input word to be stemmed.
      * @return std::string The stemmed (reduced) version of the input word.
      */
-    std::string process(const std::string &word) const override;
+    void process(std::string &word) const override;
 
     /**
      * @brief Constructs an EnglishStemmer object.

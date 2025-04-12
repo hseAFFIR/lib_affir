@@ -50,7 +50,7 @@ public:
 
 
     void createIndex(std::unordered_map<std::string, BigToken>& data) override;
-    void getRawIndex(const std::string& body, PosMap& output) override;
+    PosMap getRawIndex(const std::string& body) override;
 
     void close() override;
 };

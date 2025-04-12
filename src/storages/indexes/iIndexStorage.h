@@ -27,7 +27,7 @@ public:
      * @param bodies A string representing the body of token.
      * @param[out] output A PosMap where results will be stored.
      */
-    virtual void getRawIndex(const std::string& body, PosMap&) = 0;
+    virtual PosMap getRawIndex(const std::string& body) = 0;
     /**
     * @brief Closes all file streams and flush data.
     */
