@@ -20,7 +20,7 @@ public:
      *
      * @param data A map where keys are strings and values are BigToken objects.
      */
-    virtual void createIndex(std::unordered_map<std::string, BigToken>& data) = 0;
+    virtual void createIndex(const std::unordered_map<std::string, BigToken>& data) = 0;
     /**
      * @brief Retrieves the raw index from the files by given token bodies.
      *

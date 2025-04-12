@@ -28,33 +28,35 @@ void Indexer::addToken(const Token &token) {
         if (currentSizeInBytes + newBT.getPosesSize() > maxBufferSizeInBytes)
             saveTo();
 
+        currentSizeInBytes += newBT.getPosesSize();
         buffer.emplace(token.body, std::move(newBT));
-        currentSizeInBytes = newBT.getPosesSize();
     } else {
         BigToken &bt = it->second;
-        size_t newSize = bt.getPosesSize();
+        const size_t oldSize = bt.getPosesSize();
+        size_t newSize = oldSize;
 
         if (!bt.getFilePositions().contains(token.fileId))
             newSize += sizeof(FileId) + sizeof(TokenInfo);
         else
             newSize += sizeof(TokenInfo);
 
-        if (newSize > maxBufferSizeInBytes) {
+        if (currentSizeInBytes + (newSize - oldSize) > maxBufferSizeInBytes) {
             saveTo();
             addToken(token);
             return;
         }
         bt.addPosition(token.fileId, token.info);
+        currentSizeInBytes += (newSize - oldSize);
     }
     Logger::debug("Indexer (addToken)", "{} sizeInBytes {}", token.body, currentSizeInBytes);
 }
 
-BigToken Indexer::getTokenInfo(const std::string &tokenName) const {
+BigToken Indexer::getTokenInfo(const std::string &tokenName) {
 
     BigToken resultBigToken(tokenName);
     resultBigToken.mergeFilePositions(indexStorage.getRawIndex(tokenName));
 
-    return std::move(resultBigToken);
+    return resultBigToken;
 }
 
 Indexer::~Indexer() {

@@ -17,17 +17,20 @@ DataHandler::DataHandler(const std::vector<Base*> &filters, const size_t buffer,
     indexer = new Indexer(buffer, indexStorage);
 }
 
-void DataHandler::processText(const std::string &text, const std::string &filename) {
+void DataHandler::processText(std::string &text, const std::string &filename) {
     FileStorage fileStorage(filename, text.size());
 
     FileId fileId = fileStorage.getId();
     fileStorage.write(text);
     FileStorage::saveStorageMeta();
 
-    tokenizer->tokenize(text, [this](Token token) {
-        Logger::debug("dataHandler::processText","Token: {} | Pos: {}", token.body, token.info.pos);
-        this->indexer->addToken(token);
-    }, fileId);
+    tokenizer->tokenize(text, fileId);
+
+    while(tokenizer->hasNext()) {
+        Token token = tokenizer->next();
+        Logger::debug("dataHandler::processText", "Token: {} | Pos: {}", token.body, token.info.pos);
+        indexer->addToken(token);
+    }
 
     indexer->saveTo();
 

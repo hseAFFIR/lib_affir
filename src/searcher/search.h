@@ -1,47 +1,71 @@
-//
-// Created by amenk on 22.03.2025.
-//
-
 #ifndef LIB_AFFIR_SEARCH_H
 #define LIB_AFFIR_SEARCH_H
-
-#include <string>
-#include <vector>
-#include <utility> // for std::pair
 #include "../indexer/indexer.h"
-#include "../tokenizer/filters/stemFilter.h"
+#include "../tokenizer/tokenizer.h"
+#include <vector>
+#include <string>
 
 /**
- * @class Search
- * @brief The Search class provides functionality to search for tokens in indexed data.
- *
- * This class uses an Indexer to retrieve token information and a StemFilter to process tokens
- * before searching. It returns a list of file IDs and positions where the tokens are found.
+ * @brief Class for performing index search operations
  */
 class Search {
 public:
     /**
-     * @brief Constructs a Search object.
-     *
-     * @param indexer Reference to an Indexer instance for token lookup.
-     * @param stemFilter Reference to a StemFilter instance for token processing.
+     * @brief Structure for storing search results
      */
-    Search(Indexer& indexer, StemFilter& stemFilter);
+    struct SearchResult {
+        std::string query;       ///< Original query
+        PosMap posMap;           ///< Position map in files
+    };
 
     /**
-     * @brief Searches for the given text in the indexed data.
-     *
-     * This method tokenizes the input text, processes each token using the StemFilter,
-     * and retrieves their positions from the Indexer.
-     *
-     * @param text The text to search for.
-     * @return A vector of pairs containing file IDs and positions where the tokens are found.
+     * @brief Constructor
+     * @param indexer Reference to indexer
      */
-    std::vector<std::pair<unsigned long, unsigned long>> find(const std::string& text);
+    explicit Search(const std::vector<Base*> &filters, IIndexStorage &indStor);
+    explicit Search(IIndexStorage &indStor) : Search({}, indStor) { };
+
+    virtual ~Search();
+
+    /**
+     * @brief Main search method
+     * @param query Query text (can be a single word or phrase)
+     * @return Vector of search results
+     * @throws std::invalid_argument if query is empty or too long
+     */
+    SearchResult search(std::string& query) const;
+
+    /**
+     * @brief Prints search results to console
+     * @param results Vector of search results
+     */
+    static void printSearchResults(const std::vector<SearchResult>& results);
+    static void printSearchResults(const SearchResult& result) { printSearchResults(std::vector<SearchResult>{result}); };
 
 private:
-    Indexer& indexer; ///< Reference to the Indexer for token lookup.
-    StemFilter& stemFilter; ///< Reference to the StemFilter for token processing.
-};
+    Tokenizer *tokenizer;
+    Indexer *indexer;                        ///< Reference to indexer
+    static constexpr size_t MAX_QUERY_LENGTH = 1000;
 
-#endif //LIB_AFFIR_SEARCH_H
+    /**
+     * @brief Searches for a phrase
+     * @param words Vector of phrase words
+     * @return Vector of search results
+     */
+    PosMap getPhrasePositions(const std::vector<Token>& tokens) const;
+
+    /**
+     * @brief Combines words into a phrase string
+     * @param words Vector of words
+     * @return Combined phrase string
+     */
+    static std::string combinePhrase(const std::vector<Token>& tokens);
+
+    /**
+     * @brief Validates search query
+     * @param query Query to validate
+     * @throws std::invalid_argument if query is invalid
+     */
+    static void validateQuery(const std::string& query);
+};
+#endif // LIB_AFFIR_SEARCH_H

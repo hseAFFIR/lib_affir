@@ -46,6 +46,23 @@ public:
      */
     explicit BigToken(std::string body) : body(std::move(body)) { }
 
+    BigToken(BigToken&& other) noexcept
+            : body(std::move(other.body)),
+              filePositions(std::move(other.filePositions)),
+              posMapSize(other.posMapSize) {
+        other.posMapSize = 0;  // Ensure the moved-from object is in a valid state
+    }
+
+    BigToken& operator=(BigToken&& other) noexcept {
+        if (this != &other) {  // Self-assignment check
+            body = std::move(other.body);
+            filePositions = std::move(other.filePositions);
+            posMapSize = other.posMapSize;
+            other.posMapSize = 0;  // Ensure the moved-from object is in a valid state
+        }
+        return *this;
+    }
+
     /**
      * @brief Calculates the memory size occupied by this BigToken.
      *

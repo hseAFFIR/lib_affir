@@ -46,7 +46,7 @@ class SingleIndexStorage : public IIndexStorage {
 public:
     explicit SingleIndexStorage();
 
-    void createIndex(std::unordered_map<std::string, BigToken> &data) override;
+    void createIndex(const std::unordered_map<std::string, BigToken> &data) override;
 
     PosMap getRawIndex(const std::string& body) override;
 
