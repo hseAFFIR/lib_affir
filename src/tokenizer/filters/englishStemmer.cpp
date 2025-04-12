@@ -309,42 +309,44 @@ std::string EnglishStemmer::step5(std::string &res, const long long &R1, const l
     return res;
 }
 
-std::string EnglishStemmer::process(const std::string &inputWord) const {
-    std::string word = inputWord;
-    word = to_lower(word);
+void EnglishStemmer::process(std::string &token) {
+//    std::string word = inputWord;
+    token = to_lower(token);
     // Если слово присутствует в исключениях – возвращаем его преобразование
-    if (english_exceptions1.find(inputWord) != english_exceptions1.end())
-        return english_exceptions1.at(inputWord);
-
-    if (!word.empty() && word[0] == 'y')
-        word[0] = 'Y';
-
-    // Замена строчных "y" на "Y", если они после гласной
-    for (long long i = 1; i < word.size(); ++i) {
-        if ((word[i] == 'y') && (english_vowels.find(word[i - 1]) != std::string::npos))
-            word[i] = 'Y';
+    if (english_exceptions1.find(token) != english_exceptions1.end()) {
+        token = english_exceptions1.at(token);
+        return;
     }
 
-    word = english_replace_suffixes(word);
-    auto regions = english_set_regions(word);
+    if (!token.empty() && token[0] == 'y')
+        token[0] = 'Y';
+
+    // Замена строчных "y" на "Y", если они после гласной
+    for (long long i = 1; i < token.size(); ++i) {
+        if ((token[i] == 'y') && (english_vowels.find(token[i - 1]) != std::string::npos))
+            token[i] = 'Y';
+    }
+
+    token = english_replace_suffixes(token);
+    auto regions = english_set_regions(token);
     long long R1 = regions.first;
     long long R2 = regions.second;
 
-    word = step2(word, R1);
-    regions = english_set_regions(word);
+    token = step2(token, R1);
+    regions = english_set_regions(token);
     R1 = regions.first;
     R2 = regions.second;
 
-    word = step3(word, R1, R2);
-    regions = english_set_regions(word);
+    token = step3(token, R1, R2);
+    regions = english_set_regions(token);
     R1 = regions.first;
     R2 = regions.second;
 
-    word = step4(word, R2);
-    regions = english_set_regions(word);
+    token = step4(token, R2);
+    regions = english_set_regions(token);
     R1 = regions.first;
     R2 = regions.second;
 
-    word = step5(word, R1, R2);
-    return to_lower(word);
+    token = step5(token, R1, R2);
+    to_lower(token);
 }
