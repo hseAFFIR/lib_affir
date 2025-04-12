@@ -100,7 +100,7 @@ Search::SearchResult Search::search(std::string& query) const {
     return std::move(SearchResult(combinePhrase(tokens), getPhrasePositions(tokens)));
 }
 
-void Search::printSearchResults(const std::vector<SearchResult>& results) const {
+void Search::printSearchResults(const std::vector<SearchResult>& results) {
     if (results.empty()) {
         Logger::warn("Search", "No results found!");
         return;
