@@ -41,7 +41,10 @@ bool Tokenizer::hasNext() {
         ++currentPos;
     }
 
-    return i < text.size() and prepareNext();
+    // Skip empty tokens in order to make next token valid
+    while(i < text.size() and !prepareNext());
+
+    return i < text.size();
 }
 
 bool Tokenizer::prepareNext() {
