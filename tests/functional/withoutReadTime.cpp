@@ -33,7 +33,7 @@ void runTestProcessingWithoutReadTime(const std::string &folderPath, size_t buff
     // Засекаем только время обработки
     auto start = std::chrono::high_resolution_clock::now();
 
-    for (const auto &[filename, text]: fileContents) {
+    for (auto &[filename, text]: fileContents) {
         dh.processText(text, filename);
     }
 
