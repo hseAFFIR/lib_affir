@@ -28,10 +28,10 @@ int main() {
 
     dataHandler.processText(str, "file1");
 
-//    Search search(filters, storage);
-//    std::string find = "parts of the world";
-//    auto res = search.search(find);
-//    Search::printSearchResults(res);
+    Search search(filters, storage);
+    std::string find = "parts of the world";
+    auto res = search.search(find);
+    Search::printSearchResults(res);
 
     for (auto f : filters) delete f;
     return 0;
