@@ -14,7 +14,8 @@ void Indexer::clearBuffer() {
 }
 
 void Indexer::saveTo() {
-    indexStorage.createIndex(buffer);
+    if (!buffer.empty())
+        indexStorage.createIndex(buffer);
     clearBuffer();
 }
 
@@ -57,7 +58,5 @@ BigToken Indexer::getTokenInfo(const std::string &tokenName) const {
 }
 
 Indexer::~Indexer() {
-    if (!buffer.empty()) {
-        saveTo();
-    }
+    saveTo();
 }

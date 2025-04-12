@@ -19,7 +19,7 @@ int main() {
 
     MultiFileIndexStorage mfis;
 
-    runTestProcessingWithoutReadTime("test_data_2", 1024, filters, mfis);
+    runTestProcessingWithoutReadTime("test_data", 1024*1024*16, filters, mfis);
 
     printPeakMemoryUsage();
 

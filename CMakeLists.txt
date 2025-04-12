@@ -14,8 +14,6 @@ set(STORAGE_FILES
 )
 
 set(MODEL_FILES
-        src/models/token.h
-        src/models/token.cpp
         src/models/bigToken.h
         src/models/bigToken.cpp
 )
