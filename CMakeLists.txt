@@ -14,8 +14,6 @@ set(STORAGE_FILES
 )
 
 set(MODEL_FILES
-        src/models/token.h
-        src/models/token.cpp
         src/models/bigToken.h
         src/models/bigToken.cpp
 )
@@ -52,7 +50,6 @@ set(FILTERS
         src/tokenizer/filters/punctuator.cpp
         src/tokenizer/filters/stopWords.h
         src/tokenizer/filters/stopWords.cpp
-        src/tokenizer/tokenizer.h
         src/tokenizer/filters/filters.h)
 
 set(SOURCE_FILES
@@ -62,15 +59,27 @@ set(SOURCE_FILES
         ${INDEXER_FILES}
         ${PROCESSING_FILES}
         ${SEARCHER_FILES}
-        src/main.cpp
         src/common.h
         src/logger/logger.h
         src/logger/logger.cpp
-        src/tokenizer/Tokenizer.cpp
-        src/tokenizer/Tokenizer.h)
+        src/tokenizer/tokenizer.h
+        src/tokenizer/tokenizer.cpp)
 
 
-add_executable(lib_affir ${SOURCE_FILES})
+add_executable(lib_affir src/main.cpp
+        ${SOURCE_FILES})
+
+add_executable(lib_tests tests/main.cpp
+        tests/functional/withoutReadTime.cpp
+        tests/common.h
+        tests/functional/tokIndIndStor.cpp
+        tests/functional/getTokenInCreatedIndex.cpp
+        tests/utils/utils.cpp
+        tests/tests.h
+        tests/utils/utils.h
+        ${SOURCE_FILES}
+)
 
 add_subdirectory(externals/spdlog)
 target_link_libraries(lib_affir PRIVATE spdlog::spdlog)
+target_link_libraries(lib_tests PRIVATE spdlog::spdlog)

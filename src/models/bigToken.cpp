@@ -1,7 +1,7 @@
 #include "bigToken.h"
 
-BigToken::BigToken(std::string body, unsigned long fileId, TokenInfo info): body(std::move(body)) {
-    addPosition(fileId, info);
+BigToken::BigToken(const Token &token): body(token.body) {
+    addPosition(token.fileId, token.info);
 }
 
 const PosMap &BigToken::getFilePositions() const {
@@ -26,5 +26,5 @@ BigToken::~BigToken() {
 
 void BigToken::addPosition(FileId fileId, const TokenInfo &info) {
     filePositions[fileId].push_back(info);
-    posMapSize += sizeof(FileId) + sizeof(TokenInfo);
+    posMapSize++;
 }

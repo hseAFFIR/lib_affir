@@ -11,8 +11,85 @@
   * [Multi approach](#multi-approach)
 <!-- TOC -->
 ## Overview
-_< description >_
+A module for storing the reverse index of the text. Interface of the class:
+```c++
+/**
+ * @brief Creates an index from the given data.
+ *
+ * @param data A map where keys are strings and values are BigToken objects.
+ */
+virtual void createIndex(std::unordered_map<std::string, BigToken>& data) = 0;
+/**
+ * @brief Retrieves the raw index from the files by given token bodies.
+ *
+ * @param bodies A string representing the body of token.
+ * @param[out] output A vector of references to PosMap where results will be stored.
+ */
+virtual void getRawIndex(const std::string& body, std::vector<PosMap>&) = 0;
+/**
+* @brief Closes all file streams and flush data.
+*/
+virtual void close() = 0;
+/**
+* @brief Save static index metadata into files.
+*/
+virtual void saveStorageMeta() = 0;
+/**
+* @brief Load static index metadata into internal structures.
+*/
+virtual void loadStorageMeta() = 0;
+```
+### How to create index
+```c++
+#include "storages/indexes/multi/multiFileIndexStorage.h"
+#include "storages/indexes/single/singleIndexStorage.h"
+...
 
+// Prepare example
+std::unordered_map<std::string, BigToken> data;
+
+BigToken bigToken1("myToken_1");
+FileId fileId1 = 1;
+TokenInfo tokenInfo1 = {10, 12};
+bigToken1.addPosition(fileId1, tokenInfo1);
+
+FileId fileId2 = 2;
+TokenInfo tokenInfo2 = {723, 41};
+BigToken bigToken2("myToken_2");
+bigToken2.addPosition(fileId2, tokenInfo2);
+
+data[bigToken1.getBody()] = bigToken1;
+data[bigToken2.getBody()] = bigToken2;
+// ---
+IIndexStorage *indexStorage = new MultiFileIndexStorage();
+
+indexStorage->loadStorageMeta();
+
+indexStorage->createIndex(data);
+
+indexStorage->close();
+indexStorage->saveStorageMeta();
+
+...
+```
+### How to get index
+```c++
+#include "storages/indexes/multi/multiFileIndexStorage.h"
+#include "storages/indexes/single/singleIndexStorage.h"
+...
+
+IIndexStorage *indexStorage = new MultiFileIndexStorage();
+
+indexStorage->loadStorageMeta();
+
+std::string token_to_find = "myToken_1";
+std::vector<PosMap> results;
+indexStorage->getRawIndex(token_to_find, results);
+
+indexStorage->close();
+
+...
+```
 ## Single approach
 ### Overview
 The core idea is to store the index in a single file.
@@ -55,7 +132,7 @@ store tokens of varying frequency.
 of a free space segment of size blockMask.
 
 #### Index file
-A byte-encoded file storing triples `(uint_32, uint_32, uint_32)` representing (fileId, pos, posWord).
+A byte-encoded file storing triples `(uint_64, uint_64, uint_64)` representing (fileId, pos, posWord).
 If an index block exceeds its allocated space during an update, it expands to the next block size.
 
 ## Multi approach

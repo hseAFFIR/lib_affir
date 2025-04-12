@@ -1,6 +1,5 @@
 #include <stdexcept>
 #include <iostream>
-#include <cerrno>
 #include <cstring>
 #include "fileStorage.h"
 #include "../../logger/logger.h"
@@ -110,10 +109,13 @@ bool FileStorage::isEnd() {
 
 void FileStorage::loadStorageMeta() {
     if (isStorageLoaded) return;
+    isStorageLoaded = true;
+
+    dataMap.clear();
 
     std::ifstream metaFileIn(FileStorage::META_FILENAME_PATH, std::ios::binary);
     if (!metaFileIn.is_open()) {
-        std::cerr << "Cannot open file: " + std::string(strerror(errno)) << std::endl;
+        Logger::warn("FileStorage", "Cannot open file: {}", std::string(strerror(errno)));
         return;
     }
 
@@ -124,7 +126,6 @@ void FileStorage::loadStorageMeta() {
     size_t mapSize;
     metaFileIn.read(reinterpret_cast<char *>(&mapSize), sizeof(mapSize));
 
-    dataMap.clear();
     for (size_t i = 0; i < mapSize; ++i) {
         // Read FileId
         FileId fileId;

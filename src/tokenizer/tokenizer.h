@@ -7,7 +7,8 @@
 #include <functional>
 #include <optional>
 #include "filters/base.h"
-#include "../models/token.h"
+#include "../common.h"
+#include <optional>
 
 /**
  * @class Tokenizer
@@ -25,7 +26,10 @@ public:
      *
      * Этот конструктор инициализирует объект с набором фильтров и шаблоном для поиска HTML-тегов.
      */
-    explicit Tokenizer(std::vector<Base*> filters);
+    explicit Tokenizer(std::vector<Base*> filters)
+        : filters(std::move(filters)),
+            htmlPattern(R"(<\/?\w+.*?>)"),
+            htmlPatternLimit(10) { };
 
     /**
      * @brief Разбивает текст на токены без применения фильтров.
@@ -47,19 +51,12 @@ public:
      * Этот метод вызывает `tokenizeRaw`, а затем применяет фильтры к каждому токену, передавая
      * отфильтрованные токены в callback.
      */
-    void tokenizeFiltered(const std::string &text, std::function<void(Token)> callback, std::optional<FileId> fileId = std::nullopt);
-
-    /**
-     * @brief Добавляет фильтр в список фильтров.
-     * @param filter Указатель на объект фильтра.
-     *
-     * Этот метод позволяет добавить новый фильтр в список применяемых фильтров.
-     */
-    void addFilter(Base* filter);
+    void tokenize(const std::string &text, std::function<void(Token)> callback, std::optional<FileId> fileId = std::nullopt);
 
 private:
     std::vector<Base*> filters; /**< Список фильтров, применяемых к токенам. */
-    std::regex htmlPattern;     /**< Регулярное выражение для поиска HTML-тегов. */
+    const std::regex htmlPattern;     /**< Регулярное выражение для поиска HTML-тегов. */
+    const size_t htmlPatternLimit;
 
     /**
      * @brief Применяет все фильтры к токену.
@@ -69,7 +66,7 @@ private:
      * Этот метод применяет все фильтры в списке к токену и возвращает результат.
      * Если после применения фильтров токен становится пустым, возвращается пустая строка.
      */
-    std::string applyFilters(const std::string &token);
+    void applyFilters(std::string &token);
 };
 
 #endif // TOKENIZER_H
