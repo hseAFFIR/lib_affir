@@ -2,13 +2,13 @@
 #define LIB_AFFIR_FILTERORDER_H
 
 enum class FilterOrder {
-    Lowercaser = 1,
-    Htmler = 2,
-    Punctuator = 3,
-    StopWords = 4,
-    StemFilter = 5,
-    EnglishStemmer = 6,
-    RussianPorterStemmer = 7
+    Lowercaser,
+    Htmler,
+    Punctuator,
+    StopWords,
+    StemFilter,
+    EnglishStemmer,
+    RussianPorterStemmer
 };
 
 #endif // LIB_AFFIR_FILTERORDER_H

@@ -12,9 +12,9 @@ void runTestGetTokenInCreatedIndex(std::string &text, size_t buffer, std::vector
     Tokenizer tk(filters);
     Indexer ind(buffer, storage);
 
-    tk.tokenizeFiltered(text, [&ind](Token token) {
+    tk.tokenize(text, [&ind](Token token) {
         auto start = std::chrono::high_resolution_clock::now();
-        ind.getTokenInfo(token.getBody());
+        ind.getTokenInfo(token.body);
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> diff = end - start;
         std::cout << "Total getTokenInfo time: "

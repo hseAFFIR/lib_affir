@@ -26,7 +26,7 @@ public:
      * @param token Входная строка, представляющая токен.
      * @return Строка, содержащая результат обработки.
      */
-    virtual std::string process(const std::string &token) const = 0;
+    virtual void process(std::string &token) = 0;
 
     virtual FilterOrder getOrder() const = 0;
 };

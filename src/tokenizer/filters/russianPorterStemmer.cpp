@@ -54,46 +54,45 @@ RussianPorterStemmer::russian_set_regions(const std::string &word) const {
     return {rv, r1, r2};
 }
 
-std::string RussianPorterStemmer::process(const std::string &token) const {
-    std::string word = token;
-    std::transform(word.begin(), word.end(), word.begin(), ::tolower);
-    std::replace(word.begin(), word.end(), 'ё', 'е');
+void RussianPorterStemmer::process(std::string &token) {
+    const std::string initialWord = token;
+    std::transform(token.begin(), token.end(), token.begin(), ::tolower);
+    std::replace(token.begin(), token.end(), L'ё', L'е');
 
-    auto [rv, r1, r2] = russian_set_regions(word);
+    auto [rv, r1, r2] = russian_set_regions(token);
 
-    word = step_1(rv, word);
-    std::tie(rv, r1, r2) = russian_set_regions(word);
+    token = step_1(rv, token);
+    std::tie(rv, r1, r2) = russian_set_regions(token);
 
     if (rv.ends_with("и")) {
-        word.pop_back();
-        std::tie(rv, r1, r2) = russian_set_regions(word);
+        token.pop_back();
+        std::tie(rv, r1, r2) = russian_set_regions(token);
     }
 
     for (const auto &ending: derivational) {
         if (r2.ends_with(ending)) {
-            word.erase(word.size() - ending.size());
-            std::tie(rv, r1, r2) = russian_set_regions(word);
+            token.erase(token.size() - ending.size());
+            std::tie(rv, r1, r2) = russian_set_regions(token);
             break;
         }
     }
 
     for (const auto &ending: superlative) {
         if (rv.ends_with(ending)) {
-            word.erase(word.size() - ending.size());
-            std::tie(rv, r1, r2) = russian_set_regions(word);
+            token.erase(token.size() - ending.size());
+            std::tie(rv, r1, r2) = russian_set_regions(token);
             break;
         }
     }
 
     if (rv.ends_with("нн")) {
-        word.pop_back();
+        token.pop_back();
     }
     else if (rv.ends_with("ь")) {
-        word.pop_back();
+        token.pop_back();
     }
 
-    Logger::debug("russianPorterStemmer", "{} -> {}",token,word);
-    return word;
+    Logger::debug("russianPorterStemmer", "{} -> {}", initialWord, token);
 }
 
 std::string RussianPorterStemmer::step_1(const std::string &rv, const std::string &word) const {

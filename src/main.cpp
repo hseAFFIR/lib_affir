@@ -7,7 +7,15 @@
 #include "logger/logger.h"
 
 int main(){
+    setlocale(LC_ALL, "Russian");
+
     Logger::init("logs/log.txt");
     Logger::info("Main", "Application started");
+
+    std::string a = "Всем привёт!";
+    for (char ch : a) {
+        std::wcout << ch << "\n";
+    }
+
     return 0;
 }

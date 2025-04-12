@@ -36,7 +36,7 @@ void runTestTokIndIndStor(const std::string &folderPath, size_t buffer, std::vec
         Tokenizer tk(filters);
         Indexer ind(buffer, storage);
 
-        tk.tokenizeFiltered(text, [&ind](Token token) {
+        tk.tokenize(text, [&ind](Token token) {
 
             ind.addToken(token);
         }, id);

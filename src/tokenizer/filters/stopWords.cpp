@@ -51,12 +51,10 @@ void StopWords::initialize() {
     initialized = true;
 }
 
-std::string StopWords::process(const std::string &token) const {
+void StopWords::process(std::string &token) {
     if (!initialized)
         initialize();
     if (stopWordsEn.find(token) != stopWordsEn.end() ||
-        stopWordsRu.find(token) != stopWordsRu.end()) {
-        return "";
-    }
-    return token;
+        stopWordsRu.find(token) != stopWordsRu.end())
+        token.clear();
 }

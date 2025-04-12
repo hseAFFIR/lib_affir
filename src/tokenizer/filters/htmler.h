@@ -22,7 +22,7 @@ public:
      * @param token The input token to be processed.
      * @return std::string The processed token, or an empty string if the token is identified as HTML.
      */
-    std::string process(const std::string &token) const override;
+    void process(std::string &token) override;
     
     /**
      * @brief Returns the processing order for the Htmler filter.

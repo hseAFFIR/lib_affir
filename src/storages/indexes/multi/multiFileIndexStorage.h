@@ -15,6 +15,8 @@
  */
 class MultiFileIndexStorage : public IIndexStorage {
 private:
+    const char metaChar = ':'; /// Char indicates meta data in file such as file number.
+
     std::string storageDir = "index_files";
     std::string metadataFile = storageDir + "/metadata.idx";
     unsigned int fileCounter = 0;
@@ -31,7 +33,7 @@ private:
     /**
      * @brief Parses compact JSON to PosMap
      */
-    PosMap jsonToPosMap(const std::string& jsonStr);
+    void jsonToPosMap(const std::string& jsonStr, PosMap &posMap);
 
 public:
     MultiFileIndexStorage();
@@ -48,7 +50,7 @@ public:
 
 
     void createIndex(std::unordered_map<std::string, BigToken>& data) override;
-    void getRawIndex(const std::string& body, std::vector<PosMap>& output) override;
+    PosMap getRawIndex(const std::string& body) override;
 
     void close() override;
 };

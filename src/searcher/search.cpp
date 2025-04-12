@@ -39,11 +39,11 @@ std::vector<std::pair<unsigned long, unsigned long>> Search::find(const std::str
     }
 
     // Обрабатываем каждый токен с помощью StemFilter
-    for (const std::string& token : tokens) {
-        std::string stemmedToken = stemFilter.process(token);
+    for (std::string& token : tokens) {
+        stemFilter.process(token);
 
         // Ищем обработанный токен в индексе
-        const BigToken& bigToken = indexer.getTokenInfo(stemmedToken);
+        const BigToken& bigToken = indexer.getTokenInfo(token);
 
         // Получаем информацию о позициях токена в файлах
         const auto& filePositions = bigToken.getFilePositions();
