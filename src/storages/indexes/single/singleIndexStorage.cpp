@@ -14,7 +14,7 @@ SingleIndexStorage::SingleIndexStorage() {
     open();
 }
 
-void SingleIndexStorage::createIndex(std::unordered_map<std::string, BigToken> &data) {
+void SingleIndexStorage::createIndex(const std::unordered_map<std::string, BigToken> &data) {
     for (const auto& [key, value] : data) {
         uint32_t incomingIndexSize = value.getFullPosesSize();
         Logger::debug("SingleFileStorage", "Key: {}, Value count: {}, incomingIndexSize: {}",

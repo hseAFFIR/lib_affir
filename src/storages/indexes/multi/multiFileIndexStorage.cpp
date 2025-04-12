@@ -17,7 +17,7 @@ MultiFileIndexStorage::MultiFileIndexStorage() {
     loadStorageMeta();
 }
 
-void MultiFileIndexStorage::createIndex(std::unordered_map<std::string, BigToken> &data) {
+void MultiFileIndexStorage::createIndex(const std::unordered_map<std::string, BigToken> &data) {
     std::string filename = storageDir + "/index_" + std::to_string(fileCounter++) + ".json";
     std::ofstream outFile(filename, std::ios::binary);
 
@@ -26,7 +26,7 @@ void MultiFileIndexStorage::createIndex(std::unordered_map<std::string, BigToken
         return;
     }
 
-    for (auto &[token, bigToken]: data) {
+    for (const auto &[token, bigToken]: data) {
         size_t offset = static_cast<size_t>(outFile.tellp());
 
         outFile << posMapToJson(bigToken.getFilePositions()) << '\n';
