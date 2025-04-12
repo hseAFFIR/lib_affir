@@ -41,10 +41,10 @@ bool Tokenizer::hasNext() {
         ++currentPos;
     }
 
-    return i < text.size();
+    return i < text.size() and prepareNext();
 }
 
-Token Tokenizer::next() {
+bool Tokenizer::prepareNext() {
     const size_t startPos = currentPos;
     std::string body;
 
@@ -87,7 +87,14 @@ Token Tokenizer::next() {
     }
 
     applyFilters(body);
-    return std::move(Token(body, {startPos, wordPos++}, fileId));
+    if (body.empty())
+        return false;
+    preparedToken = Token(body, {startPos, wordPos++}, fileId);
+    return true;
+}
+
+Token Tokenizer::next() {
+    return std::move(preparedToken);
 }
 
 /**

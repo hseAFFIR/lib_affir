@@ -50,6 +50,9 @@ private:
     const std::regex htmlPattern;     /**< Регулярное выражение для поиска HTML-тегов. */
     const size_t htmlPatternLimit;
 
+    bool prepareNext();
+    Token preparedToken;
+
     size_t currentPos = 0;
     size_t wordPos = 0;
     size_t i = 0;
