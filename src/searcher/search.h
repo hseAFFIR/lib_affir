@@ -1,6 +1,7 @@
 #ifndef LIB_AFFIR_SEARCH_H
 #define LIB_AFFIR_SEARCH_H
 #include "../indexer/indexer.h"
+#include "../tokenizer/tokenizer.h"
 #include <vector>
 #include <string>
 
@@ -15,7 +16,6 @@ public:
     struct SearchResult {
         std::string query;       ///< Original query
         PosMap posMap;           ///< Position map in files
-        bool isPhrase;          ///< Whether the result is a phrase search
     };
 
     /**
@@ -24,52 +24,41 @@ public:
      */
     Search(Indexer& indexer);
 
+    virtual ~Search();
+
     /**
      * @brief Main search method
      * @param query Query text (can be a single word or phrase)
      * @return Vector of search results
      * @throws std::invalid_argument if query is empty or too long
      */
-    std::vector<SearchResult> search(const std::string& query) const;
+    SearchResult search(const std::string& query) const;
 
     /**
      * @brief Prints search results to console
      * @param results Vector of search results
      */
     void printSearchResults(const std::vector<SearchResult>& results) const;
+    void printSearchResults(const SearchResult& result) const { printSearchResults(std::vector<SearchResult>{result}); };
 
 private:
+    Tokenizer *tokenizer;
     Indexer& indexer;                        ///< Reference to indexer
-
-    /**
-     * @brief Checks if words are adjacent in correct order
-     * @param firstInfos Vector of token info for first word
-     * @param secondInfos Vector of token info for second word
-     * @return true if words are adjacent in correct order
-     */
-    bool areWordsAdjacent(const std::vector<TokenInfo>& firstInfos,
-                         const std::vector<TokenInfo>& secondInfos) const;
-
-    /**
-     * @brief Searches for a single word
-     * @param word Word to search for
-     * @return Vector of search results
-     */
-    std::vector<SearchResult> searchSingleWord(const std::string& word) const;
+    static constexpr size_t MAX_QUERY_LENGTH = 1000;
 
     /**
      * @brief Searches for a phrase
      * @param words Vector of phrase words
      * @return Vector of search results
      */
-    std::vector<SearchResult> searchPhrase(const std::vector<std::string>& words) const;
+    PosMap getPhrasePositions(const std::vector<Token>& tokens) const;
 
     /**
      * @brief Combines words into a phrase string
      * @param words Vector of words
      * @return Combined phrase string
      */
-    static std::string combinePhrase(const std::vector<std::string>& words);
+    static std::string combinePhrase(const std::vector<Token>& tokens);
 
     /**
      * @brief Validates search query

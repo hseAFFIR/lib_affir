@@ -4,166 +4,101 @@
 #include <iostream>
 #include <stdexcept>
 
-constexpr size_t MAX_QUERY_LENGTH = 1000;
-
 void Search::validateQuery(const std::string& query) {
-    if (query.empty()) {
+    if (query.empty())
         throw std::invalid_argument("Query cannot be empty");
-    }
-    if (query.length() > MAX_QUERY_LENGTH) {
+    if (query.length() > MAX_QUERY_LENGTH)
         throw std::invalid_argument("Query is too long");
-    }
 }
 
-std::string Search::combinePhrase(const std::vector<std::string>& words) {
+std::string Search::combinePhrase(const std::vector<Token>& tokens) {
     std::string result;
-    for (size_t i = 0; i < words.size(); ++i) {
+    for (size_t i = 0; i < tokens.size(); ++i) {
         if (i > 0) result += " ";
-        result += words[i];
+        result += tokens[i].body;
     }
     return result;
 }
 
 Search::Search(Indexer& indexer) 
     : indexer(indexer) {
+    tokenizer = new Tokenizer();
 }
 
-std::vector<Search::SearchResult> Search::searchSingleWord(const std::string& word) const {
-    std::vector<SearchResult> results;
-    
-    BigToken token = indexer.getTokenInfo(word);
-    PosMap positions = token.getFilePositions();
+PosMap Search::getPhrasePositions(const std::vector<Token>& tokens) const {
+    BigToken firstWordResults = indexer.getTokenInfo(tokens[0].body);
 
-    Logger::debug("Search", "appearances: {} for word {}", positions.size(), word);
-    
-    if (!positions.empty()) {
-        results.push_back({
-            word,
-            positions,
-            false  // isPhrase = false for single word
-        });
-    }
-    
-    return results;
-}
+    auto &firstWordPoses = const_cast<PosMap &>(firstWordResults.getFilePositions());
 
-bool Search::areWordsAdjacent(const std::vector<TokenInfo>& firstInfos,
-                            const std::vector<TokenInfo>& secondInfos) const {
-    if (firstInfos.empty() || secondInfos.empty()) {
-        return false;
-    }
-    
-    // Check all possible combinations of positions
-    for (const auto& firstPos : firstInfos) {
-        for (const auto& secondPos : secondInfos) {
-            if (secondPos.wordPos - firstPos.wordPos == 1) {
-                return true;
-            }
-        }
-    }
-    
-    return false;
-}
-
-std::vector<Search::SearchResult> Search::searchPhrase(const std::vector<std::string>& words) const {
-    if (words.empty()) {
+    if (firstWordPoses.empty())
         return {};
-    }
-    
-    std::string fullPhrase = combinePhrase(words);
-    auto firstWordResults = searchSingleWord(words[0]);
-    
-    if (firstWordResults.empty()) {
-        return {};
-    }
-    
-    std::vector<SearchResult> results;
-    
-    if (!firstWordResults.empty()) {
-        const auto& firstWord = firstWordResults[0];
-        PosMap phrasePositions;
-        
-        for (const auto& [fileId, firstInfos] : firstWord.posMap) {
-            for (const auto& firstInfo : firstInfos) {
-                std::vector<TokenInfo> currentPhrasePositions = {firstInfo};
-                bool foundPhrase = true;
-                
-                for (size_t i = 1; i < words.size(); ++i) {
-                    auto nextWordResults = searchSingleWord(words[i]);
-                    if (nextWordResults.empty()) {
-                        foundPhrase = false;
-                        break;
-                    }
-                    
-                    auto it = nextWordResults[0].posMap.find(fileId);
-                    if (it == nextWordResults[0].posMap.end()) {
-                        foundPhrase = false;
-                        break;
-                    }
-                    
-                    // Find the next word's position that is adjacent to the last position in current phrase
-                    bool foundNext = false;
-                    for (const auto& nextPos : it->second) {
-                        if (nextPos.wordPos - currentPhrasePositions.back().wordPos == 1) {
-                            currentPhrasePositions.push_back(nextPos);
-                            foundNext = true;
-                            break;
-                        }
-                    }
-                    
-                    if (!foundNext) {
-                        foundPhrase = false;
+
+    PosMap phrasePositions;
+
+    for (const auto& [fileId, firstInfos] : firstWordPoses) {
+        for (const TokenInfo& firstTokenInfo : firstInfos) {
+            std::vector<TokenInfo> currentPhrasePositions = { firstTokenInfo };
+            bool foundPhrase = true;
+
+            for (size_t i = 1; i < tokens.size(); ++i) {
+                BigToken nextWordResults = indexer.getTokenInfo(tokens[i].body);
+                auto &nextWordPoses = const_cast<PosMap &>(nextWordResults.getFilePositions());
+                if (nextWordPoses.empty()) {
+                    foundPhrase = false;
+                    break;
+                }
+
+                auto it = nextWordPoses.find(fileId);
+                // Следующее слово есть в индексе, но не в том же файле
+                if (it == nextWordPoses.end()) {
+                    foundPhrase = false;
+                    break;
+                }
+
+                // Find the next word's position that is adjacent to the last position in current phrase
+                bool foundNext = false;
+                for (const TokenInfo& nextPos : it->second) {
+                    if (nextPos.wordPos - currentPhrasePositions.back().wordPos == 1) {
+                        currentPhrasePositions.push_back(nextPos);
+                        foundNext = true;
                         break;
                     }
                 }
-                
-                if (foundPhrase) {
-                    // Only add the first position of the complete phrase
-                    phrasePositions[fileId] = {currentPhrasePositions[0]};
+
+                if (!foundNext) {
+                    foundPhrase = false;
+                    break;
                 }
             }
-        }
-        
-        if (!phrasePositions.empty()) {
-            results.push_back({
-                fullPhrase,
-                phrasePositions,
-                true
-            });
+
+            if (foundPhrase)
+                // Only add the first position of the complete phrase
+                phrasePositions[fileId].push_back(currentPhrasePositions[0]);
         }
     }
     
-    return results;
+    return phrasePositions;
 }
 
-std::vector<Search::SearchResult> Search::search(const std::string& query) const {
+Search::SearchResult Search::search(const std::string& query) const {
     validateQuery(query);
     Logger::info("Search", "Searching for: {}", query);
 
-    Tokenizer tokenizer({});
     std::vector<Token> tokens;
-    
-    tokenizer.tokenizeRaw(query, [&tokens](Token token) {
+    std::string text = query;
+    tokenizer->tokenize(text);
+    while (tokenizer->hasNext()) {
+        Token token = tokenizer->next();
         tokens.push_back(token);
-        Logger::debug("Search", "pushed token: {}", token.getBody());
-    });
+        Logger::debug("Search", "pushed token: {}", token.body);
+    }
 
     if (tokens.empty()) {
         Logger::warn("Search", "Empty vector after tokenization!");
         return {};
     }
 
-    if (tokens.size() == 1) {
-        Logger::info("Search", "Searching for single word: {}", tokens[0].getBody());
-        return searchSingleWord(tokens[0].getBody());
-    }
-    
-    std::vector<std::string> words;
-    words.reserve(tokens.size());
-    for (const auto& token : tokens) {
-        words.push_back(token.getBody());
-    }
-    return searchPhrase(words);
+    return SearchResult(combinePhrase(tokens), getPhrasePositions(tokens));
 }
 
 void Search::printSearchResults(const std::vector<SearchResult>& results) const {
@@ -178,10 +113,13 @@ void Search::printSearchResults(const std::vector<SearchResult>& results) const 
         for (const auto& [fileId, tokenInfos] : result.posMap) {
             std::cout << "File ID: " << fileId << std::endl;
             std::cout << "  Positions: ";
-            for (const auto& info : tokenInfos) {
+            for (const auto& info : tokenInfos)
                 std::cout << "(pos=" << info.pos << ", wordPos=" << info.wordPos << ") ";
-            }
             std::cout << std::endl;
         }
     }
+}
+
+Search::~Search() {
+    delete tokenizer;
 }
