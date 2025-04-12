@@ -27,12 +27,67 @@ bool isAlnumCustom(const std::string& text, size_t index) {
     unsigned char ch = text[index];
 
     // ASCII буквы и цифры
-    if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9')) {
+    if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9'))
         return true;
-    }
 
     // Кириллица
     return isCyrillicChar(text, index);
+}
+
+bool Tokenizer::hasNext() {
+    // Пропускаем пробельные символы
+    while (i < text.size() && std::isspace(static_cast<unsigned char>(text[i]))) {
+        ++i;
+        ++currentPos;
+    }
+
+    return i < text.size();
+}
+
+Token Tokenizer::next() {
+    size_t startPos = currentPos;
+    std::string body;
+
+    // Проверяем на HTML-тег
+    if (text[i] == '<') {
+        std::smatch match;
+        std::string remainingText = text.substr(i, htmlPatternLimit);
+
+        if (std::regex_search(remainingText, match, htmlPattern) && match.position() == 0) {
+            body = match.str();
+            i += match.length();
+            currentPos += match.length();
+        } else {
+            body = text[i];
+            ++i;
+            ++currentPos;
+        }
+    }
+    // Одиночные символы (не буква/цифра)
+    else if (!isAlnumCustom(text, i)) {
+        body = text[i];
+        ++i;
+        ++currentPos;
+    }
+    // Собираем слова и числа (ASCII + кириллица)
+    else {
+        while (i < text.size() && isAlnumCustom(text, i)) {
+            body += text[i];
+
+            // Если это кириллический символ, он состоит из двух байт
+            if (isCyrillicChar(text, i)) {
+                body += text[i + 1];
+                i += 2;
+                currentPos++;
+            } else {
+                ++i;
+                ++currentPos;
+            }
+        }
+    }
+
+    applyFilters(body);
+    return Token(body, {startPos, wordPos++}, fileId);
 }
 
 /**
@@ -41,82 +96,12 @@ bool isAlnumCustom(const std::string& text, size_t index) {
  * @param fileId Идентификатор файла, откуда взят текст.
  * @param callback Функция обратного вызова для обработки каждого найденного токена.
  */
-void Tokenizer::tokenizeRaw(const std::string &text, std::function<void(Token)> callback, std::optional<FileId> fileId) {
-    size_t currentPos = 0;
-    size_t index = 0;
-    size_t i = 0;
-    FileId actualFileId = fileId.value_or(0);
-
-    while (i < text.size()) {
-        // Пропускаем пробельные символы
-        while (i < text.size() && std::isspace(static_cast<unsigned char>(text[i]))) {
-            ++i;
-            ++currentPos;
-        }
-
-        if (i >= text.size()) break;
-
-        size_t startPos = currentPos;
-        std::string token;
-
-        // Проверяем на HTML-тег
-        if (text[i] == '<') {
-            std::smatch match;
-            std::string remainingText = text.substr(i, htmlPatternLimit);
-
-            if (std::regex_search(remainingText, match, htmlPattern) && match.position() == 0) {
-                token = match.str();
-                i += match.length();
-                currentPos += match.length();
-            } else {
-                token = text[i];
-                ++i;
-                ++currentPos;
-            }
-        }
-        // Одиночные символы (не буква/цифра)
-        else if (!isAlnumCustom(text, i)) {
-            unsigned char ch = text[i];
-            token = ch;
-            ++i;
-            ++currentPos;
-        }
-        // Собираем слова и числа (ASCII + кириллица)
-        else {
-            while (i < text.size() && isAlnumCustom(text, i)) {
-                unsigned char ch = text[i];
-                token += ch;
-
-                // Если это кириллический символ, он состоит из двух байт
-                if (isCyrillicChar(text, i)) {
-                    token += text[i + 1];
-                    i += 2;
-                    currentPos++;
-                } else {
-                    ++i;
-                    ++currentPos;
-                }
-            }
-        }
-
-        callback(Token(token, {startPos, index++} , actualFileId));
-    }
-}
-
-/**
- * @brief Разбивает текст на токены с применением фильтров.
- * @param text Входной текст.
- * @param fileId Идентификатор файла.
- * @param callback Функция обратного вызова для обработки отфильтрованных токенов.
- */
-void Tokenizer::tokenize(const std::string &text, std::function<void(Token)> callback, std::optional<FileId> fileId) {
-    tokenizeRaw(text, [this, &callback](Token token) {
-        applyFilters(token.body);
-
-        if (!token.body.empty())
-            callback(Token(token.body, token.info, token.fileId));
-
-    }, fileId);
+void Tokenizer::tokenize(std::string &input, FileId inFileId) {
+    currentPos = 0;
+    wordPos = 0;
+    i = 0;
+    text = std::move(input);
+    fileId = inFileId;
 }
 
 /**

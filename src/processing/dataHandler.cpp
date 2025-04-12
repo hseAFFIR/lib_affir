@@ -24,11 +24,12 @@ void DataHandler::processText(const std::string &text, const std::string &filena
     fileStorage.write(text);
     FileStorage::saveStorageMeta();
 
-    tokenizer->tokenize(text, [this](Token token) {
-        Logger::debug("dataHandler::processText","Token: {} | Pos: {}", token.body, token.info.pos);
-        this->indexer->addToken(token);
-    }, fileId);
-
+    while(tokenizer->hasNext()) {
+        Token token = tokenizer->next();
+        Logger::debug("dataHandler::processText", "Token: {} | Pos: {}", token.body, token.info.pos);
+        indexer->addToken(token);
+    }
+    
     indexer->saveTo();
 
     indexStorage.saveStorageMeta();
