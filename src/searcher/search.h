@@ -33,7 +33,7 @@ public:
      * @return Vector of search results
      * @throws std::invalid_argument if query is empty or too long
      */
-    SearchResult search(const std::string& query) const;
+    SearchResult search(std::string& query) const;
 
     /**
      * @brief Prints search results to console

@@ -45,7 +45,7 @@ bool Tokenizer::hasNext() {
 }
 
 Token Tokenizer::next() {
-    size_t startPos = currentPos;
+    const size_t startPos = currentPos;
     std::string body;
 
     // Проверяем на HTML-тег
@@ -87,7 +87,7 @@ Token Tokenizer::next() {
     }
 
     applyFilters(body);
-    return Token(body, {startPos, wordPos++}, fileId);
+    return std::move(Token(body, {startPos, wordPos++}, fileId));
 }
 
 /**

@@ -17,7 +17,7 @@ std::string Search::combinePhrase(const std::vector<Token>& tokens) {
         if (i > 0) result += " ";
         result += tokens[i].body;
     }
-    return result;
+    return std::move(result);
 }
 
 Search::Search(const std::vector<Base*> &filters, IIndexStorage &indStor) {
@@ -77,19 +77,18 @@ PosMap Search::getPhrasePositions(const std::vector<Token>& tokens) const {
         }
     }
     
-    return phrasePositions;
+    return std::move(phrasePositions);
 }
 
-Search::SearchResult Search::search(const std::string& query) const {
+Search::SearchResult Search::search(std::string& query) const {
     validateQuery(query);
     Logger::info("Search", "Searching for: {}", query);
 
     std::vector<Token> tokens;
-    std::string text = query;
-    tokenizer->tokenize(text);
+    tokenizer->tokenize(query);
     while (tokenizer->hasNext()) {
         Token token = tokenizer->next();
-        tokens.push_back(token);
+        tokens.push_back(std::move(token));
         Logger::debug("Search", "pushed token: {}", token.body);
     }
 
@@ -98,7 +97,7 @@ Search::SearchResult Search::search(const std::string& query) const {
         return {};
     }
 
-    return SearchResult(combinePhrase(tokens), getPhrasePositions(tokens));
+    return std::move(SearchResult(combinePhrase(tokens), getPhrasePositions(tokens)));
 }
 
 void Search::printSearchResults(const std::vector<SearchResult>& results) const {
