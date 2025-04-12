@@ -22,7 +22,8 @@ public:
      * @brief Constructor
      * @param indexer Reference to indexer
      */
-    Search(Indexer& indexer);
+    explicit Search(const std::vector<Base*> &filters, IIndexStorage &indStor);
+    explicit Search(IIndexStorage &indStor) : Search({}, indStor) { };
 
     virtual ~Search();
 
@@ -43,7 +44,7 @@ public:
 
 private:
     Tokenizer *tokenizer;
-    Indexer& indexer;                        ///< Reference to indexer
+    Indexer *indexer;                        ///< Reference to indexer
     static constexpr size_t MAX_QUERY_LENGTH = 1000;
 
     /**

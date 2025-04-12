@@ -20,14 +20,13 @@ std::string Search::combinePhrase(const std::vector<Token>& tokens) {
     return result;
 }
 
-Search::Search(Indexer& indexer) 
-    : indexer(indexer) {
-    tokenizer = new Tokenizer();
+Search::Search(const std::vector<Base*> &filters, IIndexStorage &indStor) {
+    indexer = new Indexer(indStor);
+    tokenizer = new Tokenizer(filters);
 }
 
 PosMap Search::getPhrasePositions(const std::vector<Token>& tokens) const {
-    BigToken firstWordResults = indexer.getTokenInfo(tokens[0].body);
-
+    BigToken firstWordResults = indexer->getTokenInfo(tokens[0].body);
     auto &firstWordPoses = const_cast<PosMap &>(firstWordResults.getFilePositions());
 
     if (firstWordPoses.empty())
@@ -41,8 +40,9 @@ PosMap Search::getPhrasePositions(const std::vector<Token>& tokens) const {
             bool foundPhrase = true;
 
             for (size_t i = 1; i < tokens.size(); ++i) {
-                BigToken nextWordResults = indexer.getTokenInfo(tokens[i].body);
+                BigToken nextWordResults = indexer->getTokenInfo(tokens[i].body);
                 auto &nextWordPoses = const_cast<PosMap &>(nextWordResults.getFilePositions());
+
                 if (nextWordPoses.empty()) {
                     foundPhrase = false;
                     break;
@@ -122,4 +122,5 @@ void Search::printSearchResults(const std::vector<SearchResult>& results) const 
 
 Search::~Search() {
     delete tokenizer;
+    delete indexer;
 }
