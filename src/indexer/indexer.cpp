@@ -49,12 +49,12 @@ void Indexer::addToken(const Token &token) {
     Logger::debug("Indexer (addToken)", "{} sizeInBytes {}", token.body, currentSizeInBytes);
 }
 
-BigToken Indexer::getTokenInfo(const std::string &tokenName) const {
+BigToken Indexer::getTokenInfo(const std::string &tokenName) {
 
     BigToken resultBigToken(tokenName);
     resultBigToken.mergeFilePositions(indexStorage.getRawIndex(tokenName));
 
-    return std::move(resultBigToken);
+    return resultBigToken;
 }
 
 Indexer::~Indexer() {

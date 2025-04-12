@@ -53,7 +53,7 @@ public:
      * @param text The input text to be processed.
      * @param filename The name of the file where the text will be stored.
      */
-    void processText(const std::string &text, const std::string &filename);
+    void processText(std::string &text, const std::string &filename);
 
     /**
      * @brief Gets the vector of filter pointers used by this DataHandler.
