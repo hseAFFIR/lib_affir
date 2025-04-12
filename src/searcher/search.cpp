@@ -27,7 +27,7 @@ Search::Search(const std::vector<Base*> &filters, IIndexStorage &indStor) {
 
 PosMap Search::getPhrasePositions(const std::vector<Token>& tokens) const {
     BigToken firstWordResults = indexer->getTokenInfo(tokens[0].body);
-    auto &firstWordPoses = const_cast<PosMap &>(firstWordResults.getFilePositions());
+    const auto &firstWordPoses = firstWordResults.getFilePositions();
 
     if (firstWordPoses.empty())
         return {};
@@ -41,7 +41,7 @@ PosMap Search::getPhrasePositions(const std::vector<Token>& tokens) const {
 
             for (size_t i = 1; i < tokens.size(); ++i) {
                 BigToken nextWordResults = indexer->getTokenInfo(tokens[i].body);
-                auto &nextWordPoses = const_cast<PosMap &>(nextWordResults.getFilePositions());
+                const auto &nextWordPoses = nextWordResults.getFilePositions();
 
                 if (nextWordPoses.empty()) {
                     foundPhrase = false;
