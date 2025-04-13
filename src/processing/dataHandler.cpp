@@ -13,8 +13,6 @@ DataHandler::DataHandler(const std::vector<Base*> &filters, const size_t buffer,
         [](const Base* a, const Base* b) {
             return a->getOrder() < b->getOrder();
         });
-
-    encodingHandler.initConsole();
     tokenizer = new Tokenizer(filters);
     indexer = new Indexer(buffer, indexStorage);
 }

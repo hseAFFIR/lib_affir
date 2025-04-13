@@ -7,7 +7,6 @@
 #include "../tokenizer/filters/base.h"
 #include "../tokenizer/tokenizer.h"
 #include "../common.h"
-#include "encodingHandler/encodingHandler.h"
 #include "../storages/indexes/iIndexStorage.h"
 #include "../indexer/indexer.h"
 
@@ -66,7 +65,6 @@ public:
      */
     const std::vector<Base*>& getFilters() const { return filters; };
 private:
-    EncodingHandler encodingHandler; /**< Handles text encoding conversion and validation. */
     std::vector<Base*> filters; /** The collection of filter objects (derived from Base) applied to the text. */
     IIndexStorage &indexStorage; /** Ref to indexStorage. */
 
