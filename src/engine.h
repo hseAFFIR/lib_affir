@@ -33,6 +33,8 @@ public:
 
     virtual ~Engine();
 
+    void flush();
+
     void proceed(std::string text, FileStorage &storage);
     /**
      * @brief Reads a text file and processes its contents

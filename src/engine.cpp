@@ -68,16 +68,14 @@ void Engine::proceed(const std::string &filepath, size_t CHUNK_SIZE) {
         proceed(std::move(data), storage);
     }
 
-    dataHandler->flush();
-    FileStorage::saveStorageMeta();
+    flush();
 }
 
 void Engine::proceed(std::string text, const std::string &filename) {
     FileStorage storage(filename, text.size());
     proceed(std::move(text), storage);
 
-    dataHandler->flush();
-    FileStorage::saveStorageMeta();
+    flush();
 }
 
 void Engine::proceed(std::string text, FileStorage &storage) {
@@ -105,4 +103,9 @@ Engine::~Engine() {
     instancesNumber--;
     for (auto f : filters) delete f;
     Logger::debug("Engine", "Destructed (number of instances = {})", instancesNumber);
+}
+
+void Engine::flush() {
+    dataHandler->flush();
+    FileStorage::saveStorageMeta();
 }
