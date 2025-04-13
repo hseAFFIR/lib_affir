@@ -44,7 +44,7 @@ bool Tokenizer::hasNext() {
     // Skip empty tokens in order to make next token valid
     while(i < text.size() and !prepareNext());
 
-    return i < text.size();
+    return i < text.size() or !preparedToken.body.empty();
 }
 
 bool Tokenizer::prepareNext() {
