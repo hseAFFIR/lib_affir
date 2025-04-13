@@ -22,19 +22,20 @@ void Engine::proceed(const std::string &filepath, size_t CHUNK_SIZE) {
 
     // Read unless reached the end of file.
     while (file.read(buffer.data(), (long) CHUNK_SIZE) || file.gcount() > 0) {
-        std::string_view data(buffer.data(), file.gcount());
-        proceed(data, storage);
+        std::string data(buffer.data(), file.gcount());
+        proceed(std::move(data), storage);
     }
 
     dataHandler->flush();
-    storage.close();
+    FileStorage::saveStorageMeta();
 }
 
 void Engine::proceed(std::string text, const std::string &filename) {
     FileStorage storage(filename, text.size());
     proceed(std::move(text), storage);
+
     dataHandler->flush();
-    storage.close();
+    FileStorage::saveStorageMeta();
 }
 
 void Engine::proceed(std::string text, FileStorage &storage) {

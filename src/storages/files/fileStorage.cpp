@@ -45,6 +45,7 @@ void FileStorage::open() {
 }
 
 FileStorage::~FileStorage() {
+    close();
     instancesNumber--;
 }
 
@@ -81,7 +82,6 @@ size_t FileStorage::read(std::vector<char> &buffer, size_t bytesToRead) {
 
 void FileStorage::close() {
     dataStream.close();
-    delete this;
 }
 
 FileId FileStorage::getId() const {
