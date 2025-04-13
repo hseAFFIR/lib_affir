@@ -19,14 +19,14 @@ Engine::Engine(FilterType filterFlags, IndexStorageType indexStorageType, const 
     instancesNumber++;
 
     if (indexStorageType == IndexStorageType::SINGLE)
-        indexStorage = std::make_unique<SingleIndexStorage>();
+        indexStorage = new SingleIndexStorage();
     else if (indexStorageType == IndexStorageType::MULTI)
-        indexStorage = std::make_unique<MultiFileIndexStorage>();
+        indexStorage = new MultiFileIndexStorage();
     else
         throw std::invalid_argument("Unknown type of IndexStorage");
 
-    dataHandler = std::make_unique<DataHandler>(filters, buffer, *indexStorage);
-    searcher = std::make_unique<Search>(filters, *indexStorage);
+    dataHandler = new DataHandler(filters, buffer, *indexStorage);
+    searcher = new Search(filters, *indexStorage);
 }
 
 std::vector<Base*> Engine::createFilters(Engine::FilterType filterFlags) {
@@ -100,8 +100,12 @@ std::string Engine::getFilename(const std::string &path) {
 }
 
 Engine::~Engine() {
-    instancesNumber--;
+    delete searcher;
+    delete dataHandler;
+    delete indexStorage;
     for (auto f : filters) delete f;
+
+    instancesNumber--;
     Logger::debug("Engine", "Destructed (number of instances = {})", instancesNumber);
 }
 

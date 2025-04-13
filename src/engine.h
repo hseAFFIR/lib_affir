@@ -64,9 +64,9 @@ public:
     static void displayResultInContext(const Search::SearchResult &result, size_t contextWords = 0);
 
 private:
-    std::unique_ptr<DataHandler> dataHandler;
-    std::unique_ptr<Search> searcher;
-    std::unique_ptr<IIndexStorage> indexStorage;
+    DataHandler *dataHandler;
+    Search *searcher;
+    IIndexStorage *indexStorage;
 
     const std::vector<Base*> filters;
 
