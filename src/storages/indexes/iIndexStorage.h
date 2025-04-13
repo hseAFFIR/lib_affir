@@ -15,6 +15,8 @@
  */
 class IIndexStorage {
 public:
+    virtual ~IIndexStorage() = default;
+
     /**
      * @brief Creates an index from the given data.
      *
