@@ -17,7 +17,19 @@ public:
         MULTI
     };
 
-    explicit Engine(const std::vector<Base*>& filters, IndexStorageType indexStorageType, size_t buffer = DEFAULT_BUFFER_SIZE);
+    enum class FilterType : int {
+        NONE = 0,
+        HTMLER = 1 << 0,
+        LOWERCASER = 1 << 1,
+        PUNCTUATOR = 1 << 2,
+        STEMMER = 1 << 3,
+        STOPWORDS = 1 << 4
+    };
+
+    explicit Engine(FilterType filterFlags, IndexStorageType indexStorageType, size_t buffer = DEFAULT_BUFFER_SIZE);
+
+    explicit Engine(IndexStorageType indexStorageType, size_t buffer = DEFAULT_BUFFER_SIZE)
+        : Engine(FilterType::NONE, indexStorageType, buffer) { };
 
     virtual ~Engine();
 
@@ -56,10 +68,13 @@ private:
     std::unique_ptr<Search> searcher;
     std::unique_ptr<IIndexStorage> indexStorage;
 
+    const std::vector<Base*> filters;
+
     static constexpr size_t DEFAULT_CHUNK_SIZE = 512;
     static constexpr size_t DEFAULT_BUFFER_SIZE = 1024 * 1024 * 16;
 
     std::string getFilename(const std::string& path);
+    static std::vector<Base*> createFilters(FilterType filterFlags);
 
     static unsigned short instancesNumber;
 };

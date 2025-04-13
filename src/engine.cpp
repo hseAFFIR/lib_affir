@@ -7,10 +7,12 @@
 #include "storages/files/fileStorage.h"
 #include "storages/indexes/single/singleIndexStorage.h"
 #include "storages/indexes/multi/multiFileIndexStorage.h"
+#include "tokenizer/filters/filters.h"
+#include "logger/logger.h"
 
-unsigned short FileStorage::instancesNumber = 0;
+unsigned short Engine::instancesNumber = 0;
 
-Engine::Engine(const std::vector<Base *> &filters, IndexStorageType indexStorageType, const size_t buffer) {
+Engine::Engine(FilterType filterFlags, IndexStorageType indexStorageType, const size_t buffer) : filters(createFilters(filterFlags)) {
     if(instancesNumber > 0)
         throw std::logic_error("Engine instance is already created.");
 
@@ -25,6 +27,25 @@ Engine::Engine(const std::vector<Base *> &filters, IndexStorageType indexStorage
 
     dataHandler = std::make_unique<DataHandler>(filters, buffer, *indexStorage);
     searcher = std::make_unique<Search>(filters, *indexStorage);
+}
+
+std::vector<Base*> Engine::createFilters(Engine::FilterType filterFlags) {
+    std::vector<Base*> filters;
+
+    if (static_cast<int>(filterFlags) & static_cast<int>(FilterType::HTMLER))
+        filters.push_back(new Htmler());
+    if (static_cast<int>(filterFlags) & static_cast<int>(FilterType::LOWERCASER))
+        filters.push_back(new Lowercaser());
+    if (static_cast<int>(filterFlags) & static_cast<int>(FilterType::PUNCTUATOR))
+        filters.push_back(new Punctuator());
+    if (static_cast<int>(filterFlags) & static_cast<int>(FilterType::STEMMER))
+        filters.push_back(new StemFilter());
+    if (static_cast<int>(filterFlags) & static_cast<int>(FilterType::STOPWORDS))
+        filters.push_back(new StopWords());
+
+    Logger::debug("Engine", "Filters created: {}", filters.size());
+
+    return std::move(filters);
 }
 
 void Engine::proceed(const std::string &filepath, size_t CHUNK_SIZE) {
@@ -82,4 +103,6 @@ std::string Engine::getFilename(const std::string &path) {
 
 Engine::~Engine() {
     instancesNumber--;
+    for (auto f : filters) delete f;
+    Logger::debug("Engine", "Destructed (number of instances = {})", instancesNumber);
 }
