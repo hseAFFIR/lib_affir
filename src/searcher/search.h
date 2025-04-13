@@ -39,8 +39,7 @@ public:
      * @brief Prints search results to console
      * @param results Vector of search results
      */
-    static void printSearchResults(const std::vector<SearchResult>& results);
-    static void printSearchResults(const SearchResult& result) { printSearchResults(std::vector<SearchResult>{result}); };
+    static void printSearchResults(const SearchResult& result);
 
 private:
     Tokenizer *tokenizer;

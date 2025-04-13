@@ -17,7 +17,7 @@ public:
         MULTI
     };
 
-    enum class FilterType : int {
+    enum class FilterType {
         NONE = 0,
         HTMLER = 1 << 0,
         LOWERCASER = 1 << 1,
@@ -60,10 +60,8 @@ public:
      * @brief Utility method to print search result
      */
     static void displayResult(const Search::SearchResult& result);
-    /**
-     * @brief Utility method to print vector of search results
-     */
-    static void displayResult(const std::vector<Search::SearchResult>& results);
+
+    static void displayResultInContext(const Search::SearchResult &result, size_t contextWords = 0);
 
 private:
     std::unique_ptr<DataHandler> dataHandler;

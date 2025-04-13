@@ -100,23 +100,15 @@ Search::SearchResult Search::search(std::string& query) const {
     return std::move(SearchResult(combinePhrase(tokens), getPhrasePositions(tokens)));
 }
 
-void Search::printSearchResults(const std::vector<SearchResult>& results) {
-    if (results.empty()) {
-        Logger::warn("Search", "No results found!");
-        return;
+void Search::printSearchResults(const Search::SearchResult &result) {
+    std::ostringstream output;
+    for (const auto& [fileId, tokenInfos] : result.posMap) {
+        output << "File ID: " << fileId << std::endl;
+        output << "Positions: ";
+        for (const auto& info : tokenInfos)
+            output << "\n\t(pos=" << info.pos << ", wordPos=" << info.wordPos << ")";
     }
-
-    for (const auto& result : results) {
-        std::cout << "--------------------------------" << std::endl;
-        Logger::info("Search", "Found results for query {}:", result.query);
-        for (const auto& [fileId, tokenInfos] : result.posMap) {
-            std::cout << "File ID: " << fileId << std::endl;
-            std::cout << "  Positions: ";
-            for (const auto& info : tokenInfos)
-                std::cout << "(pos=" << info.pos << ", wordPos=" << info.wordPos << ") ";
-            std::cout << std::endl;
-        }
-    }
+    Logger::info("Search", "Results for query \"{}\":\n{}", result.query, output.str());
 }
 
 Search::~Search() {

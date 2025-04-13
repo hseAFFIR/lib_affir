@@ -91,8 +91,8 @@ void Engine::displayResult(const Search::SearchResult &result) {
     Search::printSearchResults(result);
 }
 
-void Engine::displayResult(const std::vector<Search::SearchResult> &results) {
-    Search::printSearchResults(results);
+void Engine::displayResultInContext(const Search::SearchResult &result, size_t contextWords) {
+
 }
 
 std::string Engine::getFilename(const std::string &path) {
