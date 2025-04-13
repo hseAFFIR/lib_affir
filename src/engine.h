@@ -11,9 +11,15 @@
 #include <filesystem>
 
 class Engine {
-
-
 public:
+    enum class IndexStorageType {
+        SINGLE,
+        MULTI
+    };
+
+    explicit Engine(const std::vector<Base*>& filters, IndexStorageType indexStorageType, size_t buffer = DEFAULT_BUFFER_SIZE);
+
+    virtual ~Engine();
 
     void proceed(std::string text, FileStorage &storage);
     /**
@@ -48,9 +54,14 @@ public:
 private:
     std::unique_ptr<DataHandler> dataHandler;
     std::unique_ptr<Search> searcher;
-    static const size_t DEFAULT_CHUNK_SIZE = 512;
+    std::unique_ptr<IIndexStorage> indexStorage;
+
+    static constexpr size_t DEFAULT_CHUNK_SIZE = 512;
+    static constexpr size_t DEFAULT_BUFFER_SIZE = 1024 * 1024 * 16;
 
     std::string getFilename(const std::string& path);
+
+    static unsigned short instancesNumber;
 };
 
 

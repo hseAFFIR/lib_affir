@@ -5,6 +5,27 @@
 #include <fstream>
 #include "engine.h"
 #include "storages/files/fileStorage.h"
+#include "storages/indexes/single/singleIndexStorage.h"
+#include "storages/indexes/multi/multiFileIndexStorage.h"
+
+unsigned short FileStorage::instancesNumber = 0;
+
+Engine::Engine(const std::vector<Base *> &filters, IndexStorageType indexStorageType, const size_t buffer) {
+    if(instancesNumber > 0)
+        throw std::logic_error("Engine instance is already created.");
+
+    instancesNumber++;
+
+    if (indexStorageType == IndexStorageType::SINGLE)
+        indexStorage = std::make_unique<SingleIndexStorage>();
+    else if (indexStorageType == IndexStorageType::MULTI)
+        indexStorage = std::make_unique<MultiFileIndexStorage>();
+    else
+        throw std::invalid_argument("Unknown type of IndexStorage");
+
+    dataHandler = std::make_unique<DataHandler>(filters, buffer, *indexStorage);
+    searcher = std::make_unique<Search>(filters, *indexStorage);
+}
 
 void Engine::proceed(const std::string &filepath, size_t CHUNK_SIZE) {
     std::ifstream file(filepath);
@@ -44,7 +65,7 @@ void Engine::proceed(std::string text, FileStorage &storage) {
 }
 
 Search::SearchResult Engine::find(std::string query) const {
-    return searcher->search(query);
+    return std::move(searcher->search(query));
 }
 
 void Engine::displayResult(const Search::SearchResult &result) {
@@ -57,4 +78,8 @@ void Engine::displayResult(const std::vector<Search::SearchResult> &results) {
 
 std::string Engine::getFilename(const std::string &path) {
     return std::move(std::filesystem::path(path).filename().string());
+}
+
+Engine::~Engine() {
+    instancesNumber--;
 }
