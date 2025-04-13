@@ -10,22 +10,32 @@
 #include "storages/files/fileStorage.h"
 #include <filesystem>
 
+enum class IndexStorageType {
+    SINGLE,
+    MULTI
+};
+
+enum class FilterType {
+    NONE = 0,
+    HTMLER = 1 << 0,
+    LOWERCASER = 1 << 1,
+    PUNCTUATOR = 1 << 2,
+    STEMMER = 1 << 3,
+    STOPWORDS = 1 << 4
+};
+
+inline FilterType operator|(FilterType a, FilterType b) {
+    using T = std::underlying_type_t<FilterType>;
+    return static_cast<FilterType>(static_cast<T>(a) | static_cast<T>(b));
+}
+
+inline FilterType operator&(FilterType a, FilterType b) {
+    using T = std::underlying_type_t<FilterType>;
+    return static_cast<FilterType>(static_cast<T>(a) &static_cast<T>(b));
+}
+
 class Engine {
 public:
-    enum class IndexStorageType {
-        SINGLE,
-        MULTI
-    };
-
-    enum class FilterType {
-        NONE = 0,
-        HTMLER = 1 << 0,
-        LOWERCASER = 1 << 1,
-        PUNCTUATOR = 1 << 2,
-        STEMMER = 1 << 3,
-        STOPWORDS = 1 << 4
-    };
-
     explicit Engine(FilterType filterFlags, IndexStorageType indexStorageType, size_t buffer = DEFAULT_BUFFER_SIZE);
 
     explicit Engine(IndexStorageType indexStorageType, size_t buffer = DEFAULT_BUFFER_SIZE)

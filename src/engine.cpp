@@ -29,18 +29,18 @@ Engine::Engine(FilterType filterFlags, IndexStorageType indexStorageType, const 
     searcher = new Search(filters, *indexStorage);
 }
 
-std::vector<Base*> Engine::createFilters(Engine::FilterType filterFlags) {
+std::vector<Base*> Engine::createFilters(FilterType filterFlags) {
     std::vector<Base*> filters;
 
-    if (static_cast<int>(filterFlags) & static_cast<int>(FilterType::HTMLER))
+    if ((filterFlags & FilterType::HTMLER) == FilterType::HTMLER)
         filters.push_back(new Htmler());
-    if (static_cast<int>(filterFlags) & static_cast<int>(FilterType::LOWERCASER))
+    if ((filterFlags & FilterType::LOWERCASER) == FilterType::LOWERCASER)
         filters.push_back(new Lowercaser());
-    if (static_cast<int>(filterFlags) & static_cast<int>(FilterType::PUNCTUATOR))
+    if ((filterFlags & FilterType::PUNCTUATOR) == FilterType::PUNCTUATOR)
         filters.push_back(new Punctuator());
-    if (static_cast<int>(filterFlags) & static_cast<int>(FilterType::STEMMER))
+    if ((filterFlags & FilterType::STEMMER) == FilterType::STEMMER)
         filters.push_back(new StemFilter());
-    if (static_cast<int>(filterFlags) & static_cast<int>(FilterType::STOPWORDS))
+    if ((filterFlags & FilterType::STOPWORDS) == FilterType::STOPWORDS)
         filters.push_back(new StopWords());
 
     Logger::debug("Engine", "Filters created: {}", filters.size());
