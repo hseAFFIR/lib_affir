@@ -6,7 +6,7 @@
 #define BASE_H
 
 #include <string>
-#include "../../processing/filterOrder.h"
+#include "filterOrder.h"
 
 /**
  * @class Base

@@ -34,6 +34,15 @@ bool isAlnumCustom(const std::string& text, size_t index) {
     return isCyrillicChar(text, index);
 }
 
+Tokenizer::Tokenizer(std::vector<Base*> filters)
+        : filters(std::move(filters)),
+          htmlPattern(R"(<\/?\w+.*?>)"),
+          htmlPatternLimit(DEFAULT_HTML_PATTERN_LIMIT) {
+    std::sort(this->filters.begin(), this->filters.end(), [](const Base* a, const Base* b) {
+        return a->getOrder() < b->getOrder();
+    });
+}
+
 bool Tokenizer::hasNext() {
     // Пропускаем пробельные символы
     while (i < text.size() && std::isspace(static_cast<unsigned char>(text[i]))) {

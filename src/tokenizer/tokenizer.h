@@ -26,10 +26,7 @@ public:
      *
      * Этот конструктор инициализирует объект с набором фильтров и шаблоном для поиска HTML-тегов.
      */
-    explicit Tokenizer(std::vector<Base*> filters)
-        : filters(std::move(filters)),
-            htmlPattern(R"(<\/?\w+.*?>)"),
-            htmlPatternLimit(10) { };
+    explicit Tokenizer(std::vector<Base*> filters);
 
     explicit Tokenizer() : Tokenizer({}) { }
 
@@ -50,6 +47,8 @@ private:
     const std::regex htmlPattern;     /**< Регулярное выражение для поиска HTML-тегов. */
     const size_t htmlPatternLimit;
 
+    static const size_t DEFAULT_HTML_PATTERN_LIMIT = 10;
+
     bool prepareNext();
     Token preparedToken;
 
@@ -57,7 +56,7 @@ private:
     size_t wordPos = 0;
     size_t i = 0;
     std::string text;
-    FileId fileId;
+    FileId fileId = 0;
 
     /**
      * @brief Применяет все фильтры к токену.

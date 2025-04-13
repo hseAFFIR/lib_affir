@@ -7,11 +7,6 @@ DataHandler::DataHandler(const std::vector<Base*> &filters, const size_t buffer,
     : filters(filters), indexStorage(indStor)
 {
     Logger::info("DataHandler", "DataHandler module initialized");
-    std::sort(this->filters.begin(), this->filters.end(),
-        [](const Base* a, const Base* b) {
-            return a->getOrder() < b->getOrder();
-        });
-
     tokenizer = new Tokenizer(filters);
     indexer = new Indexer(buffer, indexStorage);
 }

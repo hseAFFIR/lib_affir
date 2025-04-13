@@ -19,7 +19,7 @@ set(MODEL_FILES
 )
 
 set(PROCESSING_FILES
-        src/processing/filterOrder.h
+        src/tokenizer/filters/filterOrder.h
         src/processing/dataHandler.h
         src/processing/dataHandler.cpp
 )
