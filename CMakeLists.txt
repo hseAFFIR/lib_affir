@@ -22,8 +22,6 @@ set(PROCESSING_FILES
         src/processing/filterOrder.h
         src/processing/dataHandler.h
         src/processing/dataHandler.cpp
-        src/processing/encodingHandler/encodingHandler.h
-        src/processing/encodingHandler/encodingHandler.cpp
 )
 
 set(INDEXER_FILES
