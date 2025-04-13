@@ -7,7 +7,8 @@ int main() {
     Logger::info("Main", "Application started");
 
     Engine engine(Engine::IndexStorageType::MULTI);
-    engine.proceed("Some long text, text", "123");
+
+    Engine::displayResult(engine.find("long text"));
 
     return 0;
 }

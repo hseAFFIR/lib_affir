@@ -101,14 +101,18 @@ Search::SearchResult Search::search(std::string& query) const {
 }
 
 void Search::printSearchResults(const Search::SearchResult &result) {
-    std::ostringstream output;
+    std::ostringstream buffer;
     for (const auto& [fileId, tokenInfos] : result.posMap) {
-        output << "File ID: " << fileId << std::endl;
-        output << "Positions: ";
+        buffer << "File ID: " << fileId << std::endl;
+        buffer << "Positions: ";
         for (const auto& info : tokenInfos)
-            output << "\n\t(pos=" << info.pos << ", wordPos=" << info.wordPos << ")";
+            buffer << "\n\t(pos=" << info.pos << ", wordPos=" << info.wordPos << ")";
+        buffer << "\n\n";
     }
-    Logger::info("Search", "Results for query \"{}\":\n{}", result.query, output.str());
+    std::string output = buffer.str();
+    if (output.size() >= 2)
+        output.erase(output.size() - 2);
+    Logger::info("Search", "Results for query \"{}\":\n{}", result.query, output);
 }
 
 Search::~Search() {
