@@ -3,13 +3,6 @@
 #include <iostream>
 
 /**
- * @brief Конструктор Tokenizer.
- * @param filters Вектор указателей на объекты фильтров, применяемых к токенам.
- */
-Tokenizer::Tokenizer(std::vector<Base*> filters)
-    : filters(std::move(filters)), htmlPattern(R"(<\/?\w+.*?>)") {}
-
-/**
  * @brief Проверяет, является ли символ кириллическим (UTF-8).
  */
 bool isCyrillicChar(const std::string& text, size_t index) {
@@ -34,12 +27,77 @@ bool isAlnumCustom(const std::string& text, size_t index) {
     unsigned char ch = text[index];
 
     // ASCII буквы и цифры
-    if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9')) {
+    if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9'))
         return true;
-    }
 
     // Кириллица
     return isCyrillicChar(text, index);
+}
+
+bool Tokenizer::hasNext() {
+    // Пропускаем пробельные символы
+    while (i < text.size() && std::isspace(static_cast<unsigned char>(text[i]))) {
+        ++i;
+        ++currentPos;
+    }
+
+    // Skip empty tokens in order to make next token valid
+    while(i < text.size() and !prepareNext());
+
+    return i < text.size();
+}
+
+bool Tokenizer::prepareNext() {
+    const size_t startPos = currentPos;
+    std::string body;
+
+    // Проверяем на HTML-тег
+    if (text[i] == '<') {
+        std::smatch match;
+        std::string remainingText = text.substr(i, htmlPatternLimit);
+
+        if (std::regex_search(remainingText, match, htmlPattern) && match.position() == 0) {
+            body = match.str();
+            i += match.length();
+            currentPos += match.length();
+        } else {
+            body = text[i];
+            ++i;
+            ++currentPos;
+        }
+    }
+    // Одиночные символы (не буква/цифра)
+    else if (!isAlnumCustom(text, i)) {
+        body = text[i];
+        ++i;
+        ++currentPos;
+    }
+    // Собираем слова и числа (ASCII + кириллица)
+    else {
+        while (i < text.size() && isAlnumCustom(text, i)) {
+            body += text[i];
+
+            // Если это кириллический символ, он состоит из двух байт
+            if (isCyrillicChar(text, i)) {
+                body += text[i + 1];
+                i += 2;
+                currentPos++;
+            } else {
+                ++i;
+                ++currentPos;
+            }
+        }
+    }
+
+    applyFilters(body);
+    if (body.empty())
+        return false;
+    preparedToken = Token(body, {startPos, wordPos++}, fileId);
+    return true;
+}
+
+Token Tokenizer::next() {
+    return std::move(preparedToken);
 }
 
 /**
@@ -48,81 +106,12 @@ bool isAlnumCustom(const std::string& text, size_t index) {
  * @param fileId Идентификатор файла, откуда взят текст.
  * @param callback Функция обратного вызова для обработки каждого найденного токена.
  */
-void Tokenizer::tokenizeRaw(const std::string &text, std::function<void(Token)> callback, std::optional<FileId> fileId) {
-    size_t currentPos = 0;
-    size_t index = 0;
-    size_t i = 0;
-    FileId actualFileId = fileId.value_or(0);
-
-    while (i < text.size()) {
-        // Пропускаем пробельные символы
-        while (i < text.size() && std::isspace(static_cast<unsigned char>(text[i]))) {
-            ++i;
-            ++currentPos;
-        }
-
-        if (i >= text.size()) break;
-
-        size_t startPos = currentPos;
-        std::string token;
-
-        // Проверяем на HTML-тег
-        if (text[i] == '<') {
-            std::smatch match;
-            std::string remainingText = text.substr(i);
-
-            if (std::regex_search(remainingText, match, htmlPattern) && match.position() == 0) {
-                token = match.str();
-                i += match.length();
-                currentPos += match.length();
-            } else {
-                token = text[i];
-                ++i;
-                ++currentPos;
-            }
-        }
-        // Одиночные символы (не буква/цифра)
-        else if (!isAlnumCustom(text, i)) {
-            unsigned char ch = text[i];
-            token = ch;
-            ++i;
-            ++currentPos;
-        }
-        // Собираем слова и числа (ASCII + кириллица)
-        else {
-            while (i < text.size() && isAlnumCustom(text, i)) {
-                unsigned char ch = text[i];
-                token += ch;
-
-                // Если это кириллический символ, он состоит из двух байт
-                if (isCyrillicChar(text, i)) {
-                    token += text[i + 1];
-                    i += 2;
-                    currentPos++;
-                } else {
-                    ++i;
-                    ++currentPos;
-                }
-            }
-        }
-
-        callback(Token(token, startPos, index++, actualFileId));
-    }
-}
-
-/**
- * @brief Разбивает текст на токены с применением фильтров.
- * @param text Входной текст.
- * @param fileId Идентификатор файла.
- * @param callback Функция обратного вызова для обработки отфильтрованных токенов.
- */
-void Tokenizer::tokenizeFiltered(const std::string &text, std::function<void(Token)> callback, std::optional<FileId> fileId) {
-    tokenizeRaw(text, [this, &callback](Token token) {
-        std::string filteredToken = applyFilters(token.getBody());
-        if (!filteredToken.empty()) {
-            callback(Token(filteredToken, token.getPos(), token.getIndex(), token.getFileId()));
-        }
-    }, fileId);
+void Tokenizer::tokenize(std::string &input, FileId inFileId) {
+    currentPos = 0;
+    wordPos = 0;
+    i = 0;
+    text = std::move(input);
+    fileId = inFileId;
 }
 
 /**
@@ -130,13 +119,9 @@ void Tokenizer::tokenizeFiltered(const std::string &text, std::function<void(Tok
  * @param token Исходный токен.
  * @return Отфильтрованный токен или пустая строка.
  */
-std::string Tokenizer::applyFilters(const std::string &token) {
-    std::string *result = const_cast<std::string*>(&token);
-
+void Tokenizer::applyFilters(std::string &token) {
     for (const auto &filter : filters) {
-        *result = filter->process(*result);
-        if (result->empty()) break;
+        filter->process(token);
+        if (token.empty()) break;
     }
-
-    return *result;
 }

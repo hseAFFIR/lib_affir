@@ -14,90 +14,51 @@ void Indexer::clearBuffer() {
 }
 
 void Indexer::saveTo() {
-    indexStorage.createIndex(buffer);
+    if (!buffer.empty())
+        indexStorage.createIndex(buffer);
     clearBuffer();
 }
 
 void Indexer::addToken(const Token &token) {
-    const std::string &body = token.getBody();
-    unsigned long long fileId = token.getFileId();
-    const TokenInfo info{token.getPos(), token.getIndex()};
-
     // Checking the existence of BigToken with this body
-    auto it = buffer.find(body);
+    auto it = buffer.find(token.body);
     if (it == buffer.end()) {
-        BigToken newBT(body);
-        newBT.addPosition(fileId, info);
+        BigToken newBT(token);
 
-        const size_t newSize = newBT.getSize();
-        currentSizeInBytes += newSize;
-
-        Logger::debug("Indexer::addToken", "{} sizeInBytes {}",token.getBody(),currentSizeInBytes);
-
-        if (currentSizeInBytes > maxBufferSizeInBytes) {
+        if (currentSizeInBytes + newBT.getPosesSize() > maxBufferSizeInBytes)
             saveTo();
-        }
 
-        buffer.emplace(body, std::move(newBT));
+        currentSizeInBytes += newBT.getPosesSize();
+        buffer.emplace(token.body, std::move(newBT));
     } else {
         BigToken &bt = it->second;
-        const size_t oldSize = bt.getSize();
-
+        const size_t oldSize = bt.getPosesSize();
         size_t newSize = oldSize;
 
-        auto btIt = bt.getFilePositions().find(fileId);
+        if (!bt.getFilePositions().contains(token.fileId))
+            newSize += sizeof(FileId) + sizeof(TokenInfo);
+        else
+            newSize += sizeof(TokenInfo);
 
-        if (btIt == bt.getFilePositions().end()) {
-            newSize += sizeof(unsigned long)*3;
-        } else {
-            newSize += sizeof(unsigned  long)*2;
-        }
-
-        currentSizeInBytes += (newSize - oldSize);
-
-        if (currentSizeInBytes > maxBufferSizeInBytes) {
+        if (currentSizeInBytes + (newSize - oldSize) > maxBufferSizeInBytes) {
             saveTo();
-
-            buffer[body] = BigToken(body, fileId, info);
-            currentSizeInBytes+=buffer[body].getSize();
-
-            Logger::debug("Indexer::addToken", "{} sizeInBytes {}",token.getBody(),currentSizeInBytes);
+            addToken(token);
             return;
         }
-
-        Logger::debug("Indexer::addToken", "{} sizeInBytes {}",token.getBody(),currentSizeInBytes);
-
-        bt.addPosition(fileId, info);
+        bt.addPosition(token.fileId, token.info);
+        currentSizeInBytes += (newSize - oldSize);
     }
+    Logger::debug("Indexer (addToken)", "{} sizeInBytes {}", token.body, currentSizeInBytes);
 }
 
-const BigToken &Indexer::getTokenInfo(const std::string &tokenName) const {
+BigToken Indexer::getTokenInfo(const std::string &tokenName) {
 
-    auto resultBigToken = new BigToken(tokenName);
+    BigToken resultBigToken(tokenName);
+    resultBigToken.mergeFilePositions(indexStorage.getRawIndex(tokenName));
 
-    std::vector<PosMap> inputPositions;
-
-    indexStorage.getRawIndex(tokenName, inputPositions);
-
-    for (auto &bt: inputPositions) {
-        resultBigToken->mergeFilePositions(bt);
-    }
-
-    return *resultBigToken;
-}
-
-Indexer::BufferType Indexer::getBufferWithClear() {
-    BufferType copy = buffer;
-    clearBuffer();
-    return copy;
-}
-
-const Indexer::BufferType &Indexer::getBuffer() const {
-    return buffer;
+    return resultBigToken;
 }
 
 Indexer::~Indexer() {
-    if (!buffer.empty()) {
-        saveTo();
-    }
+    saveTo();
 }

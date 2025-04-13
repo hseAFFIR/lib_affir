@@ -78,7 +78,7 @@ public:
      * @param token Входное слово.
      * @return Стеммированное слово.
      */
-    std::string process(const std::string &token) const override;
+    void process(std::string &token) override;
 
     FilterOrder getOrder() const override {
         return FilterOrder::RussianPorterStemmer;

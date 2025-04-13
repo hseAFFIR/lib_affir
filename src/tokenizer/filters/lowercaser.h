@@ -23,7 +23,7 @@ public:
      * @param token The input token to be processed.
      * @return std::string The resulting token with all characters converted to lowercase.
      */
-    std::string process(const std::string& token) const override;
+    void process(std::string& token) override;
 
     /**
      * @brief Returns the processing order for the Lowercaser filter.

@@ -2,7 +2,7 @@
 
 
 
-std::string Lowercaser::process(const std::string& token) const {
+void Lowercaser::process(std::string& token) {
     std::string result;
     size_t i = 0;
     while (i < token.size()) {
@@ -32,5 +32,5 @@ std::string Lowercaser::process(const std::string& token) const {
         
         i += len;
     }
-    return result;
+    return;
 }

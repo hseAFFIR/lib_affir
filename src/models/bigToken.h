@@ -46,14 +46,31 @@ public:
      */
     explicit BigToken(std::string body) : body(std::move(body)) { }
 
+    BigToken(BigToken&& other) noexcept
+            : body(std::move(other.body)),
+              filePositions(std::move(other.filePositions)),
+              posMapSize(other.posMapSize) {
+        other.posMapSize = 0;  // Ensure the moved-from object is in a valid state
+    }
+
+    BigToken& operator=(BigToken&& other) noexcept {
+        if (this != &other) {  // Self-assignment check
+            body = std::move(other.body);
+            filePositions = std::move(other.filePositions);
+            posMapSize = other.posMapSize;
+            other.posMapSize = 0;  // Ensure the moved-from object is in a valid state
+        }
+        return *this;
+    }
+
     /**
      * @brief Calculates the memory size occupied by this BigToken.
      *
      * @return The size in bytes.
      */
 
-    size_t getSize() const { return body.size() + posMapSize; };
-    size_t getPosesSize() const { return posMapSize; };
+    size_t getPosesSize() const { return posMapSize * sizeof(TokenInfo) + filePositions.size() * sizeof(FileId); };
+    size_t getFullPosesSize() const { return posMapSize * (sizeof(FileId) + sizeof(TokenInfo)); };
 
     /**
      * @brief Adds a new position to the token for a given file ID.
@@ -78,7 +95,7 @@ public:
     ~BigToken();
 
 
-    explicit BigToken(std::string body, unsigned long fileId, TokenInfo info);
+    explicit BigToken(const Token &token);
 };
 
 

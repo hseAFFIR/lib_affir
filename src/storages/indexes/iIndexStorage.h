@@ -20,14 +20,14 @@ public:
      *
      * @param data A map where keys are strings and values are BigToken objects.
      */
-    virtual void createIndex(std::unordered_map<std::string, BigToken>& data) = 0;
+    virtual void createIndex(const std::unordered_map<std::string, BigToken>& data) = 0;
     /**
      * @brief Retrieves the raw index from the files by given token bodies.
      *
      * @param bodies A string representing the body of token.
-     * @param[out] output A vector of references to PosMap where results will be stored.
+     * @param[out] output A PosMap where results will be stored.
      */
-    virtual void getRawIndex(const std::string& body, std::vector<PosMap>&) = 0;
+    virtual PosMap getRawIndex(const std::string& body) = 0;
     /**
     * @brief Closes all file streams and flush data.
     */

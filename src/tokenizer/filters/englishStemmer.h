@@ -24,7 +24,7 @@ public:
      * @param word The input word to be stemmed.
      * @return std::string The stemmed (reduced) version of the input word.
      */
-    std::string process(const std::string &word) const override;
+    void process(std::string &token) override;
 
     /**
      * @brief Constructs an EnglishStemmer object.
@@ -50,6 +50,13 @@ private:
     std::string english_valid_li_endings; ///< Valid endings for "li" deletion rule.
     std::unordered_map<std::string, std::string> english_exceptions1; ///< Exception mappings for specific words.
     std::unordered_set<std::string> english_exceptions2; ///< A set of words that are exceptions to certain stemming rules.
+    std::vector<std::string> suffixes_step1_first; ///< A set of suffixes for step1.
+    std::vector<std::string> suffixes_step1_second; ///< Second set of suffixes for step1.
+    std::vector<std::pair<std::string, std::string>> suffixes_step2; ///< A set of suffixes for step2.
+    std::vector<std::pair<std::string, std::string>> suffixes_step3; ///< A set of suffixes for step3.
+    std::vector<std::string> suffixes_step4;
+    
+
 
     /**
      * @brief Determines the regions R1 and R2 for the input word.

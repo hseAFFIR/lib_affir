@@ -24,7 +24,7 @@ public:
      * @param token The input token to be processed.
      * @return The original token if it is not a stop word, otherwise an empty string.
      */
-    std::string process(const std::string &token) const override;
+    void process(std::string &token) override;
 
     /**
      * @brief Returns the filter order associated with the stopWords.

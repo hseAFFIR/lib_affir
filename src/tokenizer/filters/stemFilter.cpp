@@ -23,18 +23,16 @@ std::string StemFilter::detect_language(const std::string &token) const {
     return "";
 }
 
-std::string StemFilter::process(const std::string &token) const {
+void StemFilter::process(std::string &token) {
     try {
         std::string lang = detect_language(token);
         if (lang == "ru") {
-            return russian_stemmer.process(token);
+            russian_stemmer.process(token);
         }
         if (lang == "en") {
-            return english_stemmer.process(token);
+            english_stemmer.process(token);
         }
-        return token;
     } catch (...) {
         Logger::error("stemFilter::process","Undefined exception!");
-        return token;
     }
 }

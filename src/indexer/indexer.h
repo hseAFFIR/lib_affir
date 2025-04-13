@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include "../models/bigToken.h"
-#include "../models/token.h"
+#include "../common.h"
 #include "../storages/indexes/iIndexStorage.h"
 
 
@@ -29,6 +29,8 @@ private:
      */
     void clearBuffer();
 
+    static constexpr size_t DEFAULT_BUFFER_SIZE = 1024 * 1024 * 16;
+
 public:
     /**
      * @brief Constructs an Indexer instance with a specified buffer size limit.
@@ -36,7 +38,8 @@ public:
      * @param bufferSize Maximum buffer size (in bytes) before flushing to storage.
      * @param indStor Instance of object MFIS or SFIS
      */
-    explicit Indexer(unsigned long bufferSize, IIndexStorage &indStor);
+    explicit Indexer(size_t bufferSize, IIndexStorage &indStor);
+    explicit Indexer(IIndexStorage &indStor) : Indexer(DEFAULT_BUFFER_SIZE, indStor) { };
 
     /**
      * @brief Adds a new token to the buffer, handling overflow.
@@ -56,7 +59,7 @@ public:
      * @param tokenName The body of the token to query.
      * @return Ref to the BigToken instance if found, nullptr otherwise.
      */
-    const BigToken& getTokenInfo(const std::string& tokenName) const;
+    BigToken getTokenInfo(const std::string& tokenName);
 
     /**
      * @brief Returns the current buffer contents and clears the buffer.
@@ -65,7 +68,6 @@ public:
      *
      * @return A copy of the buffer's contents.
      */
-    BufferType getBufferWithClear();
 
     /**
      * @brief Returns a constant reference to the current buffer contents.
@@ -74,7 +76,7 @@ public:
      *
      * @return A constant reference to the buffer.
      */
-    const BufferType& getBuffer() const;
+    const BufferType& getBuffer() const { return buffer; }
 
     /**
      * @brief Destroys the Indexer object, ensuring buffer persistence.

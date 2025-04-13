@@ -1,10 +1,11 @@
-#include <iostream>
-#include "tokenizer/filters/filters.h"
-#include "processing/dataHandler.h"
 #include "storages/indexes/multi/multiFileIndexStorage.h"
+#include "indexer/indexer.h"
+#include "searcher/search.h"
 #include "logger/logger.h"
-#include <vector>
-#include "logger/logger.h"
+#include "processing/dataHandler.h"
+#include "tokenizer/filters/htmler.h"
+#include "tokenizer/filters/punctuator.h"
+#include "tokenizer/filters/stopWords.h"
 
 #include <cassert>
 #include <fstream>
