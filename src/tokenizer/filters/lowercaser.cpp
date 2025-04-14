@@ -5,8 +5,10 @@
 void Lowercaser::process(std::string& token) {
     std::string result;
     size_t i = 0;
-    while (i < token.size()) {
-        // Определяем длину символа UTF-8 (1-4 байта)
+    const size_t token_size = token.size();
+    result.reserve(token_size);
+    while (i < token_size) {
+        // UTF-8 (1-4 bytes)
         int len = 1;
         if ((token[i] & 0x80) != 0) {
             if      ((token[i] & 0xF0) == 0xF0) len = 4;
@@ -14,15 +16,13 @@ void Lowercaser::process(std::string& token) {
             else if ((token[i] & 0xC0) == 0xC0) len = 2;
         }
         
-        // Извлекаем символ
         std::string ch = token.substr(i, len);
-        
-        // Ищем в таблице замен
+
         auto it = lower_map.find(ch);
         if (it != lower_map.end()) {
             result += it->second;
         } else {
-            // Для латиницы используем tolower()
+            // ASCII
             if (len == 1) {
                 result += static_cast<char>(std::tolower(ch[0]));
             } else {
@@ -32,5 +32,6 @@ void Lowercaser::process(std::string& token) {
         
         i += len;
     }
+    token = std::move(result);
     return;
 }

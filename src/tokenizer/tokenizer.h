@@ -31,7 +31,7 @@ public:
             htmlPattern(R"(<\/?\w+.*?>)"),
             htmlPatternLimit(10) { };
 
-    explicit Tokenizer() : Tokenizer({}) { }
+    explicit Tokenizer() : Tokenizer(std::vector<Base*>()) { }
 
     bool hasNext();
 

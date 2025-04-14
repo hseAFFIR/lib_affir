@@ -11,20 +11,24 @@
 
 
 int main(){
+    system("chcp 65001");
     Logger::init("logs/log.txt");
     Logger::info("Main", "Application started");
     MultiFileIndexStorage storage;
-    std::vector<Base*> filters = {new Lowercaser()};
+    std::vector<Base*> filters = {};
     DataHandler dh(filters,100, storage);
     std::string text = "Привет, мир!";
     RussianPorterStemmer rps;
         
     std::string testtexttt = "АБВГДЕЁЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
-    std::string testtext = "漢";
-    testtext = "Hello, World!";
+    Lowercaser* gol = new Lowercaser();
+    gol->process(testtexttt);
+    std::cout << testtexttt;
+
+    std::string testtext = "Hello, World!";
     
     std::string filename = "test_output.txt";
-    dh.processText(testtexttt, filename);
+    // dh.processText(testtexttt, filename);
     for (auto filter : filters) {
         delete filter;
     }
