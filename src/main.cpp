@@ -18,10 +18,11 @@ int main(){
     std::vector<Base*> filters = {};
     DataHandler dh(filters,100, storage);
     std::string text = "Привет, мир!";
-    RussianPorterStemmer rps;
-        
+    Lowercaser* low = new Lowercaser();    
     std::string testtexttt = "АБВГДЕЁЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
     std::string testtext = "Hello, World!";
+    // low->process(testtexttt);
+    std::cout << testtexttt;
     
     std::string filename = "test_output.txt";
     dh.processText(testtexttt, filename);
