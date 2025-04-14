@@ -16,17 +16,17 @@ void Lowercaser::process(std::string& token) {
             else if ((token[i] & 0xC0) == 0xC0) len = 2;
         }
         
-        std::string ch = token.substr(i, len);
+        std::string_view ch(&token[i], len);
 
         auto it = lower_map.find(ch);
         if (it != lower_map.end()) {
-            result += it->second;
+            result.append(it->second);
         } else {
             // ASCII
             if (len == 1) {
-                result += static_cast<char>(std::tolower(ch[0]));
+                result.push_back(static_cast<char>(std::tolower(ch[0])));
             } else {
-                result += ch;
+                result.append(ch.data(), ch.size());
             }
         }
         

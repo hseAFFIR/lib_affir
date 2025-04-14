@@ -37,7 +37,7 @@ public:
     }
 
 private:
-    const std::unordered_map<std::string, std::string> lower_map = {
+    const std::unordered_map<std::string_view, std::string_view> lower_map = {
         {"А", "а"}, {"Б", "б"}, {"В", "в"}, {"Г", "г"}, {"Д", "д"},
         {"Е", "е"}, {"Ё", "ё"}, {"Ж", "ж"}, {"З", "з"}, {"И", "и"},
         {"Й", "й"}, {"К", "к"}, {"Л", "л"}, {"М", "м"}, {"Н", "н"},

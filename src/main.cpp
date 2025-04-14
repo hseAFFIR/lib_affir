@@ -21,14 +21,10 @@ int main(){
     RussianPorterStemmer rps;
         
     std::string testtexttt = "АБВГДЕЁЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
-    Lowercaser* gol = new Lowercaser();
-    gol->process(testtexttt);
-    std::cout << testtexttt;
-
     std::string testtext = "Hello, World!";
     
     std::string filename = "test_output.txt";
-    // dh.processText(testtexttt, filename);
+    dh.processText(testtexttt, filename);
     for (auto filter : filters) {
         delete filter;
     }
