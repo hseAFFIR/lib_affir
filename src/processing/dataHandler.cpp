@@ -2,7 +2,6 @@
 #include "../storages/files/fileStorage.h"
 #include "../logger/logger.h"
 #include <fstream>
-#include "../logger/logger.h"
 #include <algorithm>
 
 DataHandler::DataHandler(const std::vector<Base*> &filters, const size_t buffer, IIndexStorage &indStor)
