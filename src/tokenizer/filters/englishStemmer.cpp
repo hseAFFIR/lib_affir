@@ -309,9 +309,8 @@ std::string EnglishStemmer::step5(std::string &res, const long long &R1, const l
 }
 
 void EnglishStemmer::process(std::string &token) {
-    // token = to_lower(token);
-    // if(!std::isalpha(static_cast<unsigned char>(token[0])))
-        // return;
+    if(!std::isalpha(static_cast<unsigned char>(token[0])))
+        return;
     to_lower(token);
     // Если слово присутствует в исключениях – возвращаем его преобразование
     if (english_exceptions1.find(token) != english_exceptions1.end()) {
