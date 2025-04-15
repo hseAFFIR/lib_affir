@@ -4,6 +4,7 @@
 #include "base.h"
 #include <algorithm>
 #include <cctype>
+#include <unordered_map>
 
 /**
  * @brief The Lowercaser class converts all characters of a token to lowercase.

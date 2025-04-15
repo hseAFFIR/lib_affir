@@ -15,8 +15,8 @@
  * storing the processed text in a file, and then tokenizing it for further indexing.
  *
  * The DataHandler receives a collection of filter objects (derived from Base) and a buffer size 
- * used by the Indexer. It sorts the filters based on a predefined order and then processes the 
- * text by writing it to a file, tokenizing it, and passing the tokens to an indexer.
+ * used by the Indexer. It sorts the filters based on a predefined order, processes the text
+ * by writing it to a file, tokenizing it, and passing the tokens to an indexer.
  */
 class DataHandler {
 public:
