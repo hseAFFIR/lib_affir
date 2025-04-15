@@ -9,25 +9,26 @@
 #include <fstream>
 #include "tokenizer/filters/russianPorterStemmer.h"
 
-
-int main(){
+int main() {
     system("chcp 65001");
     Logger::init("logs/log.txt");
     Logger::info("Main", "Application started");
-    MultiFileIndexStorage storage;
-    std::vector<Base*> filters = {};
-    DataHandler dh(filters,100, storage);
-    std::string text = "Привет, мир!";
-    Lowercaser* low = new Lowercaser();    
-    std::string testtexttt = "АБВГДЕЁЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
-    std::string testtext = "Hello, World!";
-    // low->process(testtexttt);
-    std::cout << testtexttt;
-    
-    std::string filename = "test_output.txt";
-    dh.processText(testtexttt, filename);
-    for (auto filter : filters) {
-        delete filter;
+
+    std::vector<Base*> filters = {new StemFilter()};
+
+    std::string text = "hello Ёлка маленькая";
+
+    auto *tokenizer = new Tokenizer(filters);
+
+    tokenizer->tokenize(text, 1);
+
+    while(tokenizer->hasNext()) {
+        Token token = tokenizer->next();
+        std::cout << "Token: " << token.body << " | Pos: " << token.info.pos<< " | wordPos: "<< token.info.wordPos << std::endl;
     }
+
+    delete tokenizer;
+
+    for (auto f : filters) delete f;
     return 0;
 }

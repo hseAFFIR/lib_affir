@@ -5,7 +5,7 @@ StemFilter::StemFilter() {
     Logger::info("StemFilter", "StemFilter module initialized");
 }
 
-bool isCyrillicChar(const std::string &text, size_t index) {
+bool CyrillicChar(const std::string &text, size_t index) {
     if (index + 1 >= text.size()) return false;
 
     unsigned char first = text[index];
@@ -26,7 +26,7 @@ std::string StemFilter::detect_language(const std::string &token) const {
 
     for (size_t i = 0; i < token.size(); ++i) {
         unsigned char c = token[i];
-        if (isCyrillicChar(token, i)) {
+        if (CyrillicChar(token, i)) {
             has_cyrillic = true;
             ++i;
         }
