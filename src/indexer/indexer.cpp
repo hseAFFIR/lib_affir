@@ -2,7 +2,7 @@
 #include <iostream>
 #include "../logger/logger.h"
 
-Indexer::Indexer(unsigned long long bufferSize, IIndexStorage &indStor)
+Indexer::Indexer(size_t bufferSize, IIndexStorage &indStor)
         : maxBufferSizeInBytes(bufferSize), currentSizeInBytes(0), indexStorage(indStor) {
     Logger::info("Indexer", "Indexer module initialized");
 }
