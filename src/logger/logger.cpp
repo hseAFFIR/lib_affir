@@ -4,22 +4,27 @@
 #include "logger.h"
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/rotating_file_sink.h>
+#include <spdlog/async.h>
 #include <cstdlib> // для getenv
 
 std::shared_ptr<spdlog::logger> Logger::logger = nullptr;
 
 void Logger::init(const std::string& logFilePath) {
 
+    spdlog::init_thread_pool(8192, 1);
+
     // Создаем сенки (sinks) для вывода в файл и консоль
     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
     auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFilePath, true);
+//    auto rotating_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(logFilePath, 1024*1024*10, 3);
+    std::initializer_list<spdlog::sink_ptr> sinks {file_sink, console_sink};
+
 
     // Устанавливаем формат вывода
-    console_sink->set_pattern("%^%l: %Y-%m-%d %H:%M:%S [%n]: %v%$");
-    file_sink->set_pattern("%l: %Y-%m-%d %H:%M:%S [%n]: %v");
+    spdlog::set_pattern("[%H:%M:%S %z] [%n] [%^%l%$] %v");
 
-    // Создаем логгер с двумя сенками
-    logger = std::make_shared<spdlog::logger>("logger", spdlog::sinks_init_list{console_sink, file_sink});
+    logger = std::make_shared<spdlog::async_logger>("logger", sinks.begin(), sinks.end(), spdlog::thread_pool(), spdlog::async_overflow_policy::block);
 
     // Устанавливаем уровень логирования в зависимости от переменной окружения DEBUG
     const char* debugEnv = std::getenv("DEBUG");
