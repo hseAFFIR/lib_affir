@@ -4,22 +4,22 @@
 
 #include "stemFilter.h"
 #include <regex>
-#include "../../logger/logger.h"
+
 
 StemFilter::StemFilter() {
-    Logger::info("StemFilter", "StemFilter module initialized");
+//    Logger::info("StemFilter", "StemFilter module initialized");
 }
 
 std::string StemFilter::detect_language(const std::string &token) const {
     if (std::regex_search(token, std::regex("[а-яА-Я]"))) {
-        Logger::debug("StemFilter", "Russian language detected for word {}",token);
+//        Logger::debug("StemFilter", "Russian language detected for word {}",token);
         return "ru";
     }
     if (std::regex_search(token, std::regex("[a-zA-Z]"))) {
-        Logger::debug("StemFilter", "English language detected for word {}",token);
+//        Logger::debug("StemFilter", "English language detected for word {}",token);
         return "en";
     }
-    Logger::warn("StemFilter", "Unknown language! {}",token);
+//    Logger::warn("StemFilter", "Unknown language! {}",token);
     return "";
 }
 
@@ -33,6 +33,6 @@ void StemFilter::process(std::string &token) {
             english_stemmer.process(token);
         }
     } catch (...) {
-        Logger::error("stemFilter::process","Undefined exception!");
+//        Logger::error("stemFilter::process","Undefined exception!");
     }
 }

@@ -1,16 +1,15 @@
 #include "indexer.h"
 #include <iostream>
-#include "../logger/logger.h"
 
 Indexer::Indexer(size_t bufferSize, IIndexStorage &indStor)
         : maxBufferSizeInBytes(bufferSize), currentSizeInBytes(0), indexStorage(indStor) {
-    Logger::info("Indexer", "Indexer module initialized");
+//    Logger::info("Indexer", "Indexer module initialized");
 }
 
 void Indexer::clearBuffer() {
     buffer.clear();
     currentSizeInBytes = 0;
-    Logger::debug("Indexer", "Buffer cleared");
+//    Logger::debug("Indexer", "Buffer cleared");
 }
 
 void Indexer::saveTo() {
@@ -48,7 +47,7 @@ void Indexer::addToken(const Token &token) {
         bt.addPosition(token.fileId, token.info);
         currentSizeInBytes += (newSize - oldSize);
     }
-    Logger::debug("Indexer (addToken)", "{} sizeInBytes {}", token.body, currentSizeInBytes);
+//    Logger::debug("Indexer (addToken)", "{} sizeInBytes {}", token.body, currentSizeInBytes);
 }
 
 BigToken Indexer::getTokenInfo(const std::string &tokenName) {
