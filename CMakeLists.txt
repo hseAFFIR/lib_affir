@@ -67,8 +67,7 @@ set(SOURCE_FILES
 
 
 add_executable(lib_affir src/main.cpp
-        ${SOURCE_FILES}
-        src/logger/loggermacros.h)
+        ${SOURCE_FILES})
 
 add_executable(lib_tests tests/main.cpp
         tests/functional/withoutReadTime.cpp
