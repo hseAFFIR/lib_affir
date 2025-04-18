@@ -1,5 +1,5 @@
 #include "search.h"
-//#include "../logger/logger.h"
+#include "../logger/logger.h"
 #include "../tokenizer/tokenizer.h"
 #include <iostream>
 #include <stdexcept>
@@ -82,18 +82,19 @@ PosMap Search::getPhrasePositions(const std::vector<Token>& tokens) const {
 
 Search::SearchResult Search::search(std::string& query) const {
     validateQuery(query);
-//    Logger::info("Search", "Searching for: {}", query);
+    LOG_INFO( GetRootLogger(),"Search", "Searching for: {}", query);
 
     std::vector<Token> tokens;
     tokenizer->tokenize(query);
     while (tokenizer->hasNext()) {
         Token token = tokenizer->next();
         tokens.push_back(std::move(token));
-//        Logger::debug("Search", "pushed token: {}", token.body);
+        LOG_INFO( GetRootLogger(),"Search", "pushed token: {}", token.body);
     }
 
     if (tokens.empty()) {
-//        Logger::warn("Search", "Empty vector after tokenization!");
+        LOG_INFO( GetRootLogger(),"Search", "Empty vector after tokenization!");
+
         return {};
     }
 
@@ -102,13 +103,13 @@ Search::SearchResult Search::search(std::string& query) const {
 
 void Search::printSearchResults(const std::vector<SearchResult>& results) {
     if (results.empty()) {
-//        Logger::warn("Search", "No results found!");
+        LOG_INFO( GetRootLogger(),"Search", "No results found!");
         return;
     }
 
     for (const auto& result : results) {
         std::cout << "--------------------------------" << std::endl;
-//        Logger::info("Search", "Found results for query {}:", result.query);
+        LOG_INFO( GetRootLogger(),"Search", "Found results for query {}:", result.query);
         for (const auto& [fileId, tokenInfos] : result.posMap) {
             std::cout << "File ID: " << fileId << std::endl;
             std::cout << "  Positions: ";

@@ -1,13 +1,14 @@
 #include "dataHandler.h"
 #include "../storages/files/fileStorage.h"
-
+#include "../logger/logger.h"
 #include <fstream>
 #include <algorithm>
 
 DataHandler::DataHandler(const std::vector<Base*> &filters, const size_t buffer, IIndexStorage &indStor)
     : filters(filters), indexStorage(indStor)
 {
-//    Logger::info("DataHandler", "DataHandler module initialized");
+    LOG_INFO(GetRootLogger(), "DataHandler module initialized");
+
     std::sort(this->filters.begin(), this->filters.end(),
         [](const Base* a, const Base* b) {
             return a->getOrder() < b->getOrder();
@@ -27,7 +28,7 @@ void DataHandler::processText(std::string &text, const std::string &filename) {
 
     while(tokenizer->hasNext()) {
         Token token = tokenizer->next();
-//        Logger::debug("dataHandler::processText", "Token: {} | Pos: {}", token.body, token.info.pos);
+        LOG_DEBUG( GetRootLogger(),"dataHandler::processText", "Token: {} | Pos: {}", token.body, token.info.pos);
         indexer->addToken(token);
     }
 

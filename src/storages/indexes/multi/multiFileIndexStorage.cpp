@@ -1,4 +1,5 @@
 #include "multiFileIndexStorage.h"
+#include "../../../logger/logger.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -8,7 +9,7 @@
 bool MultiFileIndexStorage::isMetadataLoaded = false;
 
 MultiFileIndexStorage::MultiFileIndexStorage() {
-//    Logger::info("MultiFileIndexStorage", "MultiFileIndexStorage module initialized");
+    LOG_INFO(GetRootLogger(),"MultiFileIndexStorage module initialized");
     // Create folder for storing indexes
     if (!std::filesystem::exists(storageDir)) {
         std::filesystem::create_directory(storageDir);
@@ -22,7 +23,7 @@ void MultiFileIndexStorage::createIndex(const std::unordered_map<std::string, Bi
     std::ofstream outFile(filename, std::ios::binary);
 
     if (!outFile) {
-//        Logger::error("MultiFileIndexStorage", "Error creating index file: {}", filename);
+        LOG_ERROR(GetRootLogger(), "Error creating index file: {}", filename);
         return;
     }
 
@@ -63,7 +64,7 @@ void MultiFileIndexStorage::saveStorageMeta() {
         outFile.seekg(--pos);
         outFile.get(ch);
         if (ch == metaChar) {
-//            Logger::debug("MultiFileIndexStorage (saveStorageMeta)", "Deleted file counter");
+            LOG_DEBUG(GetRootLogger(),"MultiFileIndexStorage (saveStorageMeta)", "Deleted file counter");
             outFile.close();
             std::filesystem::resize_file(metadataFile, pos);
             break;

@@ -67,7 +67,8 @@ set(SOURCE_FILES
 
 
 add_executable(lib_affir src/main.cpp
-        ${SOURCE_FILES})
+        ${SOURCE_FILES}
+        src/logger/loggermacros.h)
 
 add_executable(lib_tests tests/main.cpp
         tests/functional/withoutReadTime.cpp
@@ -79,6 +80,9 @@ add_executable(lib_tests tests/main.cpp
         tests/utils/utils.h
         ${SOURCE_FILES}
 )
+find_package(quill CONFIG REQUIRED)
+target_link_libraries(lib_affir PRIVATE quill::quill)
+target_link_libraries(lib_tests PRIVATE quill::quill)
 
 add_subdirectory(externals/spdlog)
 target_link_libraries(lib_affir PRIVATE spdlog::spdlog)
