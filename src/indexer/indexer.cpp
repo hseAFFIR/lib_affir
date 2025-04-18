@@ -16,7 +16,8 @@
 
 Indexer::Indexer(size_t bufferSize, IIndexStorage &indStor)
         : maxBufferSizeInBytes(bufferSize), currentSizeInBytes(0), indexStorage(indStor) {
-        LOG_INFO(GetRootLogger(),"Indexer module initialized");
+    logger = GetRootLogger();
+        LOG_INFO(logger,"Indexer module initialized");
 }
 
 
@@ -25,7 +26,7 @@ void Indexer::clearBuffer() {
     currentSizeInBytes = 0;
 
 //    Logger::debug("Indexer", "Buffer cleared");
-    LOG_DEBUG( GetRootLogger(),"Buffer cleared");
+    LOG_DEBUG( logger,"Buffer cleared");
 
 
 
@@ -68,7 +69,7 @@ void Indexer::addToken(const Token &token) {
     }
 //    Logger::debug("Indexer (addToken)", "{} sizeInBytes {}", token.body, currentSizeInBytes);
 
-    LOG_DEBUG( GetRootLogger(),"Indexer (addToken)", "{} sizeInBytes {}", token.body, currentSizeInBytes);
+    LOG_DEBUG( logger,"Indexer (addToken)", "{} sizeInBytes {}", token.body, currentSizeInBytes);
 
 
 }

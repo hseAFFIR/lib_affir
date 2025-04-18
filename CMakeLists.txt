@@ -83,7 +83,3 @@ add_executable(lib_tests tests/main.cpp
 find_package(quill CONFIG REQUIRED)
 target_link_libraries(lib_affir PRIVATE quill::quill)
 target_link_libraries(lib_tests PRIVATE quill::quill)
-
-add_subdirectory(externals/spdlog)
-target_link_libraries(lib_affir PRIVATE spdlog::spdlog)
-target_link_libraries(lib_tests PRIVATE spdlog::spdlog)

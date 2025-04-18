@@ -9,7 +9,8 @@ std::map<uint32_t, uint32_t> SingleIndexStorage::freeBlockPoses;
 uint32_t SingleIndexStorage::currentBlockPos = 0;
 
 SingleIndexStorage::SingleIndexStorage() {
-    LOG_INFO(GetRootLogger(), "Init storage");
+    logger = GetRootLogger();
+    LOG_INFO(logger, "Init storage");
     loadStorageMeta();
     open();
 }
@@ -17,20 +18,20 @@ SingleIndexStorage::SingleIndexStorage() {
 void SingleIndexStorage::createIndex(const std::unordered_map<std::string, BigToken> &data) {
     for (const auto& [key, value] : data) {
         uint32_t incomingIndexSize = value.getFullPosesSize();
-        LOG_DEBUG(GetRootLogger(),"Key: {}, Value count: {}, incomingIndexSize: {}",
+        LOG_DEBUG(logger,"Key: {}, Value count: {}, incomingIndexSize: {}",
                       key, value.getFilePositions().size(), incomingIndexSize);
         // Already exists
         if (indexMap.find(key) != indexMap.end()) {
-            LOG_DEBUG(GetRootLogger(), "Token body already exists in map. Appending...");
+            LOG_DEBUG(logger, "Token body already exists in map. Appending...");
             IndexPos curIndexPos = indexMap[key];
             BlockMask neededMask = getMask(curIndexPos.bytesSize + incomingIndexSize);
-        LOG_DEBUG(GetRootLogger(),"Current index pos: {},\n\tNeeded mask: {}",to_str_indexpos(curIndexPos), (int)neededMask);
+        LOG_DEBUG(logger,"Current index pos: {},\n\tNeeded mask: {}",to_str_indexpos(curIndexPos), (int)neededMask);
             // New mask is short, we need larger
             if(curIndexPos.blockMask != neededMask) {
-                LOG_DEBUG(GetRootLogger(), "Mask is short. Getting the bigger one...");
+                LOG_DEBUG(logger, "Mask is short. Getting the bigger one...");
                 // Save old position
                 IndexPos oldIndexPos = indexMap[key];
-                LOG_DEBUG(GetRootLogger(), "Saved old IndexPos: {}", to_str_indexpos(oldIndexPos));
+                LOG_DEBUG(logger, "Saved old IndexPos: {}", to_str_indexpos(oldIndexPos));
                 // Save the new one
                 markBlockAvailable(curIndexPos.blockStart, toBaseBlocks(curIndexPos.blockMask));
                 indexMap[key] = getNewBlock(curIndexPos.bytesSize + incomingIndexSize);
@@ -42,7 +43,7 @@ void SingleIndexStorage::createIndex(const std::unordered_map<std::string, BigTo
         else
             indexMap[key] = getNewBlock(incomingIndexSize);
         updateStorageFile(indexMap[key], value.getFilePositions());
-        LOG_DEBUG(GetRootLogger(),"IndexPos for {} is {}", key, to_str_indexpos(indexMap[key]));
+        LOG_DEBUG(logger,"IndexPos for {} is {}", key, to_str_indexpos(indexMap[key]));
     }
 }
 
@@ -106,7 +107,7 @@ void SingleIndexStorage::createIndexFile() {
     indexStream.open(STORAGE_FILENAME_PATH, std::ios::app);
     if (!indexStream.is_open())
 //        throw std::runtime_error("Cannot open file: " + std::string(strerror(errno)));
-        LOG_ERROR(GetRootLogger(),"Cannot open file: {}", std::string(strerror(errno)));
+        LOG_ERROR(logger,"Cannot open file: {}", std::string(strerror(errno)));
     indexStream.close();
 }
 
@@ -118,8 +119,9 @@ BlockMask SingleIndexStorage::getMask(size_t size) {
 }
 
 void SingleIndexStorage::markBlockAvailable(const uint32_t blockStart, const uint32_t blockCount) {
+    auto* logger = GetRootLogger();
     if(blockCount <= 0) return;
-    LOG_DEBUG(GetRootLogger(), "freeBlockPoses (before): {}", to_str_map(freeBlockPoses));
+    LOG_DEBUG(logger, "freeBlockPoses (before): {}", to_str_map(freeBlockPoses));
     // -1 to avoid self finding
     auto lower_it = freeBlockPoses.lower_bound(blockStart - 1);
 
@@ -140,7 +142,7 @@ void SingleIndexStorage::markBlockAvailable(const uint32_t blockStart, const uin
     }
 
     freeBlockPoses[newBlockPos] = newBlockCount;
-    LOG_DEBUG(GetRootLogger(), "freeBlockPoses (after): {}", to_str_map(freeBlockPoses));
+    LOG_DEBUG(logger, "freeBlockPoses (after): {}", to_str_map(freeBlockPoses));
 }
 
 IndexPos SingleIndexStorage::getNewBlock(uint32_t indexSize) {
@@ -157,19 +159,21 @@ IndexPos SingleIndexStorage::getNewBlock(uint32_t indexSize) {
             break;
         }
     }
+    auto* logger = GetRootLogger();
     // We should remove reserved space from map
     if(availableBlocks) {
-        LOG_DEBUG(GetRootLogger(), "There are availableBlocks: start {}, count {}", indexPos.blockStart, availableBlocks);
+
+        LOG_DEBUG(logger, "There are availableBlocks: start {}, count {}", indexPos.blockStart, availableBlocks);
         // Remove from freeBlocks == reserve it
-        LOG_DEBUG(GetRootLogger(),"Delete this block sequence.");
+        LOG_DEBUG(logger,"Delete this block sequence.");
         freeBlockPoses.erase(indexPos.blockStart);
         uint32_t newFreeIndexPos = indexPos.blockStart + requiredBlocks;
-        LOG_DEBUG(GetRootLogger(), "Adding left sequence ({}, {})...", newFreeIndexPos, availableBlocks - requiredBlocks);
+        LOG_DEBUG(logger, "Adding left sequence ({}, {})...", newFreeIndexPos, availableBlocks - requiredBlocks);
         markBlockAvailable(newFreeIndexPos, availableBlocks - requiredBlocks);
     }
     // Otherwise there is no such pos, then we must allocate new one
     else {
-        LOG_DEBUG(GetRootLogger(), "There are NO availableBlocks, create the new one at: {}", currentBlockPos);
+        LOG_DEBUG(logger, "There are NO availableBlocks, create the new one at: {}", currentBlockPos);
         indexPos = IndexPos(requiredBlockMask, currentBlockPos, 0);
         currentBlockPos += requiredBlocks;
     }
@@ -201,7 +205,7 @@ void SingleIndexStorage::loadStorageMeta() {
     std::ifstream metaFileIn(SingleIndexStorage::META_FILENAME_PATH, std::ios::binary);
 
     if (!metaFileIn.is_open()) {
-        LOG_WARNING(GetRootLogger(),"Cannot open file: {}", std::string(strerror(errno)));
+        LOG_WARNING(logger,"Cannot open file: {}", std::string(strerror(errno)));
         return;
     }
 

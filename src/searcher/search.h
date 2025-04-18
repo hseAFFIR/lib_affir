@@ -43,6 +43,7 @@ public:
     static void printSearchResults(const SearchResult& result) { printSearchResults(std::vector<SearchResult>{result}); };
 
 private:
+    quill::Logger* logger;
     Tokenizer *tokenizer;
     Indexer *indexer;                        ///< Reference to indexer
     static constexpr size_t MAX_QUERY_LENGTH = 1000;

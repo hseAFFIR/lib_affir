@@ -82,18 +82,19 @@ PosMap Search::getPhrasePositions(const std::vector<Token>& tokens) const {
 
 Search::SearchResult Search::search(std::string& query) const {
     validateQuery(query);
-    LOG_INFO( GetRootLogger(),"Search", "Searching for: {}", query);
+    auto* logger = GetRootLogger();
+    LOG_INFO( logger,"Search", "Searching for: {}", query);
 
     std::vector<Token> tokens;
     tokenizer->tokenize(query);
     while (tokenizer->hasNext()) {
         Token token = tokenizer->next();
         tokens.push_back(std::move(token));
-        LOG_INFO( GetRootLogger(),"Search", "pushed token: {}", token.body);
+        LOG_INFO( logger,"Search", "pushed token: {}", token.body);
     }
 
     if (tokens.empty()) {
-        LOG_INFO( GetRootLogger(),"Search", "Empty vector after tokenization!");
+        LOG_INFO( logger,"Search", "Empty vector after tokenization!");
 
         return {};
     }
@@ -102,14 +103,15 @@ Search::SearchResult Search::search(std::string& query) const {
 }
 
 void Search::printSearchResults(const std::vector<SearchResult>& results) {
+    auto* logger = GetRootLogger();
     if (results.empty()) {
-        LOG_INFO( GetRootLogger(),"Search", "No results found!");
+        LOG_INFO( logger,"Search", "No results found!");
         return;
     }
 
     for (const auto& result : results) {
         std::cout << "--------------------------------" << std::endl;
-        LOG_INFO( GetRootLogger(),"Search", "Found results for query {}:", result.query);
+        LOG_INFO( logger,"Search", "Found results for query {}:", result.query);
         for (const auto& [fileId, tokenInfos] : result.posMap) {
             std::cout << "File ID: " << fileId << std::endl;
             std::cout << "  Positions: ";

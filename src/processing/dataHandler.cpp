@@ -7,7 +7,8 @@
 DataHandler::DataHandler(const std::vector<Base*> &filters, const size_t buffer, IIndexStorage &indStor)
     : filters(filters), indexStorage(indStor)
 {
-    LOG_INFO(GetRootLogger(), "DataHandler module initialized");
+    logger = GetRootLogger();
+    LOG_INFO(logger, "DataHandler module initialized");
 
     std::sort(this->filters.begin(), this->filters.end(),
         [](const Base* a, const Base* b) {
@@ -28,7 +29,7 @@ void DataHandler::processText(std::string &text, const std::string &filename) {
 
     while(tokenizer->hasNext()) {
         Token token = tokenizer->next();
-        LOG_DEBUG( GetRootLogger(),"dataHandler::processText", "Token: {} | Pos: {}", token.body, token.info.pos);
+        LOG_DEBUG( logger,"dataHandler::processText", "Token: {} | Pos: {}", token.body, token.info.pos);
         indexer->addToken(token);
     }
 
