@@ -9,19 +9,19 @@
 
 StemFilter::StemFilter() {
     logger = GetRootLogger();
-    LOG_INFO(logger, "StemFilter", "StemFilter module initialized");
+    LOG_INFO(logger,"StemFilter module initialized");
 }
 
 std::string StemFilter::detect_language(const std::string &token) const {
     if (std::regex_search(token, std::regex("[а-яА-Я]"))) {
-//        Logger::debug("StemFilter", "Russian language detected for word {}",token);
+        LOG_DEBUG(logger, "Russian language detected for word {}",token);
         return "ru";
     }
     if (std::regex_search(token, std::regex("[a-zA-Z]"))) {
-//        Logger::debug("StemFilter", "English language detected for word {}",token);
+        LOG_DEBUG(logger,"English language detected for word {}",token);
         return "en";
     }
-//    Logger::warn("StemFilter", "Unknown language! {}",token);
+    LOG_WARNING(logger,"Unknown language! {}",token);
     return "";
 }
 
@@ -35,6 +35,6 @@ void StemFilter::process(std::string &token) {
             english_stemmer.process(token);
         }
     } catch (...) {
-//        Logger::error("stemFilter::process","Undefined exception!");
+        LOG_INFO(logger,"stemFilter::process - Undefined exception!");
     }
 }
