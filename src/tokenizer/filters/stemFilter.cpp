@@ -3,11 +3,13 @@
 //
 
 #include "stemFilter.h"
+#include "../../logger/logger.h"
 #include <regex>
 
 
 StemFilter::StemFilter() {
-//    Logger::info("StemFilter", "StemFilter module initialized");
+    logger = GetRootLogger();
+    LOG_INFO(logger, "StemFilter", "StemFilter module initialized");
 }
 
 std::string StemFilter::detect_language(const std::string &token) const {
