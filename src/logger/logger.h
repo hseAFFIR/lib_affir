@@ -3,18 +3,25 @@
 #include "quill/Logger.h"
 #include "quill/Frontend.h"
 #include "quill/LogMacros.h" // Включаем макросы для удобства
+#include "quill/Backend.h"
+#include "quill/Frontend.h"
+#include "quill/LogMacros.h"
+#include "quill/Logger.h"
+#include "quill/sinks/ConsoleSink.h"
+#include <string_view>
 
-// Функция, которая возвращает указатель на нужный логгер
+
 inline quill::Logger* GetRootLogger() {
-    // quill::Frontend::get_logger() обычно потокобезопасен
-    // и возвращает один и тот же указатель для одного имени.
-    // Если вы хотите гарантировать вызов get_logger только один раз
-    // (хотя это обычно не нужно), можно использовать static:
-    // static quill::Logger* logger = quill::Frontend::get_logger("root");
-    // return logger;
-    // Но обычно достаточно просто вернуть результат вызова:
     return quill::Frontend::get_logger("root");
 }
+class Logger {
+public:
+    static void init(std::string level);
+
+private:
+    static quill::Logger* logger;
+};
+
 
 // Опционально: Определите свои макросы для еще большего удобства,
 // чтобы не передавать логгер каждый раз
