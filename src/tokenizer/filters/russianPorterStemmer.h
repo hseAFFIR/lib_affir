@@ -15,74 +15,33 @@
  *
  * Этот класс реализует стемминг русского языка, удаляя суффиксы и окончания для приведения слов к их основам.
  */
-class RussianPorterStemmer : public Base {
+class RussianPorterStemmer:public Base{
 private:
+    std::tuple<std::string, std::string, std::string> russianSetRegions(std:: string &token);
+    std::string step_1(std::string rv,std::string token);
+    std:: string step_1_if(std::string rv,std::string token);
     std::string vowels; ///< Гласные буквы, используемые для разделения слова на части.
-
-    // Списки окончаний для различных частей речи
     std::vector<std::string> perfective_gerund_1; ///< Окончания совершенных деепричастий (группа 1).
-    std::vector<std::string> perfective_gerund_2; ///< Окончания совершенных деепричастий (группа 2).
+    std::vector<std::string> perfective_gerund_2;
+    std::vector<std::string> perfective_gerund;
+    std::vector<std::string> participle;///< Окончания совершенных деепричастий (группа 2).
     std::vector<std::string> adjective; ///< Окончания прилагательных.
     std::vector<std::string> participle_1; ///< Окончания причастий (группа 1).
     std::vector<std::string> participle_2; ///< Окончания причастий (группа 2).
     std::vector<std::string> reflexive; ///< Окончания возвратных глаголов.
     std::vector<std::string> verb_1; ///< Окончания глаголов (группа 1).
-    std::vector<std::string> verb_2; ///< Окончания глаголов (группа 2).
+    std::vector<std::string> verb_2;
+    std::vector<std::string> verb;///< Окончания глаголов (группа 2).
     std::vector<std::string> noun; ///< Окончания существительных.
     std::vector<std::string> superlative; ///< Окончания превосходной степени прилагательных.
     std::vector<std::string> derivational; ///< Производные суффиксы.
-
-    /**
-     * @brief Инициализирует списки окончаний.
-     */
-    void initialize_endings();
-
-    /**
-     * @brief Определяет регионы R1, R2 и RV в слове.
-     *
-     * Разделяет слово на три области, которые используются в алгоритме стемминга.
-     * @param word Исходное слово.
-     * @return Кортеж строк (R1, R2, RV).
-     */
-    std::tuple<std::string, std::string, std::string> russian_set_regions(const std::string &word) const;
-
-    /**
-     * @brief Выполняет первый шаг стемминга.
-     *
-     * Производит обработку окончаний в области RV.
-     * @param rv Часть слова, начиная с первой гласной (RV).
-     * @param word Исходное слово.
-     * @return Обработанное слово.
-     */
-    std::string step_1(const std::string &rv, const std::string &word) const;
-
-    /**
-     * @brief Удаляет окончания в области RV при определенных условиях.
-     *
-     * @param word Исходное слово.
-     * @param rv Область RV.
-     * @return Обработанное слово.
-     */
-    std::string step_1_if(const std::string &word, const std::string &rv) const;
-
 public:
-    /**
-     * @brief Конструктор, инициализирующий списки окончаний.
-     */
     RussianPorterStemmer();
-
-    /**
-     * @brief Выполняет стемминг переданного слова.
-     *
-     * Метод принимает русское слово и возвращает его основу (стемму).
-     * @param token Входное слово.
-     * @return Стеммированное слово.
-     */
     void process(std::string &token) override;
-
     FilterOrder getOrder() const override {
         return FilterOrder::RussianPorterStemmer;
     }
+
 };
 
 #endif // RUSSIAN_PORTER_STEMMER_H

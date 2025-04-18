@@ -6,181 +6,272 @@
 #include "../../logger/logger.h"
 #include <algorithm>
 #include <regex>
+#include "lowercaser.h"
 
-RussianPorterStemmer::RussianPorterStemmer() {
-    vowels = "аеиоуыэюя";
-    initialize_endings();
+void replace_letter(std::string& word) {
+    for (size_t i = 0; i < word.length() - 1; ++i) {
+        // Ищем UTF-8 символ 'ё' (0xD1 0x91)
+        if ((unsigned char)word[i] == 0xD1 && (unsigned char)word[i+1] == 0x91) {
+            // Заменяем на 'е' (0xD0 0xB5)
+            word[i] = (char)0xD0;
+            word[i+1] = (char)0xB5;
+        }
+    }
+}
+bool isVowel(const std::string& text, size_t index) {
+    // Проверяем корректность индекса (учитываем, что символы могут быть многобайтовыми)
+    if (index >= text.size()) return false; // Если индекс выходит за пределы строки
+
+    unsigned char first = text[index];
+
+    // Если первый байт в пределах кириллической кодировки
+    if (first == 0xD0 || first == 0xD1) {
+        unsigned char second = text[index + 1];
+
+        // Гласные в кириллице
+        if ((first == 0xD0) & (second==0xB0 || second == 0xB5 || second == 0xB8 ||second == 0xBE)){ // для символов от 0xD0 до 0xD1
+            return true;}
+        if ((first == 0xD1) & (second == 0x83 || second == 0x8B || second == 0x8D || second == 0x8E || second == 0x8F)){
+            return true;
+        }
+    }
+
+    return false; // Если символ не является гласным, возвращаем false
 }
 
-void RussianPorterStemmer::initialize_endings() {
-    perfective_gerund_1 = {"в", "вши", "вшись"};
-    perfective_gerund_2 = {"ив", "ивши", "ившись", "ыв", "ывши", "ывшись"};
-    adjective = {"ее", "ие", "ые", "ое", "ими", "ыми", "ей", "ий", "ый", "ой", "ем", "им", "ым", "ом", "его", "ого",
-                 "ему", "ому", "их", "ых", "ую", "юю", "ая", "яя", "ою", "ею"};
-    participle_1 = {"ем", "нн", "вш", "ющ", "щ"};
-    participle_2 = {"ивш", "ывш", "ующ"};
-    reflexive = {"ся", "сь"};
-    verb_1 = {"ла", "на", "ете", "йте", "ли", "й", "л", "ем", "н", "ло", "но", "ет", "ют", "ны", "ть", "ешь", "нно"};
-    verb_2 = {"ила", "ыла", "ена", "ейте", "уйте", "ите", "или", "ыли", "ей", "уй", "ил", "ыл", "им", "ым", "ен", "ило",
-              "ыло", "ено", "ят", "ует", "уют", "ит", "ыт", "ены", "ить", "ыть", "ишь", "ую", "ю"};
-    noun = {"а", "ев", "ов", "ие", "ье", "е", "иями", "ями", "ами", "еи", "ии", "и", "ией", "ей", "ой", "ий", "й",
-            "иям", "ям", "ием", "ем", "ам", "ом", "о", "у", "ах", "иях", "ях", "ы", "ь", "ию", "ью", "ю", "ия", "ья",
-            "я"};
-    superlative = {"ейш", "ейше"};
-    derivational = {"ост", "ость"};
-}
 
-std::tuple<std::string, std::string, std::string>
-RussianPorterStemmer::russian_set_regions(const std::string &word) const {
+// Конструктор – инициализирует константы
+RussianPorterStemmer::RussianPorterStemmer()
+    : vowels("аеиоуыэюя"),
+      perfective_gerund_1({"в", "вши", "вшись"}),
+      perfective_gerund_2({"ив", "ивши", "ившись", "ыв", "ывши", "ывшись"}),
+      perfective_gerund({"в", "вши", "вшись", "ив", "ивши", "ившись", "ыв", "ывши", "ывшись"}),
+      participle_1({"ем", "нн", "вш", "ющ", "щ"}),
+      participle_2({"ивш", "ывш", "ующ"}),
+      participle({"ем", "нн", "вш", "ющ", "щ", "ивш", "ывш", "ующ"}),
+      adjective({
+          "ее", "ие", "ые", "ое", "ими", "ыми", "ей", "ий", "ый", "ой", "ем", "им", "ым", "ом",
+          "его", "ого", "ему", "ому", "их", "ых", "ую", "юю", "ая", "яя", "ою", "ею"
+      }),
+      reflexive({"ся", "сь"}),
+      verb_1({
+          "ла", "на", "ете", "йте", "ли", "й", "л", "ем", "н", "ло", "но", "ет", "ют",
+          "ны", "ть", "ешь", "нно"
+      }),
+      verb_2({
+          "ила", "ыла", "ена", "ейте", "уйте", "ите", "или", "ыли", "ей", "уй", "ил",
+          "ыл", "им", "ым", "ен", "ило", "ыло", "ено", "ят", "ует", "уют", "ит", "ыт",
+          "ены", "ить", "ыть", "ишь", "ую", "ю"
+      }),
+      verb({
+          "ла", "на", "ете", "йте", "ли", "й", "л", "ем", "н", "ло", "но", "ет", "ют",
+          "ны", "ть", "ешь", "нно", "ила", "ыла", "ена", "ейте", "уйте", "ите", "или", "ыли", "ей", "уй", "ил",
+          "ыл", "им", "ым", "ен", "ило", "ыло", "ено", "ят", "ует", "уют", "ит", "ыт",
+          "ены", "ить", "ыть", "ишь", "ую", "ю"
+      }),
+      noun({
+          "а", "ев", "ов", "ие", "ье", "е", "иями", "ями", "ами", "еи", "ии", "и", "ией",
+          "ей", "ой", "ий", "й", "иям", "ям", "ием", "ем", "ам", "ом", "о", "у", "ах",
+          "иях", "ях", "ы", "ь", "ию", "ью", "ю", "ия", "ья", "я"
+      }),
+      superlative({"ейш", "ейше"}),
+      derivational({"ост", "ость"}) {}
+std::tuple<std::string, std::string, std::string> RussianPorterStemmer::russianSetRegions(std::string& token) {
     std::string rv, r1, r2;
-    for (size_t i = 0; i < word.size(); ++i) {
-        if (vowels.find(word[i]) != std::string::npos) {
-            rv = word.substr(i + 1);
+
+    // === RV: после первой гласной ===
+    for (size_t i = 0; i + 1 < token.size(); i += 2) {
+        if (isVowel(token, i)) {
+            rv = token.substr(i + 2);
             break;
         }
     }
-    for (size_t i = 0; i < word.size() - 1; ++i) {
-        if (vowels.find(word[i]) != std::string::npos && vowels.find(word[i + 1]) == std::string::npos) {
-            r1 = word.substr(i + 2);
+
+    // === R1: после первой гласной + первой согласной ===
+    for (size_t i = 0; i + 3 < token.size(); i += 2) {
+        if (isVowel(token, i) && !isVowel(token, i + 2)) {
+            r1 = token.substr(i + 4);
             break;
         }
     }
-    for (size_t i = 0; i < r1.size() - 1; ++i) {
-        if (vowels.find(r1[i]) != std::string::npos && vowels.find(r1[i + 1]) == std::string::npos) {
-            r2 = r1.substr(i + 2);
+
+    // === R2: то же самое, но в r1 ===
+    for (size_t i = 0; i + 3 < r1.size(); i += 2) {
+        if (isVowel(r1, i) && !isVowel(r1, i + 2)) {
+            r2 = r1.substr(i + 4);
             break;
         }
     }
+
     return {rv, r1, r2};
 }
 
-void RussianPorterStemmer::process(std::string &token) {
-    const std::string initialWord = token;
-    std::transform(token.begin(), token.end(), token.begin(), ::tolower);
-    std::replace(token.begin(), token.end(), L'ё', L'е');
 
-    auto [rv, r1, r2] = russian_set_regions(token);
-
-    token = step_1(rv, token);
-    std::tie(rv, r1, r2) = russian_set_regions(token);
-
-    if (rv.ends_with("и")) {
-        token.pop_back();
-        std::tie(rv, r1, r2) = russian_set_regions(token);
-    }
-
-    for (const auto &ending: derivational) {
-        if (r2.ends_with(ending)) {
-            token.erase(token.size() - ending.size());
-            std::tie(rv, r1, r2) = russian_set_regions(token);
-            break;
-        }
-    }
-
-    for (const auto &ending: superlative) {
-        if (rv.ends_with(ending)) {
-            token.erase(token.size() - ending.size());
-            std::tie(rv, r1, r2) = russian_set_regions(token);
-            break;
-        }
-    }
-
-    if (rv.ends_with("нн")) {
-        token.pop_back();
-    }
-    else if (rv.ends_with("ь")) {
-        token.pop_back();
-    }
-
-    Logger::debug("russianPorterStemmer", "{} -> {}", initialWord, token);
-}
-
-std::string RussianPorterStemmer::step_1(const std::string &rv, const std::string &word) const {
+std::string RussianPorterStemmer::step_1(std::string rv, std::string word) {
     bool ends_with_p_gerund = false;
-    std::string result = word;
+    // Сортировка окончаний по длине
+    std::sort(perfective_gerund.begin(), perfective_gerund.end(), [](const std::string& a, const std::string& b) {
+        return a.size() > b.size();
+    });
 
-    for (const auto &ending: perfective_gerund_1) {
-        if (rv.ends_with(ending)) {
-            std::regex pattern("(а|я)" + ending + "$");
-            if (std::regex_search(rv, pattern)) {
-                result.erase(result.size() - ending.size());
+    // Проверка окончаний на соответствие из perfective_gerund
+    for (const auto& ending : perfective_gerund) {
+        if (rv.size() >= ending.size() && rv.compare(rv.size() - ending.size(), ending.size(), ending) == 0) {
+            // Для первого типа совершенного деепричастия
+            if (std::find(perfective_gerund_1.begin(), perfective_gerund_1.end(), ending) != perfective_gerund_1.end()) {
+                std::regex pattern(R"((а|я))" + ending + "$");
+                if (std::regex_search(rv, pattern)) {
+                    word = word.substr(0, word.size() - ending.size());
+                    std::string r1, r2;
+                    std::tie(rv, r1, r2) = russianSetRegions(word);  // Используем russianSetRegions как есть
+                    ends_with_p_gerund = true;
+                    break;
+                }
+            }
+            // Для второго типа совершенного деепричастия
+            if (std::find(perfective_gerund_2.begin(), perfective_gerund_2.end(), ending) != perfective_gerund_2.end()) {
+                word = word.substr(0, word.size() - ending.size());
+                std::string r1, r2;
+                std::tie(rv, r1, r2) = russianSetRegions(word);  // Используем russianSetRegions как есть
                 ends_with_p_gerund = true;
+                break;
             }
         }
     }
 
-    for (const auto &ending: perfective_gerund_2) {
-        if (rv.ends_with(ending)) {
-            result.erase(result.size() - ending.size());
-            ends_with_p_gerund = true;
-        }
-    }
-
+    // Если не найдено, применяем шаг 1 для других случаев
     if (!ends_with_p_gerund) {
-        result = step_1_if(result, rv);
+        word = step_1_if(word, rv);
     }
 
-    return result;
+    return word;
 }
 
-std::string RussianPorterStemmer::step_1_if(const std::string &word, const std::string &rv) const {
-    std::string result = word;
+std::string RussianPorterStemmer::step_1_if(std::string word, std::string rv) {
+    std::string r1, r2;
+    std::tie(rv, r1, r2) = russianSetRegions(word);  // Используем russianSetRegions как есть
 
-    for (const auto &ending: reflexive) {
-        if (rv.ends_with(ending)) {
-            result.erase(result.size() - ending.size());
+    // Проверка для рефлексивных окончаний
+    for (const auto& ending : reflexive) {
+        if (rv.size() >= ending.size() && rv.compare(rv.size() - ending.size(), ending.size(), ending) == 0) {
+            word = word.substr(0, word.size() - ending.size());
+            std::tie(rv, r1, r2) = russianSetRegions(word);  // Используем russianSetRegions как есть
             break;
         }
     }
 
-    for (const auto &ending: adjective) {
-        if (rv.ends_with(ending)) {
-            result.erase(result.size() - ending.size());
+    // Проверка для прилагательных
+    for (const auto& ending : adjective) {
+        if (rv.size() >= ending.size() && rv.compare(rv.size() - ending.size(), ending.size(), ending) == 0) {
+            word = word.substr(0, word.size() - ending.size());
+            std::tie(rv, r1, r2) = russianSetRegions(word);  // Используем russianSetRegions как есть
 
-            for (const auto &participle_ending: participle_1) {
-                if (rv.ends_with(participle_ending)) {
-                    std::regex pattern("(а|я)" + participle_ending + "$");
-                    if (std::regex_search(rv, pattern)) {
-                        result.erase(result.size() - participle_ending.size());
-                        return result;
+            // Проверка для причастий
+            for (const auto& participle_ending : participle) {
+                if (rv.size() >= participle_ending.size() && rv.compare(rv.size() - participle_ending.size(), participle_ending.size(), participle_ending) == 0) {
+                    if (std::find(participle_1.begin(), participle_1.end(), participle_ending) != participle_1.end()) {
+                        std::regex pattern(R"((а|я))" + participle_ending + "$");
+                        if (std::regex_search(rv, pattern)) {
+                            word = word.substr(0, word.size() - participle_ending.size());
+                            std::tie(rv, r1, r2) = russianSetRegions(word);  // Используем russianSetRegions как есть
+                            return word;
+                        }
+                    }
+                    if (std::find(participle_2.begin(), participle_2.end(), participle_ending) != participle_2.end()) {
+                        word = word.substr(0, word.size() - participle_ending.size());
+                        std::tie(rv, r1, r2) = russianSetRegions(word);  // Используем russianSetRegions как есть
+                        return word;
                     }
                 }
             }
+            return word;
+        }
+    }
 
-            for (const auto &participle_ending: participle_2) {
-                if (rv.ends_with(participle_ending)) {
-                    result.erase(result.size() - participle_ending.size());
-                    return result;
+
+    // Проверка для глагольных окончаний
+    for (const auto& ending : verb) {
+        if (rv.size() >= ending.size() && rv.compare(rv.size() - ending.size(), ending.size(), ending) == 0) {
+            if (std::find(verb_1.begin(), verb_1.end(), ending) != verb_1.end()) {
+                std::regex pattern(R"((а|я))" + ending + "$");
+                if (std::regex_search(rv, pattern)) {
+                    word = word.substr(0, word.size() - ending.size());
+                    std::tie(rv, r1, r2) = russianSetRegions(word);  // Используем russianSetRegions как есть
+                    return word;
                 }
             }
-
-            return result;
-        }
-    }
-
-    for (const auto &ending: verb_1) {
-        if (rv.ends_with(ending)) {
-            std::regex pattern("(а|я)" + ending + "$");
-            if (std::regex_search(rv, pattern)) {
-                result.erase(result.size() - ending.size());
-                return result;
+            if (std::find(verb_2.begin(), verb_2.end(), ending) != verb_2.end()) {
+                word = word.substr(0, word.size() - ending.size());
+                std::tie(rv, r1, r2) = russianSetRegions(word);  // Используем russianSetRegions как есть
+                return word;
             }
         }
     }
 
-    for (const auto &ending: verb_2) {
-        if (rv.ends_with(ending)) {
-            result.erase(result.size() - ending.size());
-            return result;
+    // Проверка для существительных
+    for (const auto& ending : noun) {
+        if (rv.size() >= ending.size() && rv.compare(rv.size() - ending.size(), ending.size(), ending) == 0) {
+            word = word.substr(0, word.size() - ending.size());
+            return word;
         }
     }
 
-    for (const auto &ending: noun) {
-        if (rv.ends_with(ending)) {
-            result.erase(result.size() - ending.size());
-            return result;
-        }
-    }
-
-    return result;
+    return word;
 }
+
+void RussianPorterStemmer::process(std::string &word) {
+    replace_letter(word);
+
+    std::string rv, r1, r2;
+    std::tie(rv, r1, r2) = russianSetRegions(word);
+
+    // Step 1
+    word = step_1(rv, word);
+    std::tie(rv, r1, r2) = russianSetRegions(word);
+
+    // Step 2
+    if (rv.size() >= 2 && (unsigned char)rv[rv.size() - 1] ==0xb8  && (unsigned char)rv[rv.size() - 2]== 0xd0) {
+        word = word.substr(0, word.size() - 2);
+        std::tie(rv, r1, r2) = russianSetRegions(word);
+    }
+
+    // Step 3
+    for (const auto& ending : derivational) {
+        if (r2.size() >= ending.size() && r2.compare(r2.size() - ending.size(), ending.size(), ending) == 0) {
+            word = word.substr(0, word.size() - ending.size());
+            std::tie(rv, r1, r2) = russianSetRegions(word);
+            break;
+        }
+    }
+
+    // Step 4
+    for (const auto& ending : superlative) {
+        if (rv.size() >= ending.size() && rv.compare(rv.size() - ending.size(), ending.size(), ending) == 0) {
+            word = word.substr(0, word.size() - ending.size());
+            std::tie(rv, r1, r2) = russianSetRegions(word);
+            break;
+        }
+    }
+
+    // Если окончание "нн" или "ь"
+    if (rv.size() >= 4 &&
+    (unsigned char)rv[rv.size() - 4] == 0xD0 &&
+    (unsigned char)rv[rv.size() - 3] == 0xBD &&  // 'н'
+    (unsigned char)rv[rv.size() - 2] == 0xD0 &&
+    (unsigned char)rv[rv.size() - 1] == 0xBD) {  // 'н'
+
+        word = word.substr(0, word.size() - 2);  // Удаляем одну 'н' (двухбайтовый символ)
+        std::tie(rv, r1, r2) = russianSetRegions(word);
+
+    } else if (rv.size() >= 2 &&
+               (unsigned char)rv[rv.size() - 2] == 0xD1 &&
+               (unsigned char)rv[rv.size() - 1] == 0x8C) {  // 'ь'
+
+        word = word.substr(0, word.size() - 2);  // Удаляем 'ь'
+        std::tie(rv, r1, r2) = russianSetRegions(word);
+               }
+
+
+}
+
+
