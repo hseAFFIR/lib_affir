@@ -92,6 +92,8 @@ SearchResult Engine::find(std::string query) const {
 }
 
 std::map<FileId, std::vector<std::string>> Engine::returnResultInContext(const SearchResult &result, size_t contextSymbols) {
+    if(!contextSymbols) contextSymbols++;
+
     std::map<FileId, std::vector<std::string>> res;
     std::vector<char> buffer;
     for (const auto& [fileId, tokenInfos] : result.posMap) {
@@ -104,7 +106,6 @@ std::map<FileId, std::vector<std::string>> Engine::returnResultInContext(const S
         std::string context(buffer.begin(), buffer.end());
         // Чтобы не обрезалось первое и последнее слово в trimContext
         if(!contextStart) context = ' ' + context;
-        context += ' ';
 
         res[fileId].push_back("..." + trimContext(context) + "...");
     }

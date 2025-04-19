@@ -45,7 +45,6 @@ void FileStorage::open() {
 }
 
 FileStorage::~FileStorage() {
-    close();
     instancesNumber--;
 }
 
@@ -63,7 +62,7 @@ size_t FileStorage::read(std::vector<char> &buffer, size_t bytesToRead, size_t s
     if (startPos >= dataStruct.filesize)
         throw std::out_of_range("Starting position exceeds file's end position.");
 
-    dataStream.seekg((long)startPos);
+    dataStream.seekg((long)(startPos + dataStruct.startPos));
 
     buffer.resize(bytesToRead + 1);
     size_t bytesToEnd = dataStruct.endPos() - dataStream.tellg();
