@@ -7,6 +7,7 @@
 
 #include "processing/dataHandler.h"
 #include "searcher/search.h"
+#include "searcher/searchResult.h"
 #include "storages/files/fileStorage.h"
 #include <filesystem>
 
@@ -44,9 +45,14 @@ public:
         : Engine(FilterType::NONE, indexStorageType, buffer) { };
 
     virtual ~Engine();
-
+    /**
+     * @brief Forces saving meta data changes
+     */
     void flush();
-
+    /**
+     * @brief Saves text data into the given storage
+     * @details Be careful, you also have to saveStorageMeta by yourself
+     */
     void proceed(std::string text, FileStorage &storage);
     /**
      * @brief Reads a text file and processes its contents
@@ -65,15 +71,13 @@ public:
      * @brief Searches for a query in the indexed data
      *
      * @param query Search query
-     * @return Search::SearchResult structure
+     * @return SearchResult structure
      */
-    Search::SearchResult find(std::string query) const;
+    SearchResult find(std::string query) const;
     /**
-     * @brief Utility method to print search result
+     * @brief Utility method to print search result in context
      */
-    static void displayResult(const Search::SearchResult& result);
-
-    static void displayResultInContext(const Search::SearchResult &result, size_t contextWords = 0);
+    static std::map<FileId, std::vector<std::string>> returnResultInContext(const SearchResult &result, size_t contextSymbols = DEFAULT_CONTEXT_SYMBOLS);
 
 private:
     DataHandler *dataHandler;
@@ -84,6 +88,7 @@ private:
 
     static constexpr size_t DEFAULT_CHUNK_SIZE = 512;
     static constexpr size_t DEFAULT_BUFFER_SIZE = 1024 * 1024 * 16;
+    static constexpr size_t DEFAULT_CONTEXT_SYMBOLS = 20;
 
     std::string getFilename(const std::string& path);
     static std::vector<Base*> createFilters(FilterType filterFlags);

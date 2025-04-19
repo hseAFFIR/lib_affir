@@ -87,16 +87,17 @@ void Engine::proceed(std::string text, FileStorage &storage) {
     dataHandler->processText(text, storage.getId());
 }
 
-Search::SearchResult Engine::find(std::string query) const {
+SearchResult Engine::find(std::string query) const {
     return std::move(searcher->search(query));
 }
 
-void Engine::displayResult(const Search::SearchResult &result) {
-    Search::printSearchResults(result);
-}
+std::map<FileId, std::vector<std::string>> Engine::returnResultInContext(const SearchResult &result, size_t contextSymbols) {
+    std::map<FileId, std::vector<std::string>> res;
+    for (const auto& [fileId, tokenInfos] : result.posMap) {
+        res[fileId].push_back("");
+    }
 
-void Engine::displayResultInContext(const Search::SearchResult &result, size_t contextWords) {
-
+    return res;
 }
 
 std::string Engine::getFilename(const std::string &path) {

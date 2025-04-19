@@ -15,7 +15,7 @@ int main() {
     engine.proceed("/path/to/file");
 
     auto res = engine.find("target text");
-    Engine::displayResult(res);
+    Logger::info("Main", "Result:\n{}", res.toString());
 
     return 0;
 }

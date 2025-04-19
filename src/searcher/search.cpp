@@ -1,7 +1,5 @@
 #include "search.h"
 #include "../logger/logger.h"
-#include "../tokenizer/tokenizer.h"
-#include <iostream>
 #include <stdexcept>
 
 void Search::validateQuery(const std::string& query) {
@@ -80,7 +78,7 @@ PosMap Search::getPhrasePositions(const std::vector<Token>& tokens) const {
     return std::move(phrasePositions);
 }
 
-Search::SearchResult Search::search(std::string& query) const {
+SearchResult Search::search(std::string& query) const {
     validateQuery(query);
     Logger::info("Search", "Searching for: {}", query);
 
@@ -97,22 +95,7 @@ Search::SearchResult Search::search(std::string& query) const {
         return {};
     }
 
-    return std::move(SearchResult(combinePhrase(tokens), getPhrasePositions(tokens)));
-}
-
-void Search::printSearchResults(const Search::SearchResult &result) {
-    std::ostringstream buffer;
-    for (const auto& [fileId, tokenInfos] : result.posMap) {
-        buffer << "File ID: " << fileId << std::endl;
-        buffer << "Positions: ";
-        for (const auto& info : tokenInfos)
-            buffer << "\n\t(pos=" << info.pos << ", wordPos=" << info.wordPos << ")";
-        buffer << "\n\n";
-    }
-    std::string output = buffer.str();
-    if (output.size() >= 2)
-        output.erase(output.size() - 2);
-    Logger::info("Search", "Results for query \"{}\":\n{}", result.query, output);
+    return std::move(SearchResult(combinePhrase(tokens), query.size(), getPhrasePositions(tokens)));
 }
 
 Search::~Search() {

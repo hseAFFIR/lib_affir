@@ -2,6 +2,7 @@
 #define LIB_AFFIR_SEARCH_H
 #include "../indexer/indexer.h"
 #include "../tokenizer/tokenizer.h"
+#include "searchResult.h"
 #include <vector>
 #include <string>
 
@@ -10,14 +11,6 @@
  */
 class Search {
 public:
-    /**
-     * @brief Structure for storing search results
-     */
-    struct SearchResult {
-        std::string query;       ///< Original query
-        PosMap posMap;           ///< Position map in files
-    };
-
     /**
      * @brief Constructor
      * @param indexer Reference to indexer
@@ -34,12 +27,6 @@ public:
      * @throws std::invalid_argument if query is empty or too long
      */
     SearchResult search(std::string& query) const;
-
-    /**
-     * @brief Prints search results to console
-     * @param results Vector of search results
-     */
-    static void printSearchResults(const SearchResult& result);
 
 private:
     Tokenizer *tokenizer;

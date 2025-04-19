@@ -32,6 +32,7 @@ set(INDEXER_FILES
 set(SEARCHER_FILES
         src/searcher/search.cpp
         src/searcher/search.h
+        src/searcher/searchResult.h
 )
 
 set(FILTERS
