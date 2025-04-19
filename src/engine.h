@@ -78,11 +78,57 @@ public:
      * @brief Utility method to print search result in context
      */
     static std::map<FileId, std::vector<std::string>> returnResultInContext(const SearchResult &result, size_t contextSymbols = DEFAULT_CONTEXT_SYMBOLS);
-
+    void openFS(FileId fileId) { readableFileStorage = std::make_unique<FileStorage>(fileId); };
+    /**
+     * @brief Reads data from the file storage into a buffer, with a specified number of bytes and start position.
+     *
+     * @param buffer The buffer to store read data.
+     * @param bytesToRead The number of bytes to read.
+     * @param startPos The starting position in the file to read from.
+     * @return The number of bytes successfully read.
+     */
+    size_t read(std::vector<char>& buffer, size_t bytesToRead, size_t startPos);
+    /**
+     * @brief Reads data from the last position in file storage into a buffer, with a specified number of bytes.
+     *
+     * @param buffer The buffer to store read data.
+     * @param bytesToRead The number of bytes to read.
+     * @return The number of bytes successfully read.
+     */
+    size_t read(std::vector<char>& buffer, size_t bytesToRead);
+    /**
+     * @brief Reads a default-sized block of data from the file storage into a buffer.
+     *
+     * @param buffer The buffer to store read data.
+     * @return The number of bytes successfully read.
+     */
+    size_t read(std::vector<char>& buffer) { return read(buffer, FileStorage::BYTES_BLOCK); }
+    /**
+     * @brief Checks if the file has reached the end of the data.
+     *
+     * @return True if the end of the data is reached, false otherwise.
+     */
+    bool isEnd();
+    /**
+     * @brief Gets the size of the file.
+     *
+     * @return The size of the file in bytes.
+     */
+    size_t getFilesize();
+    static size_t getFilesize(FileId fileId) { return FileStorage(fileId).getFilesize(); };
+    /**
+     * @brief Gets the filename associated with the data in storage.
+     *
+     * @return The filename.
+     */
+    std::string getFilename();
+    static std::string getFilename(FileId fileId) { return FileStorage(fileId).getFilename(); };
 private:
     DataHandler *dataHandler;
     Search *searcher;
     IIndexStorage *indexStorage;
+
+    std::unique_ptr<FileStorage> readableFileStorage;
 
     const std::vector<Base*> filters;
 
@@ -94,6 +140,16 @@ private:
     static std::vector<Base*> createFilters(FilterType filterFlags);
 
     static unsigned short instancesNumber;
+
+    /**
+     * @brief Checks if readableFileStorage is initialisated.
+     */
+    void checkRFSReadiness() {
+        if(!readableFileStorage)
+            throw std::logic_error("FileStorage module is not initialized. Run Engine::open() first!");
+    }
+
+    static std::string trimContext(const std::string &context);
 };
 
 

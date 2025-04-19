@@ -16,12 +16,12 @@
 class SearchResult {
 public:
     std::string query;       ///< Tokenized query
-    size_t query_original_size{};
+    size_t queryOriginalSize{};
     PosMap posMap;           ///< Position map in files
 
     std::string toString() const {
         std::ostringstream buffer;
-        buffer << "Tokenized query (original size = " << query_original_size << "): " << query << std::endl;
+        buffer << "Tokenized query (original size = " << queryOriginalSize << "): " << query << std::endl;
         for (const auto& [fileId, tokenInfos] : posMap) {
             buffer << "File ID: " << fileId << std::endl;
             buffer << "Positions: ";

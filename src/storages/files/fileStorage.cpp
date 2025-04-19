@@ -80,10 +80,6 @@ size_t FileStorage::read(std::vector<char> &buffer, size_t bytesToRead) {
     return bytesRead;
 }
 
-void FileStorage::close() {
-    dataStream.close();
-}
-
 FileId FileStorage::getId() const {
     return id;
 }

@@ -31,14 +31,14 @@ struct DataStruct {
 class FileStorage {
 public:
     /**
-     * @brief Constructs a FileStorage object using a file ID. Usually used to read data.
+     * @brief Constructs a FileStorage object using a file ID. Used to read data.
      *
      * @param fileId The file identifier.
      */
     explicit FileStorage(FileId fileId);
 
     /**
-     * @brief Constructs a FileStorage object using a filename and filesize. Usually used to write data.
+     * @brief Constructs a FileStorage object using a filename and filesize. Used to write data.
      *
      * @param filename The name of the file.
      * @param filesize The size of the file.
@@ -80,10 +80,6 @@ public:
      * @return True if the end of the data is reached, false otherwise.
      */
     bool isEnd();
-    /**
-     * @brief Closes the file safe and any associated file handles. Also destroys instance.
-     */
-    void close();
 
     static const unsigned short BYTES_BLOCK = 512; ///< The default block size for reading and writing.
 

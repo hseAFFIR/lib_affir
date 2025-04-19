@@ -93,11 +93,34 @@ SearchResult Engine::find(std::string query) const {
 
 std::map<FileId, std::vector<std::string>> Engine::returnResultInContext(const SearchResult &result, size_t contextSymbols) {
     std::map<FileId, std::vector<std::string>> res;
+    std::vector<char> buffer;
     for (const auto& [fileId, tokenInfos] : result.posMap) {
-        res[fileId].push_back("");
+        FileStorage fileStorage(fileId);
+        Pos phraseStart = tokenInfos.front().pos;
+        size_t contextStart = (phraseStart >= contextSymbols) ? phraseStart - contextSymbols : 0;
+
+        fileStorage.read(buffer, contextSymbols * 2 + result.queryOriginalSize, contextStart);
+
+        std::string context(buffer.begin(), buffer.end());
+        // Чтобы не обрезалось первое и последнее слово в trimContext
+        if(!contextStart) context = ' ' + context;
+        context += ' ';
+
+        res[fileId].push_back("..." + trimContext(context) + "...");
     }
 
     return res;
+}
+
+std::string Engine::trimContext(const std::string &context) {
+    size_t start = 0;
+    size_t end = context.size() - 1;
+    while (start < context.size() && context[start] != ' ')
+        start++;
+    while (end > 0 && context[end] != ' ')
+        end--;
+    if (start + 1 < context.size()) start++;
+    return context.substr(start, end - start);
 }
 
 std::string Engine::getFilename(const std::string &path) {
@@ -117,4 +140,29 @@ Engine::~Engine() {
 void Engine::flush() {
     dataHandler->flush();
     FileStorage::saveStorageMeta();
+}
+
+size_t Engine::getFilesize() {
+    checkRFSReadiness();
+    return readableFileStorage->getFilesize();
+}
+
+std::string Engine::getFilename() {
+    checkRFSReadiness();
+    return readableFileStorage->getFilename();
+}
+
+bool Engine::isEnd() {
+    checkRFSReadiness();
+    return readableFileStorage->isEnd();
+}
+
+size_t Engine::read(std::vector<char> &buffer, size_t bytesToRead, size_t startPos) {
+    checkRFSReadiness();
+    return readableFileStorage->read(buffer, bytesToRead, startPos);
+}
+
+size_t Engine::read(std::vector<char> &buffer, size_t bytesToRead) {
+    checkRFSReadiness();
+    return readableFileStorage->read(buffer, bytesToRead);
 }
