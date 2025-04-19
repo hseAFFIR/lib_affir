@@ -19,7 +19,7 @@ class RussianPorterStemmer:public Base{
 private:
     std::tuple<std::string, std::string, std::string> russianSetRegions(std:: string &token);
     std::string step_1(std::string rv,std::string token);
-    std:: string step_1_if(std::string rv,std::string token);
+    std:: string step_1_if(std::string token);
     std::string vowels; ///< Гласные буквы, используемые для разделения слова на части.
     std::vector<std::string> perfective_gerund_1; ///< Окончания совершенных деепричастий (группа 1).
     std::vector<std::string> perfective_gerund_2;
