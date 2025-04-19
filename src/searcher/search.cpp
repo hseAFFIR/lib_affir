@@ -81,7 +81,7 @@ PosMap Search::getPhrasePositions(const std::vector<Token>& tokens) const {
 SearchResult Search::search(std::string& query) const {
     validateQuery(query);
     Logger::info("Search", "Searching for: {}", query);
-    const size_t querySize = utf8CharCount(query);
+    const size_t querySize = query.size();
 
     std::vector<Token> tokens;
     tokenizer->tokenize(query);
