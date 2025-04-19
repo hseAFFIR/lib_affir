@@ -85,8 +85,10 @@ RussianPorterStemmer::RussianPorterStemmer()
 std::tuple<std::string, std::string, std::string> RussianPorterStemmer::russianSetRegions(std::string& token) {
     std::string rv, r1, r2;
 
+    size_t tokenSize = token.size();
+
     // === RV: после первой гласной ===
-    for (size_t i = 0; i + 1 < token.size(); i += 2) {
+    for (size_t i = 0; i + 1 < tokenSize; i += 2) {
         if (isVowel(token, i)) {
             rv = token.substr(i + 2);
             break;
@@ -94,7 +96,7 @@ std::tuple<std::string, std::string, std::string> RussianPorterStemmer::russianS
     }
 
     // === R1: после первой гласной + первой согласной ===
-    for (size_t i = 0; i + 3 < token.size(); i += 2) {
+    for (size_t i = 0; i + 3 < tokenSize; i += 2) {
         if (isVowel(token, i) && !isVowel(token, i + 2)) {
             r1 = token.substr(i + 4);
             break;
@@ -115,10 +117,7 @@ std::tuple<std::string, std::string, std::string> RussianPorterStemmer::russianS
 
 std::string RussianPorterStemmer::step_1(std::string rv, std::string word) {
     bool ends_with_p_gerund = false;
-    // Сортировка окончаний по длине
-    std::sort(perfective_gerund.begin(), perfective_gerund.end(), [](const std::string& a, const std::string& b) {
-        return a.size() > b.size();
-    });
+
 
     // Проверка окончаний на соответствие из perfective_gerund
     for (const auto& ending : perfective_gerund) {
