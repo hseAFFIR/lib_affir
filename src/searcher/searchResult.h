@@ -20,6 +20,8 @@ public:
     PosMap posMap;           ///< Position map in files
 
     std::string toString() const {
+        if(posMap.empty())
+            return "";
         std::ostringstream buffer;
         buffer << "Tokenized query (original size = " << queryOriginalSize << "): " << query << std::endl;
         for (const auto& [fileId, tokenInfos] : posMap) {
