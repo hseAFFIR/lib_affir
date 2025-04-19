@@ -8,6 +8,12 @@
 #include <regex>
 #include "lowercaser.h"
 
+bool endsWith(const std::string& str, const std::string& suffix) {
+    if (suffix.size() > str.size()) return false;
+    return std::equal(str.rbegin(), str.rbegin() + suffix.size(), suffix.rbegin());
+}
+
+
 void replace_letter(std::string& word) {
     for (size_t i = 0; i < word.length() - 1; ++i) {
         // Ищем UTF-8 символ 'ё' (0xD1 0x91)
@@ -119,8 +125,14 @@ std::string RussianPorterStemmer::step_1(std::string rv, std::string word) {
         if (rv.size() >= ending.size() && rv.compare(rv.size() - ending.size(), ending.size(), ending) == 0) {
             // Для первого типа совершенного деепричастия
             if (std::find(perfective_gerund_1.begin(), perfective_gerund_1.end(), ending) != perfective_gerund_1.end()) {
-                std::regex pattern(R"((а|я))" + ending + "$");
-                if (std::regex_search(rv, pattern)) {
+
+
+
+//                std::regex pattern(R"((а|я))" + ending + "$");
+//                if (std::regex_search(rv, pattern)) {
+                if (endsWith(rv, "а" + ending) || endsWith(rv, "я" + ending)) {
+
+
                     word = word.substr(0, word.size() - ending.size());
                     std::string r1, r2;
                     std::tie(rv, r1, r2) = russianSetRegions(word);  // Используем russianSetRegions как есть
@@ -170,8 +182,14 @@ std::string RussianPorterStemmer::step_1_if(std::string word, std::string rv) {
             for (const auto& participle_ending : participle) {
                 if (rv.size() >= participle_ending.size() && rv.compare(rv.size() - participle_ending.size(), participle_ending.size(), participle_ending) == 0) {
                     if (std::find(participle_1.begin(), participle_1.end(), participle_ending) != participle_1.end()) {
-                        std::regex pattern(R"((а|я))" + participle_ending + "$");
-                        if (std::regex_search(rv, pattern)) {
+
+
+
+//                        std::regex pattern(R"((а|я))" + participle_ending + "$");
+//                        if (std::regex_search(rv, pattern)) {
+                        if (endsWith(rv, "а" + participle_ending) || endsWith(rv, "я" + participle_ending)) {
+
+
                             word = word.substr(0, word.size() - participle_ending.size());
                             std::tie(rv, r1, r2) = russianSetRegions(word);  // Используем russianSetRegions как есть
                             return word;
@@ -193,8 +211,14 @@ std::string RussianPorterStemmer::step_1_if(std::string word, std::string rv) {
     for (const auto& ending : verb) {
         if (rv.size() >= ending.size() && rv.compare(rv.size() - ending.size(), ending.size(), ending) == 0) {
             if (std::find(verb_1.begin(), verb_1.end(), ending) != verb_1.end()) {
-                std::regex pattern(R"((а|я))" + ending + "$");
-                if (std::regex_search(rv, pattern)) {
+
+
+
+//                std::regex pattern(R"((а|я))" + ending + "$");
+//                if (std::regex_search(rv, pattern)) {
+                if (endsWith(rv, "а" + ending) || endsWith(rv, "я" + ending)) {
+
+
                     word = word.substr(0, word.size() - ending.size());
                     std::tie(rv, r1, r2) = russianSetRegions(word);  // Используем russianSetRegions как есть
                     return word;
