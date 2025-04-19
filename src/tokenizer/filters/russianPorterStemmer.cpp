@@ -133,7 +133,7 @@ std::string RussianPorterStemmer::step_1(std::string rv, std::string word) {
                 if (endsWith(rv, "а" + ending) || endsWith(rv, "я" + ending)) {
 
 
-                    word = word.substr(0, word.size() - ending.size());
+                    word.replace(word.size() - ending.size(), ending.size(), "");
                     std::string r1, r2;
                     std::tie(rv, r1, r2) = russianSetRegions(word);  // Используем russianSetRegions как есть
                     ends_with_p_gerund = true;
@@ -142,7 +142,7 @@ std::string RussianPorterStemmer::step_1(std::string rv, std::string word) {
             }
             // Для второго типа совершенного деепричастия
             if (std::find(perfective_gerund_2.begin(), perfective_gerund_2.end(), ending) != perfective_gerund_2.end()) {
-                word = word.substr(0, word.size() - ending.size());
+                word.replace(word.size() - ending.size(), ending.size(), "");
                 std::string r1, r2;
                 std::tie(rv, r1, r2) = russianSetRegions(word);  // Используем russianSetRegions как есть
                 ends_with_p_gerund = true;
@@ -166,7 +166,7 @@ std::string RussianPorterStemmer::step_1_if(std::string word, std::string rv) {
     // Проверка для рефлексивных окончаний
     for (const auto& ending : reflexive) {
         if (rv.size() >= ending.size() && rv.compare(rv.size() - ending.size(), ending.size(), ending) == 0) {
-            word = word.substr(0, word.size() - ending.size());
+            word.replace(word.size() - ending.size(), ending.size(), "");
             std::tie(rv, r1, r2) = russianSetRegions(word);  // Используем russianSetRegions как есть
             break;
         }
@@ -175,7 +175,7 @@ std::string RussianPorterStemmer::step_1_if(std::string word, std::string rv) {
     // Проверка для прилагательных
     for (const auto& ending : adjective) {
         if (rv.size() >= ending.size() && rv.compare(rv.size() - ending.size(), ending.size(), ending) == 0) {
-            word = word.substr(0, word.size() - ending.size());
+            word.replace(word.size() - ending.size(), ending.size(), "");
             std::tie(rv, r1, r2) = russianSetRegions(word);  // Используем russianSetRegions как есть
 
             // Проверка для причастий
@@ -190,13 +190,13 @@ std::string RussianPorterStemmer::step_1_if(std::string word, std::string rv) {
                         if (endsWith(rv, "а" + participle_ending) || endsWith(rv, "я" + participle_ending)) {
 
 
-                            word = word.substr(0, word.size() - participle_ending.size());
+                            word.replace(word.size() - participle_ending.size(), participle_ending.size(), "");
                             std::tie(rv, r1, r2) = russianSetRegions(word);  // Используем russianSetRegions как есть
                             return word;
                         }
                     }
                     if (std::find(participle_2.begin(), participle_2.end(), participle_ending) != participle_2.end()) {
-                        word = word.substr(0, word.size() - participle_ending.size());
+                        word.replace(word.size() - participle_ending.size(), participle_ending.size(), "");
                         std::tie(rv, r1, r2) = russianSetRegions(word);  // Используем russianSetRegions как есть
                         return word;
                     }
@@ -219,13 +219,13 @@ std::string RussianPorterStemmer::step_1_if(std::string word, std::string rv) {
                 if (endsWith(rv, "а" + ending) || endsWith(rv, "я" + ending)) {
 
 
-                    word = word.substr(0, word.size() - ending.size());
+                    word.replace(word.size() - ending.size(), ending.size(), "");
                     std::tie(rv, r1, r2) = russianSetRegions(word);  // Используем russianSetRegions как есть
                     return word;
                 }
             }
             if (std::find(verb_2.begin(), verb_2.end(), ending) != verb_2.end()) {
-                word = word.substr(0, word.size() - ending.size());
+                word.replace(word.size() - ending.size(), ending.size(), "");
                 std::tie(rv, r1, r2) = russianSetRegions(word);  // Используем russianSetRegions как есть
                 return word;
             }
@@ -235,7 +235,7 @@ std::string RussianPorterStemmer::step_1_if(std::string word, std::string rv) {
     // Проверка для существительных
     for (const auto& ending : noun) {
         if (rv.size() >= ending.size() && rv.compare(rv.size() - ending.size(), ending.size(), ending) == 0) {
-            word = word.substr(0, word.size() - ending.size());
+            word.replace(word.size() - ending.size(), ending.size(), "");
             return word;
         }
     }
@@ -255,14 +255,14 @@ void RussianPorterStemmer::process(std::string &word) {
 
     // Step 2
     if (rv.size() >= 2 && (unsigned char)rv[rv.size() - 1] ==0xb8  && (unsigned char)rv[rv.size() - 2]== 0xd0) {
-        word = word.substr(0, word.size() - 2);
+        word.replace(word.size() - 2, 2, "");
         std::tie(rv, r1, r2) = russianSetRegions(word);
     }
 
     // Step 3
     for (const auto& ending : derivational) {
         if (r2.size() >= ending.size() && r2.compare(r2.size() - ending.size(), ending.size(), ending) == 0) {
-            word = word.substr(0, word.size() - ending.size());
+            word.replace(word.size() - ending.size(), ending.size(), "");
             std::tie(rv, r1, r2) = russianSetRegions(word);
             break;
         }
@@ -271,7 +271,7 @@ void RussianPorterStemmer::process(std::string &word) {
     // Step 4
     for (const auto& ending : superlative) {
         if (rv.size() >= ending.size() && rv.compare(rv.size() - ending.size(), ending.size(), ending) == 0) {
-            word = word.substr(0, word.size() - ending.size());
+            word.replace(word.size() - ending.size(), ending.size(), "");
             std::tie(rv, r1, r2) = russianSetRegions(word);
             break;
         }
@@ -284,14 +284,14 @@ void RussianPorterStemmer::process(std::string &word) {
     (unsigned char)rv[rv.size() - 2] == 0xD0 &&
     (unsigned char)rv[rv.size() - 1] == 0xBD) {  // 'н'
 
-        word = word.substr(0, word.size() - 2);  // Удаляем одну 'н' (двухбайтовый символ)
+        word.replace(word.size() - 2, 2, "");  // Удаляем одну 'н' (двухбайтовый символ)
         std::tie(rv, r1, r2) = russianSetRegions(word);
 
     } else if (rv.size() >= 2 &&
                (unsigned char)rv[rv.size() - 2] == 0xD1 &&
                (unsigned char)rv[rv.size() - 1] == 0x8C) {  // 'ь'
 
-        word = word.substr(0, word.size() - 2);  // Удаляем 'ь'
+        word.replace(word.size() - 2, 2, "");  // Удаляем 'ь'
         std::tie(rv, r1, r2) = russianSetRegions(word);
                }
 
