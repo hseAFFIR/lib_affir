@@ -21,7 +21,9 @@ enum class FilterType {
     LOWERCASER = 1 << 1,
     PUNCTUATOR = 1 << 2,
     STEMMER = 1 << 3,
-    STOPWORDS = 1 << 4
+    STOPWORDS = 1 << 4,
+    STEMMER_RU = 1 << 5,
+    STEMMER_EN = 1 << 6
 };
 
 inline FilterType operator|(FilterType a, FilterType b) {

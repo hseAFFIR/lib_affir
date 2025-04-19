@@ -42,6 +42,10 @@ std::vector<Base*> Engine::createFilters(FilterType filterFlags) {
         filters.push_back(new StemFilter());
     if ((filterFlags & FilterType::STOPWORDS) == FilterType::STOPWORDS)
         filters.push_back(new StopWords());
+    if ((filterFlags & FilterType::STEMMER_RU) == FilterType::STEMMER_RU)
+        filters.push_back(new RussianPorterStemmer());
+    if ((filterFlags & FilterType::STEMMER_EN) == FilterType::STEMMER_EN)
+        filters.push_back(new EnglishStemmer());
 
     Logger::debug("Engine", "Filters created: {}", filters.size());
 
