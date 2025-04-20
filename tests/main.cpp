@@ -7,17 +7,12 @@
 #include "utils/utils.h"
 #include "tests.h"
 
-
 #include "../src/logger/logger.h"
 
 int main() {
     system("chcp 65001"); // Для корректного отображения русского языка в логах
-      Logger::init("info");
+    Logger::init("info","logs/test.log");
 
-//    LOG_INFO(logger, "Hello from {}!", std::string_view{"Quill"});
-//    quill::Logger* logger = quill::Frontend::get_logger("root");
-//    LOG_INFO(logger, "Logging something from {}", "someFunction");
-//    LOG_INFO(LoggerWrapper::getInstance().getLogger(), "Logging something from {}", "someFunction");
 
     std::vector<Base*> filters = { new Htmler(), new Punctuator(),
                                    new StopWords()};

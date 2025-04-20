@@ -7,8 +7,8 @@
 DataHandler::DataHandler(const std::vector<Base*> &filters, const size_t buffer, IIndexStorage &indStor)
     : filters(filters), indexStorage(indStor)
 {
-    logger = GetRootLogger();
-    LOG_INFO(logger, "DataHandler module initialized");
+    logger = Logger::GetRootLogger();
+    LOG_INFO(logger, "DataHandler module init");
 
     std::sort(this->filters.begin(), this->filters.end(),
         [](const Base* a, const Base* b) {

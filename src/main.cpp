@@ -12,8 +12,7 @@
 
 int main(){
     system("chcp 65001");
-    Logger::init("info");
-//    Logger::info("Main", "Application started");
+    Logger::init("info","");
     MultiFileIndexStorage storage;
     std::vector<Base*> filters = {};
     DataHandler dh(filters,100, storage);

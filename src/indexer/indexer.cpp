@@ -16,8 +16,8 @@
 
 Indexer::Indexer(size_t bufferSize, IIndexStorage &indStor)
         : maxBufferSizeInBytes(bufferSize), currentSizeInBytes(0), indexStorage(indStor) {
-    logger = GetRootLogger();
-        LOG_INFO(logger,"Indexer module initialized");
+    logger = Logger::GetRootLogger();
+        LOG_INFO(logger,"Indexer module init, buffer = {}",bufferSize);
 }
 
 

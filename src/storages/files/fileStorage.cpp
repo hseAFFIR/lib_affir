@@ -21,9 +21,9 @@ FileStorage::FileStorage(const std::string &filename, const size_t filesize) {
     dataStruct = DataStruct(g_cursor, filename, filesize);
     dataMap[id] = dataStruct;
     open();
-    logger = GetRootLogger();
+    logger = Logger::GetRootLogger();
 
-    LOG_DEBUG(logger,"FileStorage", "Created file block with: filename = {}, startPos = {}, endPos = {}, id = {}",dataStruct.filename, dataStruct.startPos, dataStruct.endPos(), id);
+    LOG_DEBUG(logger,"Created file block with: filename = {}, startPos = {}, endPos = {}, id = {}",dataStruct.filename, dataStruct.startPos, dataStruct.endPos(), id);
 
     dataStream.seekp((long)dataStruct.startPos);
     g_cursor = dataStruct.endPos();
@@ -35,7 +35,7 @@ FileStorage::FileStorage(const FileId fileId) : id(fileId) {
     open();
     dataStruct = dataMap[id];
     currentPosition = 0;
-    LOG_DEBUG( logger,"FileStorage", "Created file block with: filename = {}, startPos = {}, endPos = {}, id = {}",dataStruct.filename, dataStruct.startPos, dataStruct.endPos(), id);
+    LOG_DEBUG( logger,"Created file block with: filename = {}, startPos = {}, endPos = {}, id = {}",dataStruct.filename, dataStruct.startPos, dataStruct.endPos(), id);
     }
 
 void FileStorage::open() {
@@ -52,7 +52,7 @@ void FileStorage::write(std::string_view data) {
     dataStream.write(data.data(), (long)data.size());
     std::streampos position = dataStream.tellp();
 
-    LOG_DEBUG(logger,"FileStorage::write", "New pos (file {}) = {}", dataStruct.filename, (long)position);
+    LOG_DEBUG(logger,"New pos (file {}) = {}", dataStruct.filename, (long)position);
 
 }
 
@@ -67,7 +67,7 @@ size_t FileStorage::read(std::vector<char> &buffer, size_t bytesToRead, size_t s
     dataStream.read(buffer.data(), (long)std::min(bytesToRead, bytesToEnd));
 
     size_t bytesRead = dataStream.gcount();
-    LOG_DEBUG( logger,"FileStorage::read", "Read {} bytes from position {}", bytesRead, startPos);
+    LOG_DEBUG( logger,"Read {} bytes from position {}", bytesRead, startPos);
     return bytesRead;
 }
 
@@ -113,8 +113,8 @@ void FileStorage::loadStorageMeta() {
 
     std::ifstream metaFileIn(FileStorage::META_FILENAME_PATH, std::ios::binary);
     if (!metaFileIn.is_open()) {
-        auto* logger = GetRootLogger();
-        LOG_ERROR(logger,"FileStorage", "Cannot open file: {}", std::string(strerror(errno)));
+        auto* logger =  Logger::GetRootLogger();
+        LOG_ERROR(logger,"Cannot open file: {}", std::string(strerror(errno)));
         return;
     }
 

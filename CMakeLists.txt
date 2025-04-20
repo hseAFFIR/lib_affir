@@ -79,6 +79,9 @@ add_executable(lib_tests tests/main.cpp
         tests/utils/utils.h
         ${SOURCE_FILES}
 )
-find_package(quill CONFIG REQUIRED)
+
+set(CMAKE_PREFIX_PATH externals/quill_x64-windows)
+
+find_package(quill REQUIRED)
 target_link_libraries(lib_affir PRIVATE quill::quill)
 target_link_libraries(lib_tests PRIVATE quill::quill)

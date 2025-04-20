@@ -9,8 +9,8 @@ std::map<uint32_t, uint32_t> SingleIndexStorage::freeBlockPoses;
 uint32_t SingleIndexStorage::currentBlockPos = 0;
 
 SingleIndexStorage::SingleIndexStorage() {
-    logger = GetRootLogger();
-    LOG_INFO(logger, "Init storage");
+    logger = Logger::GetRootLogger();
+    LOG_INFO(logger, "Storage module initialized");
     loadStorageMeta();
     open();
 }
@@ -22,7 +22,7 @@ void SingleIndexStorage::createIndex(const std::unordered_map<std::string, BigTo
                       key, value.getFilePositions().size(), incomingIndexSize);
         // Already exists
         if (indexMap.find(key) != indexMap.end()) {
-            LOG_DEBUG(logger, "Token body already exists in map. Appending...");
+            LOG_WARNING(logger, "Token body already exists in map. Appending...");
             IndexPos curIndexPos = indexMap[key];
             BlockMask neededMask = getMask(curIndexPos.bytesSize + incomingIndexSize);
         LOG_DEBUG(logger,"Current index pos: {},\n\tNeeded mask: {}",to_str_indexpos(curIndexPos), (int)neededMask);
@@ -119,7 +119,7 @@ BlockMask SingleIndexStorage::getMask(size_t size) {
 }
 
 void SingleIndexStorage::markBlockAvailable(const uint32_t blockStart, const uint32_t blockCount) {
-    auto* logger = GetRootLogger();
+    auto* logger =  Logger::GetRootLogger();
     if(blockCount <= 0) return;
     LOG_DEBUG(logger, "freeBlockPoses (before): {}", to_str_map(freeBlockPoses));
     // -1 to avoid self finding
@@ -159,7 +159,7 @@ IndexPos SingleIndexStorage::getNewBlock(uint32_t indexSize) {
             break;
         }
     }
-    auto* logger = GetRootLogger();
+    auto* logger = Logger::GetRootLogger();
     // We should remove reserved space from map
     if(availableBlocks) {
 
@@ -205,7 +205,7 @@ void SingleIndexStorage::loadStorageMeta() {
     std::ifstream metaFileIn(SingleIndexStorage::META_FILENAME_PATH, std::ios::binary);
 
     if (!metaFileIn.is_open()) {
-        LOG_WARNING(logger,"Cannot open file: {}", std::string(strerror(errno)));
+        LOG_ERROR(logger,"Cannot open file: {}", std::string(strerror(errno)));
         return;
     }
 

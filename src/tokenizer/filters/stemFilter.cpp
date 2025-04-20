@@ -8,7 +8,7 @@
 
 
 StemFilter::StemFilter() {
-    logger = GetRootLogger();
+    logger = Logger::GetRootLogger();
     LOG_INFO(logger,"StemFilter module initialized");
 }
 
