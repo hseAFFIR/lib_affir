@@ -32,7 +32,6 @@ private:
     Tokenizer *tokenizer;
     Indexer *indexer;                        ///< Reference to indexer
     static constexpr size_t MAX_QUERY_LENGTH = 1000;
-    static size_t utf8CharCount(const std::string& str);
 
     /**
      * @brief Searches for a phrase
