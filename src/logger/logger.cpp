@@ -19,7 +19,6 @@ void Logger::init(std::string level, std::string path) {
             }(),
             quill::FileEventNotifier{});
         sinks.push_back(file_sink);
-        std::cout << "test";
     }
 
     // Создаем логгер с обоими синками

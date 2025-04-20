@@ -2,42 +2,45 @@
 
 ## Overview
 
-The Logger class provides a comprehensive logging system using the spdlog library. It supports multiple log levels and outputs logs to both console and file simultaneously. The logging level can be controlled via the `DEBUG` environment variable.
+The Logger class provides a comprehensive logging system using the Quill library. It supports multiple log levels and can output logs to both console and file simultaneously. The logging system is implemented as a singleton, ensuring consistent logging throughout the application.
 
 ## Log Levels
 
-The logger supports six different log levels, from most verbose to least:
+The logger supports five different log levels:
 
-1. **Trace** - Most detailed logging level, used for very detailed debugging information
-2. **Debug** - Detailed debugging information useful during development
-3. **Info** - General operational messages highlighting application progress
-4. **Warn** - Potentially harmful situations that are not errors
-5. **Error** - Error events that might still allow the application to continue
-6. **Critical** - Very severe error events that may lead to application termination
+1. **Debug** - Detailed debugging information useful during development
+2. **Info** - General operational messages highlighting application progress
+3. **Warn** - Potentially harmful situations that are not errors
+4. **Error** - Error events that might still allow the application to continue
+5. **None** - Disables all logging
 
 ## Usage
 
 ### Initialization
 
-Before using the logger, it must be initialized with a log file path:
+Before using the logger, it must be initialized with a log level and optional file path:
 
 ```cpp
-Logger::init("path/to/log.txt");  // Custom log file path
-// or
-Logger::init();  // Uses default path "logs/log.txt"
+// Initialize with console logging only
+Logger::init("info", "");
+
+// Initialize with both console and file logging
+Logger::init("debug", "logs/app.log");
 ```
 
 ### Logging Messages
 
-Log messages can be written using the appropriate level method:
+Log messages can be written using the Quill logging macros:
 
 ```cpp
-Logger::trace("MyClass", "Detailed trace message");
-Logger::debug("MyClass", "Debug information");
-Logger::info("MyClass", "General information");
-Logger::warn("MyClass", "Warning message");
-Logger::error("MyClass", "Error occurred");
-Logger::critical("MyClass", "Critical error!");
+// Get the logger instance
+auto logger = Logger::GetRootLogger();
+
+// Log messages at different levels
+LOG_DEBUG(logger, "Debug information");
+LOG_INFO(logger, "General information");
+LOG_WARN(logger, "Warning message");
+LOG_ERROR(logger, "Error occurred");
 ```
 
 ### Formatting Messages
@@ -45,66 +48,51 @@ Logger::critical("MyClass", "Critical error!");
 The logger supports formatted messages using the fmt library:
 
 ```cpp
-Logger::info("MyClass", "Processing file: {}", filename);
-Logger::error("MyClass", "Failed to process {}: {}", filename, errorMessage);
+LOG_INFO(logger, "Processing file: {}", filename);
+LOG_ERROR(logger, "Failed to process {}: {}", filename, errorMessage);
 ```
 
 ## Configuration
 
 ### Log Level Control
 
-The log level is controlled by the `DEBUG` environment variable:
-
-- If `DEBUG=false`: Only info and higher level messages are logged
-- Otherwise: All messages including trace and debug are logged
-
-To set the environment variable:
-
-```bash
-# Windows PowerShell
-$env:DEBUG="false"
-
-# Windows Command Prompt
-set DEBUG=false
-
-# Linux/Mac
-export DEBUG=false
-```
+The log level is set during initialization and can be one of:
+- "debug" - Most verbose, shows all messages
+- "info" - Shows informational messages and above
+- "warn" - Shows warnings and errors
+- "error" - Shows only errors
+- "none" - Disables all logging
 
 ### Output Format
 
-Logs are written in the following format:
-- Console: `%^%l: %Y-%m-%d %H:%M:%S [%n]: %v%$`
-- File: `%l: %Y-%m-%d %H:%M:%S [%n]: %v`
-
-Where:
-- `%l` - Log level
-- `%Y-%m-%d %H:%M:%S` - Timestamp
-- `%n` - Logger name
-- `%v` - Log message
-- `%^` and `%$` - Color formatting (console only)
+By default, logs are written in the following format:
+- Console: Colored output with timestamp and log level
+- File: Plain text with timestamp and log level
 
 ## Best Practices
 
 1. Always initialize the logger before use
 2. Use appropriate log levels for different types of messages
-3. Include the class name in log messages for better traceability
-4. Use formatted messages for dynamic content
-5. Set `DEBUG=false` in production environments to reduce log verbosity
+3. Use formatted messages for dynamic content
+4. Consider the log level carefully in production environments
+5. Use file logging for persistent storage of important logs
 
 ## Example
 
 ```cpp
-// Initialize logger
-Logger::init("logs/app.log");
+// Initialize logger with both console and file output
+Logger::init("info", "logs/app.log");
 
-// Log different types of messages
-Logger::info("Main", "Application started");
-Logger::debug("Database", "Connecting to database at {}", dbUrl);
+// Get the logger instance
+auto logger = Logger::GetRootLogger();
+
+// Log application start
+LOG_INFO(logger, "Application started");
 
 try {
     // Some operation
+    LOG_DEBUG(logger, "Processing data: {}", data);
 } catch (const std::exception& e) {
-    Logger::error("Main", "Operation failed: {}", e.what());
+    LOG_ERROR(logger, "Operation failed: {}", e.what());
 }
 ```
