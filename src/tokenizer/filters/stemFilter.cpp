@@ -10,7 +10,7 @@ StemFilter::StemFilter() {
     Logger::info("StemFilter", "StemFilter module initialized");
 }
 
-std::string StemFilter::detect_language(const std::string &token) const {
+std::string StemFilter::detect_language(const std::string &token) {
     if (std::regex_search(token, std::regex("[а-яА-Я]"))) {
         Logger::debug("StemFilter", "Russian language detected for word {}",token);
         return "ru";

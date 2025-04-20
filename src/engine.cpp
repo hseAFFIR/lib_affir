@@ -9,6 +9,7 @@
 #include "storages/indexes/multi/multiFileIndexStorage.h"
 #include "tokenizer/filters/filters.h"
 #include "logger/logger.h"
+#include "tokenizer/filters/stemFilter.h"
 
 unsigned short Engine::instancesNumber = 0;
 
@@ -92,7 +93,12 @@ SearchResult Engine::find(std::string query) const {
 }
 
 std::map<FileId, std::vector<std::string>> Engine::returnResultInContext(const SearchResult &result, size_t contextSymbols) {
+    // Define language by the first word in result query
+    std::string lang = StemFilter::detect_language(result.query.substr(0, result.query.find(' ')));
+
     if(!contextSymbols) contextSymbols++;
+    if(lang == "ru")
+        contextSymbols *= 2;
 
     std::map<FileId, std::vector<std::string>> res;
     std::vector<char> buffer;

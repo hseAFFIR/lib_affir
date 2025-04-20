@@ -22,6 +22,7 @@ private:
     RussianPorterStemmer russian_stemmer; ///< Стеммер для русского языка.
     EnglishStemmer english_stemmer; ///< Стеммер для английского языка.
 
+public:
     /**
      * @brief Определяет язык переданного слова.
      *
@@ -29,9 +30,7 @@ private:
      * @param token Входное слово.
      * @return Строка, указывающая язык ("ru" для русского, "en" для английского).
      */
-    std::string detect_language(const std::string &token) const;
-
-public:
+    static std::string detect_language(const std::string &token);
     /**
      * @brief Конструктор по умолчанию.
      *
