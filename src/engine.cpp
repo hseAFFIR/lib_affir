@@ -13,7 +13,8 @@
 
 unsigned short Engine::instancesNumber = 0;
 
-Engine::Engine(FilterType filterFlags, IndexStorageType indexStorageType, const size_t buffer) : filters(createFilters(filterFlags)) {
+Engine::Engine(EngineFocus engineFocus, FilterType filterFlags, IndexStorageType indexStorageType, const size_t buffer)
+    : filters(createFilters(filterFlags)) {
     if(instancesNumber > 0)
         throw std::logic_error("Engine instance is already created.");
 
@@ -26,8 +27,10 @@ Engine::Engine(FilterType filterFlags, IndexStorageType indexStorageType, const 
     else
         throw std::invalid_argument("Unknown type of IndexStorage");
 
-    dataHandler = new DataHandler(filters, buffer, *indexStorage);
-    searcher = new Search(filters, *indexStorage);
+    TokenizerMode tokenizerMode = (engineFocus == EngineFocus::CONTEXT) ? TokenizerMode::NATIVE_POSES : TokenizerMode::CLEAR_POSES;
+
+    dataHandler = new DataHandler(tokenizerMode, filters, buffer, *indexStorage);
+    searcher = new Search(tokenizerMode, filters, *indexStorage);
 }
 
 std::vector<Base*> Engine::createFilters(FilterType filterFlags) {

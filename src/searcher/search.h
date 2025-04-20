@@ -15,8 +15,8 @@ public:
      * @brief Constructor
      * @param indexer Reference to indexer
      */
-    explicit Search(const std::vector<Base*> &filters, IIndexStorage &indStor);
-    explicit Search(IIndexStorage &indStor) : Search({}, indStor) { };
+    explicit Search(TokenizerMode tokenizerMode, const std::vector<Base*> &filters, IIndexStorage &indStor);
+    explicit Search(TokenizerMode tokenizerMode, IIndexStorage &indStor) : Search(tokenizerMode, {}, indStor) { };
 
     virtual ~Search();
 

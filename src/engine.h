@@ -11,6 +11,11 @@
 #include "storages/files/fileStorage.h"
 #include <filesystem>
 
+enum class EngineFocus {
+    POSES,
+    CONTEXT
+};
+
 enum class IndexStorageType {
     SINGLE,
     MULTI
@@ -39,10 +44,10 @@ inline FilterType operator&(FilterType a, FilterType b) {
 
 class Engine {
 public:
-    explicit Engine(FilterType filterFlags, IndexStorageType indexStorageType, size_t buffer = DEFAULT_BUFFER_SIZE);
+    explicit Engine(EngineFocus engineFocus, FilterType filterFlags, IndexStorageType indexStorageType, size_t buffer = DEFAULT_BUFFER_SIZE);
 
-    explicit Engine(IndexStorageType indexStorageType, size_t buffer = DEFAULT_BUFFER_SIZE)
-        : Engine(FilterType::NONE, indexStorageType, buffer) { };
+    explicit Engine(EngineFocus engineFocus, IndexStorageType indexStorageType, size_t buffer = DEFAULT_BUFFER_SIZE)
+        : Engine(engineFocus, FilterType::NONE, indexStorageType, buffer) { };
 
     virtual ~Engine();
     /**

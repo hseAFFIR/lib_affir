@@ -18,9 +18,9 @@ std::string Search::combinePhrase(const std::vector<Token>& tokens) {
     return std::move(result);
 }
 
-Search::Search(const std::vector<Base*> &filters, IIndexStorage &indStor) {
+Search::Search(TokenizerMode tokenizerMode, const std::vector<Base*> &filters, IIndexStorage &indStor) {
     indexer = new Indexer(indStor);
-    tokenizer = new Tokenizer(filters);
+    tokenizer = new Tokenizer(tokenizerMode, filters);
 }
 
 PosMap Search::getPhrasePositions(const std::vector<Token>& tokens) const {

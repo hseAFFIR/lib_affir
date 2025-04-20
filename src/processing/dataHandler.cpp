@@ -3,11 +3,11 @@
 #include <fstream>
 #include <algorithm>
 
-DataHandler::DataHandler(const std::vector<Base*> &filters, const size_t buffer, IIndexStorage &indStor)
+DataHandler::DataHandler(TokenizerMode tokenizerMode, const std::vector<Base*> &filters, const size_t buffer, IIndexStorage &indStor)
     : filters(filters), indexStorage(indStor)
 {
     Logger::info("DataHandler", "DataHandler module initialized");
-    tokenizer = new Tokenizer(filters);
+    tokenizer = new Tokenizer(tokenizerMode, filters);
     indexer = new Indexer(buffer, indexStorage);
 }
 

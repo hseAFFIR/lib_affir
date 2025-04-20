@@ -34,10 +34,11 @@ bool isAlnumCustom(const std::string& text, size_t index) {
     return isCyrillicChar(text, index);
 }
 
-Tokenizer::Tokenizer(std::vector<Base*> filters)
+Tokenizer::Tokenizer(TokenizerMode tokenizerMode, std::vector<Base*> filters)
         : filters(std::move(filters)),
           htmlPattern(R"(<\/?\w+.*?>)"),
-          htmlPatternLimit(DEFAULT_HTML_PATTERN_LIMIT) {
+          htmlPatternLimit(DEFAULT_HTML_PATTERN_LIMIT),
+          tokenizerMode(tokenizerMode) {
     std::sort(this->filters.begin(), this->filters.end(), [](const Base* a, const Base* b) {
         return a->getOrder() < b->getOrder();
     });
@@ -91,6 +92,8 @@ bool Tokenizer::prepareNext() {
                 body += text[i + 1];
                 i += 2;
                 currentPos++;
+                if(tokenizerMode == TokenizerMode::NATIVE_POSES)
+                    currentPos++;
             } else {
                 ++i;
                 ++currentPos;

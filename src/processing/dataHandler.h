@@ -30,7 +30,7 @@ public:
      * @param buffer The size of the buffer used by the Indexer.
      * @param indStor Instance of MFIS or SFIS
      */
-    DataHandler(const std::vector<Base*> &filters, const size_t buffer, IIndexStorage &indStor);
+    DataHandler(TokenizerMode tokenizerMode, const std::vector<Base*> &filters, const size_t buffer, IIndexStorage &indStor);
 
     virtual ~DataHandler();
 
@@ -40,7 +40,7 @@ public:
      * @param buffer The size of the buffer used by the Indexer.
      * @param indStor Instance of MFIS or SFIS
      */
-    DataHandler(const size_t buffer, IIndexStorage &indStor) : DataHandler({}, buffer, indStor) { };
+    DataHandler(TokenizerMode tokenizerMode,const size_t buffer, IIndexStorage &indStor) : DataHandler(tokenizerMode, {}, buffer, indStor) { };
 
     /**
      * @brief Processes the given text by writing it to a file, tokenizing it, and indexing the tokens.
