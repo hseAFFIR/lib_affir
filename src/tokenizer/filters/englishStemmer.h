@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <cctype>
 #include <vector>
 #include <utility>
 #include "base.h"
@@ -161,9 +162,8 @@ private:
      * @brief Converts the input string to lower case.
      *
      * @param s The string to convert.
-     * @return std::string The lower-case version of s.
      */
-    static std::string to_lower(const std::string &s);
+    static void to_lower(std::string &s);
 };
 
 #endif // ENGLISHSTEMMER_H

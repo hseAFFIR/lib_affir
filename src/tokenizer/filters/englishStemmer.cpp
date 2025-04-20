@@ -19,11 +19,10 @@ bool EnglishStemmer::contains_any(const std::string &s, const std::string &chars
     return false;
 }
 
-std::string EnglishStemmer::to_lower(const std::string &s) {
-    std::string res = s;
-    std::transform(res.begin(), res.end(), res.begin(),
+void EnglishStemmer::to_lower(std::string &s) {
+    std::transform(s.begin(), s.end(), s.begin(),
                    [](unsigned char c) { return std::tolower(c); });
-    return res;
+    return;
 }
 
 // Конструктор – инициализирует константы
@@ -310,8 +309,9 @@ std::string EnglishStemmer::step5(std::string &res, const long long &R1, const l
 }
 
 void EnglishStemmer::process(std::string &token) {
-//    std::string word = inputWord;
-    token = to_lower(token);
+    if(!std::isalpha(static_cast<unsigned char>(token[0])))
+        return;
+    to_lower(token);
     // Если слово присутствует в исключениях – возвращаем его преобразование
     if (english_exceptions1.find(token) != english_exceptions1.end()) {
         token = english_exceptions1.at(token);
