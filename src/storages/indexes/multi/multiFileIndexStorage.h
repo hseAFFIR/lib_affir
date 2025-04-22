@@ -2,6 +2,7 @@
 #define LIB_AFFIR_MULTIFILEINDEXSTORAGE_H
 
 #include "../iIndexStorage.h"
+#include "../../../logger/logger.h"
 #include <fstream>
 #include <sstream>
 #include <unordered_map>
@@ -16,7 +17,7 @@
 class MultiFileIndexStorage : public IIndexStorage {
 private:
     const char metaChar = ':'; /// Char indicates meta data in file such as file number.
-
+    quill::Logger* logger;
     std::string storageDir = "index_files";
     std::string metadataFile = storageDir + "/metadata.idx";
     unsigned int fileCounter = 0;

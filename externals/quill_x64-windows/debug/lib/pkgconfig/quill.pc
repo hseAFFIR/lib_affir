@@ -1,0 +1,11 @@
+prefix=${pcfiledir}/../..
+includedir=${prefix}/../include
+
+Name: quill
+Description: Low Latency C++ Logging Library
+URL: https://github.com/odygrd/quill
+Version: 9.0.2
+CFlags: "-I${includedir}"
+Libs: 
+Requires: 
+

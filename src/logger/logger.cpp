@@ -1,34 +1,41 @@
-//
-// Created by amenk on 22.03.2025.
-//
 #include "logger.h"
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <cstdlib> // для getenv
 
-std::shared_ptr<spdlog::logger> Logger::logger = nullptr;
+quill::Logger* Logger::logger = nullptr;
 
-void Logger::init(const std::string& logFilePath) {
+void Logger::init(std::string level, std::string path) {
+    quill::Backend::start();
 
-    // Создаем сенки (sinks) для вывода в файл и консоль
-    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFilePath, true);
+    std::vector<std::shared_ptr<quill::Sink>> sinks;
+    sinks.push_back(quill::Frontend::create_or_get_sink<quill::ConsoleSink>("consoleSink"));
 
-    // Устанавливаем формат вывода
-    console_sink->set_pattern("%^%l: %Y-%m-%d %H:%M:%S [%n]: %v%$");
-    file_sink->set_pattern("%l: %Y-%m-%d %H:%M:%S [%n]: %v");
-
-    // Создаем логгер с двумя сенками
-    logger = std::make_shared<spdlog::logger>("logger", spdlog::sinks_init_list{console_sink, file_sink});
-
-    // Устанавливаем уровень логирования в зависимости от переменной окружения DEBUG
-    const char* debugEnv = std::getenv("DEBUG");
-    if (debugEnv && std::string(debugEnv) == "false") {
-        logger->set_level(spdlog::level::info); // Только info и выше
-    } else {
-        logger->set_level(spdlog::level::trace); // Все уровни
+    if (!path.empty()) {
+        auto file_sink = quill::Frontend::create_or_get_sink<quill::FileSink>(
+            path,
+            []() {
+                quill::FileSinkConfig cfg;
+                cfg.set_open_mode('w');
+                cfg.set_filename_append_option(quill::FilenameAppendOption::StartDateTime);
+                return cfg;
+            }(),
+            quill::FileEventNotifier{});
+        sinks.push_back(file_sink);
     }
 
-    // Регистрируем логгер
-    spdlog::register_logger(logger);
+    // Создаем логгер с обоими синками
+    logger = quill::Frontend::create_or_get_logger("root", sinks);
+
+    LOG_INFO(logger, "Logger module init, log level = {}", level);
+    
+    
+    // Устанавливаем уровень логирования
+    if (level == "info")
+        logger->set_log_level(quill::LogLevel::Info);
+    if (level == "debug")
+        logger->set_log_level(quill::LogLevel::Debug);
+    if (level == "error")
+        logger->set_log_level(quill::LogLevel::Error);
+    if (level == "warn")
+        logger->set_log_level(quill::LogLevel::Warning);
+    if (level == "none")
+        logger->set_log_level(quill::LogLevel::None);
 }
