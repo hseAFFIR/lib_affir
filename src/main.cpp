@@ -3,11 +3,11 @@
 #include <fstream>
 #include <chrono>
 #include "tokenizer/filters/russianPorterStemmer.h"
-
+//
 // int main() {
 //     system("chcp 65001");
 //     RussianPorterStemmer russianPorterStemmer;
-//     std:: string word="ассигнацию";
+//     std:: string word="асигнация";
 //     std:: string result="";
 //     russianPorterStemmer.process(word);
 //
@@ -15,8 +15,8 @@
 // }
 int main() {
     system("chcp 65001");
-    std::ifstream vocFile("voc.txt");
-    std::ifstream outputFile("output.txt");
+    std::ifstream vocFile("C://Users//okosh//CLionProjects//lib//src//voc.txt");
+    std::ifstream outputFile("C://Users//okosh//CLionProjects//lib//src//output.txt");
 
     if (!vocFile.is_open() || !outputFile.is_open()) {
         std::cerr << "Не удалось открыть один из файлов.\n";
