@@ -9,7 +9,7 @@
  * @param storage Instance of object MFIS or SFIS
  */
 void runTestGetTokenInCreatedIndex(std::string &text, size_t buffer, std::vector<Base *> &filters, IIndexStorage &storage) {
-    Tokenizer tk(filters);
+    Tokenizer tk(TokenizerMode::CLEAR_POSES,filters);
     Indexer ind(buffer, storage);
 
     tk.tokenize(text);

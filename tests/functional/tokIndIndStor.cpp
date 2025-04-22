@@ -33,7 +33,7 @@ void runTestTokIndIndStor(const std::string &folderPath, size_t buffer, std::vec
     auto start = std::chrono::high_resolution_clock::now();
 
     for (auto &[filename, text]: fileContents) {
-        Tokenizer tk(filters);
+        Tokenizer tk(TokenizerMode::CLEAR_POSES, filters);
         Indexer ind(buffer, storage);
         tk.tokenize(text);
 

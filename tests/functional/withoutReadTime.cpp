@@ -10,7 +10,7 @@
  */
 void runTestProcessingWithoutReadTime(const std::string &folderPath, size_t buffer, std::vector<Base *> &filters,
                                       IIndexStorage &storage) {
-    DataHandler dh(filters, buffer, storage);
+    DataHandler dh(TokenizerMode::CLEAR_POSES,filters, buffer, storage);
 
     // Загружаем все файлы заранее, чтобы не учитывать время чтения
     std::unordered_map<std::string, std::string> fileContents;
@@ -33,8 +33,9 @@ void runTestProcessingWithoutReadTime(const std::string &folderPath, size_t buff
     // Засекаем только время обработки
     auto start = std::chrono::high_resolution_clock::now();
 
+    int i = 0;
     for (auto &[filename, text]: fileContents) {
-        dh.processText(text, filename);
+        dh.processText(text, i++);
     }
 
     auto end = std::chrono::high_resolution_clock::now();

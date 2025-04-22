@@ -10,6 +10,7 @@
 #include "searcher/searchResult.h"
 #include "storages/files/fileStorage.h"
 #include <filesystem>
+#include <map>
 
 enum class EngineFocus {
     POSES,
