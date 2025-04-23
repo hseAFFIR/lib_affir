@@ -2,7 +2,8 @@
 
 quill::Logger* Logger::logger = nullptr;
 
-void Logger::init(std::string level, std::string path) {
+
+void Logger::init(Level level, std::string path) {
     quill::Backend::start();
 
     std::vector<std::shared_ptr<quill::Sink>> sinks;
@@ -24,18 +25,22 @@ void Logger::init(std::string level, std::string path) {
     // Создаем логгер с обоими синками
     logger = quill::Frontend::create_or_get_logger("root", sinks);
 
-    LOG_INFO(logger, "Logger module init, log level = {}", level);
+    LOG_INFO(logger, "Logger module init");
     
     
     // Устанавливаем уровень логирования
-    if (level == "info")
+    if (level == info)
         logger->set_log_level(quill::LogLevel::Info);
-    if (level == "debug")
+    if (level == debug)
         logger->set_log_level(quill::LogLevel::Debug);
-    if (level == "error")
+    if (level == error)
         logger->set_log_level(quill::LogLevel::Error);
-    if (level == "warn")
+    if (level == warn)
         logger->set_log_level(quill::LogLevel::Warning);
-    if (level == "none")
+    if (level == none)
         logger->set_log_level(quill::LogLevel::None);
+}
+
+Logger::~Logger() {
+    quill::Frontend::remove_logger(logger);
 }

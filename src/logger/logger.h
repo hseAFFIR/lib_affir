@@ -19,25 +19,25 @@
  */
 class Logger {
 public:
+    static quill::Logger* logger;  ///< Static instance of the logger
+
+    enum Level{
+        info,
+        debug,
+        error,
+        warn,
+        none
+    };
+
     /**
      * @brief Initialize the logger with specified log level and file path
      * 
      * @param level The log level to set ("info", "debug", "error", "warn", "none")
      * @param path Optional path to the log file. If empty, only console logging is enabled
      */
-    static void init(std::string level, std::string path);
+    static void init(Level level, std::string path);
 
-    /**
-     * @brief Get the root logger instance
-     * 
-     * @return quill::Logger* Pointer to the root logger instance
-     */
-    static quill::Logger* GetRootLogger() {
-        return quill::Frontend::get_logger("root");
-    }
-
-private:
-    static quill::Logger* logger;  ///< Static instance of the logger
+    ~Logger();
 };
 
 #endif // LIB_AFFIR_LOGGER_H

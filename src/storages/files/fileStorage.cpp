@@ -21,7 +21,7 @@ FileStorage::FileStorage(const std::string &filename, const size_t filesize) {
     dataStruct = DataStruct(g_cursor, filename, filesize);
     dataMap[id] = dataStruct;
     open();
-    logger = Logger::GetRootLogger();
+    logger = Logger::logger;
 
     LOG_DEBUG(logger,"Created file block with: filename = {}, startPos = {}, endPos = {}, id = {}",dataStruct.filename, dataStruct.startPos, dataStruct.endPos(), id);
 
@@ -113,7 +113,7 @@ void FileStorage::loadStorageMeta() {
 
     std::ifstream metaFileIn(FileStorage::META_FILENAME_PATH, std::ios::binary);
     if (!metaFileIn.is_open()) {
-        auto* logger =  Logger::GetRootLogger();
+        auto* logger =  Logger::logger;
         LOG_ERROR(logger,"Cannot open file: {}", std::string(strerror(errno)));
         return;
     }

@@ -82,7 +82,7 @@ PosMap Search::getPhrasePositions(const std::vector<Token>& tokens) const {
 
 Search::SearchResult Search::search(std::string& query) const {
     validateQuery(query);
-    auto* logger =  Logger::GetRootLogger();
+    auto* logger =  Logger::logger;
     LOG_DEBUG( logger,"Search", "Searching for: {}", query);
 
     std::vector<Token> tokens;
@@ -103,7 +103,7 @@ Search::SearchResult Search::search(std::string& query) const {
 }
 
 void Search::printSearchResults(const std::vector<SearchResult>& results) {
-    auto* logger =  Logger::GetRootLogger();
+    auto* logger =  Logger::logger;
     if (results.empty()) {
         LOG_INFO( logger,"Search", "No results found!");
         return;

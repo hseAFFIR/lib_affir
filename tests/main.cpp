@@ -11,7 +11,9 @@
 
 int main() {
     system("chcp 65001"); // Для корректного отображения русского языка в логах
-    Logger::init("info","logs/test.log");
+
+
+    Logger::init(Logger::debug,"logs/test.log");
 
 
     std::vector<Base*> filters = { new Htmler(), new Punctuator(),

@@ -8,7 +8,7 @@
 bool MultiFileIndexStorage::isMetadataLoaded = false;
 
 MultiFileIndexStorage::MultiFileIndexStorage() {
-    logger =  Logger::GetRootLogger();
+    logger =  Logger::logger;
     LOG_INFO(logger,"MultiFileIndexStorage module init");
     // Create folder for storing indexes
     if (!std::filesystem::exists(storageDir)) {
