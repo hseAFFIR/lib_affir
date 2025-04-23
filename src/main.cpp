@@ -12,7 +12,7 @@
 
 int main(){
     system("chcp 65001");
-    Logger::init(Logger::info,"");
+    Logger::init(Logger::Level::Info,"");
     MultiFileIndexStorage storage;
     std::vector<Base*> filters = {};
     DataHandler dh(filters,100, storage);

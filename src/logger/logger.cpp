@@ -1,9 +1,15 @@
 #include "logger.h"
+#include <iostream>
 
 quill::Logger* Logger::logger = nullptr;
 
 
 void Logger::init(Level level, std::string path) {
+    if (logger != nullptr) {
+        LOG_WARNING(logger, "Logger is already initialized");
+        return;
+    }
+    try{ 
     quill::Backend::start();
 
     std::vector<std::shared_ptr<quill::Sink>> sinks;
@@ -29,18 +35,27 @@ void Logger::init(Level level, std::string path) {
     
     
     // Устанавливаем уровень логирования
-    if (level == info)
-        logger->set_log_level(quill::LogLevel::Info);
-    if (level == debug)
-        logger->set_log_level(quill::LogLevel::Debug);
-    if (level == error)
-        logger->set_log_level(quill::LogLevel::Error);
-    if (level == warn)
-        logger->set_log_level(quill::LogLevel::Warning);
-    if (level == none)
-        logger->set_log_level(quill::LogLevel::None);
+    switch (level) {
+        case Level::Info:
+            logger->set_log_level(quill::LogLevel::Info);
+            break;
+        case Level::Debug:
+            logger->set_log_level(quill::LogLevel::Debug);
+            break;
+        case Level::Error:
+            logger->set_log_level(quill::LogLevel::Error);
+            break;
+        case Level::Warn:
+            logger->set_log_level(quill::LogLevel::Warning);
+            break;
+        case Level::None:
+            logger->set_log_level(quill::LogLevel::None);
+            break;
+    }
+}catch (const std::exception& e) {
+        std::cerr << "Error initializing logger: " << e.what() << std::endl;
+    }
 }
-
 Logger::~Logger() {
     quill::Frontend::remove_logger(logger);
 }

@@ -21,12 +21,12 @@ class Logger {
 public:
     static quill::Logger* logger;  ///< Static instance of the logger
 
-    enum Level{
-        info,
-        debug,
-        error,
-        warn,
-        none
+    enum class Level{
+        Info,
+        Debug,
+        Error,
+        Warn,
+        None
     };
 
     /**
