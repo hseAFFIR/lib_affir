@@ -13,17 +13,13 @@ int main() {
     system("chcp 65001"); // Для корректного отображения русского языка в логах
     Logger::init("logs/test.txt");
     Logger::info("Tests", "Application started");
-    std::vector<Base*> filters = { new Htmler(), new Punctuator(),
-                                   new StopWords()};
 
 
-    MultiFileIndexStorage mfis;
-
-    runTestProcessingWithoutReadTime("test_data", 1024*1024*16, filters, mfis);
+    runEngineSideLoadTest("death_data", EngineFocus::POSES, FilterType::NONE, IndexStorageType::MULTI, 1024*1024*16);
 
     printPeakMemoryUsage();
 
-    for (auto f : filters) delete f;
+
 
     return 0;
 }
