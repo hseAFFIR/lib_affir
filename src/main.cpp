@@ -2,73 +2,35 @@
 #include <tuple>
 #include <fstream>
 #include <chrono>
-#include "tokenizer/filters/russianPorterStemmer.h"
-//
-// int main() {
-//     system("chcp 65001");
-//     RussianPorterStemmer russianPorterStemmer;
-//     std:: string word="асигнация";
-//     std:: string result="";
-//     russianPorterStemmer.process(word);
-//
-//     std::cout << word << std::endl;
-// }
+#include "tokenizer/filters/filters.h"
+#include "searcher/search.h"
+#include "storages/indexes/multi/multiFileIndexStorage.h"
+#include "processing/dataHandler.h"
+
 int main() {
     system("chcp 65001");
-    std::ifstream vocFile("voc.txt");
-    std::ifstream outputFile("output.txt");
+    Logger::init("info","");
+    std::vector<Base*> filters = { new Htmler(), new Punctuator(),
+                                   new StopWords()};
 
-    if (!vocFile.is_open() || !outputFile.is_open()) {
-        std::cerr << "Не удалось открыть один из файлов.\n";
-        return 1;
-    }
+    MultiFileIndexStorage storage;
+    DataHandler dataHandler(filters, 1024*1024*16, storage);
 
-    auto stemmer = new RussianPorterStemmer();
+    std::string str = "This ebook is for the use of anyone anywhere in the United States and\n"
+                      "most other parts of the world at no cost and with almost no restrictions\n"
+                      "whatsoever. You may copy it, give it away or re-use it under the terms\n"
+                      "of the Project Gutenberg License included with this ebook or online\n"
+                      "at www.gutenberg.org. If you are not located in the United States,\n"
+                      "you will have to check the laws of the country where you are located\n"
+                      "before using this eBook.";
 
-    std::string vocLine, outputLine;
-    int total = 0;
-    int correct = 0;
-    int incorrect = 0;
-    int errors = 0;
+    dataHandler.processText(str, "file1");
 
-    auto start = std::chrono::high_resolution_clock::now();
+    Search search(filters, storage);
+    std::string find = "parts of the world";
+    auto res = search.search(find);
+    Search::printSearchResults(res);
 
-    while (std::getline(vocFile, vocLine) && std::getline(outputFile, outputLine)) {
-        std::string result = vocLine;
-        try {
-            stemmer->process(result);
-        } catch (const std::exception& e) {
-            ++errors;
-            std::cerr << "Ошибка при обработке строки:\n"
-                      << "  Ввод: " << vocLine << "\n"
-                      << "  Сообщение: " << e.what() << "\n";
-        } catch (...) {
-            ++errors;
-            std::cerr << "Неизвестная ошибка при обработке строки:\n"
-                      << "  Ввод: " << vocLine << "\n";
-        }
-        if (result == outputLine) {
-            ++correct;
-        } else {
-            ++incorrect;
-            std::cerr << "Несовпадение:\n"
-                      << "  Ввод:     " << vocLine << "\n"
-                      << "  Ожидание: " << outputLine << "\n"
-                      << "  Результат:" << result << "\n";
-        }
-        ++total;
-    }
-
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsedSeconds = end - start;
-
-    std::cout << "\nРезультаты:\n";
-    std::cout << "Всего обработано: " << total << "\n";
-    std::cout << "Совпадений:       " << correct << "\n";
-    std::cout << "Ошибок:           " << incorrect << "\n";
-    std::cout << "Сбоев обработки:  " << errors << "\n";
-    std::cout << "Время выполнения: " << elapsedSeconds.count() << " секунд\n";
-
-
+    for (auto f : filters) delete f;
     return 0;
 }
