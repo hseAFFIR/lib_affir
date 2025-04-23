@@ -67,6 +67,7 @@ private:
 
     Tokenizer *tokenizer;
     Indexer *indexer;
+    quill::Logger* logger;
 };
 
 #endif

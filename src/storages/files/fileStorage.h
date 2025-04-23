@@ -5,6 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <unordered_map>
+#include <quill/Logger.h>
 #include "../../common.h"
 
 // Struct to hold metadata about a file.
@@ -119,6 +120,8 @@ public:
      */
     ~FileStorage();
 private:
+    quill::Logger* logger;
+
     static unsigned short instancesNumber;                     ///< Counter for instances of FileStorage.
     static Pos g_cursor;                                       ///< Global cursor to track read/write positions.
     static std::unordered_map<FileId, DataStruct> dataMap;     ///< Map of file metadata by FileId.

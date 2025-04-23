@@ -1,47 +1,72 @@
 #include "lowercaser.h"
 
+// This table should include all symbols that are unable
+// to be lowercased  by the algorithm
 namespace {
     const std::unordered_map<std::string_view, std::string_view> lower_map = {
-        {"А", "а"}, {"Б", "б"}, {"В", "в"}, {"Г", "г"}, {"Д", "д"},
-        {"Е", "е"}, {"Ё", "ё"}, {"Ж", "ж"}, {"З", "з"}, {"И", "и"},
-        {"Й", "й"}, {"К", "к"}, {"Л", "л"}, {"М", "м"}, {"Н", "н"},
-        {"О", "о"}, {"П", "п"}, {"Р", "р"}, {"С", "с"}, {"Т", "т"},
-        {"У", "у"}, {"Ф", "ф"}, {"Х", "х"}, {"Ц", "ц"}, {"Ч", "ч"},
-        {"Ш", "ш"}, {"Щ", "щ"}, {"Ъ", "ъ"}, {"Ы", "ы"}, {"Ь", "ь"},
-        {"Э", "э"}, {"Ю", "ю"}, {"Я", "я"}
     };
 }
 
+#include "lowercaser.h"
+
 void Lowercaser::process(std::string& token) {
     std::string result;
+    result.reserve(token.size());
+    const size_t size = token.size();
     size_t i = 0;
-    const size_t token_size = token.size();
-    result.reserve(token_size);
-    while (i < token_size) {
-        // UTF-8 (1-4 bytes)
-        int len = 1;
-        if ((token[i] & 0x80) != 0) {
-            if      ((token[i] & 0xF0) == 0xF0) len = 4;
-            else if ((token[i] & 0xE0) == 0xE0) len = 3;
-            else if ((token[i] & 0xC0) == 0xC0) len = 2;
+    while (i < size) {
+        const unsigned char c1 = static_cast<unsigned char>(token[i]);
+        // ASCII
+        if ((c1 & 0x80) == 0) {
+            result += (c1 >= 'A' && c1 <= 'Z') ? c1 + 32 : c1;
+            i++;
+            continue;
         }
-        
-        std::string_view ch(&token[i], len);
 
-        auto it = lower_map.find(ch);
-        if (it != lower_map.end()) {
-            result.append(it->second);
-        } else {
-            // ASCII
-            if (len == 1) {
-                result.push_back(static_cast<char>(std::tolower(ch[0])));
-            } else {
-                result.append(ch.data(), ch.size());
+        // UTF-8 Cyrillic
+        if (i + 1 < size) {
+            const unsigned char c2 = static_cast<unsigned char>(token[i + 1]);
+
+            // All letters (except for Ё)
+            if (c1 == 0xD0 && c2 >= 0x90 && c2 <= 0x9F) {
+                result += static_cast<char>(0xD0);
+                result += static_cast<char>(c2 + 0x20);
+                i += 2;
+                continue;
+            }
+
+            if (c1 == 0xD0 && c2 >= 0xA0 && c2 <= 0xAF) {
+                result += static_cast<char>(0xD1);
+                result += static_cast<char>(c2 - 0x20);
+                i += 2;
+                continue;
+            }
+
+
+            // Ё (D0 81 -> D1 91)
+            if (c1 == 0xD0 && c2 == 0x81) {
+                result += static_cast<char>(0xD1);
+                result += static_cast<char>(0x91);
+                i += 2;
+                continue;
             }
         }
-        
+
+        // The rest
+        int len = 2;
+        if     ((c1 & 0xF0) == 0xF0) len = 4;
+        else if ((c1 & 0xE0) == 0xE0) len = 3;
+
+        len = (i + len > size) ? 1 : len;
+        std::string_view ch(&token[i], len);
+        if (auto it = lower_map.find(ch); it != lower_map.end()) {
+            result += it->second;
+        } else {
+            result += ch;
+        }
+
         i += len;
     }
+
     token = std::move(result);
-    return;
 }

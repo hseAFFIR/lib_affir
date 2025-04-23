@@ -2,7 +2,7 @@
 // Created by okosh on 14.03.2025.
 //
 #include "russianPorterStemmer.h"
-#include "../../logger/logger.h"
+
 #include <algorithm>
 #include <regex>
 #include "lowercaser.h"

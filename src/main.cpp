@@ -15,8 +15,8 @@
 // }
 int main() {
     system("chcp 65001");
-    std::ifstream vocFile("C://Users//okosh//CLionProjects//lib//src//voc.txt");
-    std::ifstream outputFile("C://Users//okosh//CLionProjects//lib//src//output.txt");
+    std::ifstream vocFile("voc.txt");
+    std::ifstream outputFile("output.txt");
 
     if (!vocFile.is_open() || !outputFile.is_open()) {
         std::cerr << "Не удалось открыть один из файлов.\n";

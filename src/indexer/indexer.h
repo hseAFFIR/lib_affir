@@ -6,7 +6,7 @@
 #include "../models/bigToken.h"
 #include "../common.h"
 #include "../storages/indexes/iIndexStorage.h"
-
+#include <quill/Logger.h>
 
 /**
  * @brief Manages token storage with a buffer-based approach.
@@ -17,6 +17,7 @@
  */
 class Indexer {
 private:
+    quill::Logger* logger;
     using BufferType = std::unordered_map<std::string, BigToken>;
 
     BufferType buffer; ///< Temporary storage for tokens before persisting.

@@ -2,7 +2,8 @@
 #include "../../logger/logger.h"
 
 StemFilter::StemFilter() {
-    Logger::info("StemFilter", "StemFilter module initialized");
+    logger = Logger::GetRootLogger();
+    LOG_INFO(logger,"StemFilter module initialized");
 }
 
 bool CyrillicChar(const std::string &text, size_t index) {
@@ -36,14 +37,14 @@ std::string StemFilter::detect_language(const std::string &token) const {
     }
 
     if (has_cyrillic && !has_latin) {
-        Logger::debug("StemFilter", "Russian language detected for word {}", token);
+        LOG_DEBUG(logger, "Russian language detected for word {}",token);
         return "ru";
     }
     if (has_latin && !has_cyrillic) {
-        Logger::debug("StemFilter", "English language detected for word {}", token);
+        LOG_DEBUG(logger,"English language detected for word {}",token);
         return "en";
     }
-    Logger::warn("StemFilter", "Unknown language! {}", token);
+    LOG_WARNING(logger,"Unknown language! {}",token);
     return "";
 }
 
@@ -57,6 +58,6 @@ void StemFilter::process(std::string &token) {
             english_stemmer.process(token);
         }
     } catch (...) {
-        Logger::error("stemFilter::process", "Undefined exception!");
+        LOG_INFO(logger,"stemFilter::process - Undefined exception!");
     }
 }

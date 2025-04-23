@@ -5,6 +5,7 @@
 #ifndef STEM_FILTER_H
 #define STEM_FILTER_H
 
+#include <quill/Logger.h>
 #include "base.h"
 #include "russianPorterStemmer.h"
 #include "englishStemmer.h"
@@ -19,6 +20,7 @@
  */
 class StemFilter : public Base {
 private:
+    quill::Logger* logger;
     RussianPorterStemmer russian_stemmer; ///< Стеммер для русского языка.
     EnglishStemmer english_stemmer; ///< Стеммер для английского языка.
 
