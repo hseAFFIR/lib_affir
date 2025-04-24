@@ -1,32 +1,36 @@
-#include "storages/indexes/multi/multiFileIndexStorage.h"
-#include "indexer/indexer.h"
-#include "searcher/search.h"
-#include "logger/logger.h"
-#include "processing/dataHandler.h"
-#include "tokenizer/filters/filters.h"
-
-#include <cassert>
+#include <iostream>
+#include <tuple>
 #include <fstream>
-#include "tokenizer/filters/russianPorterStemmer.h"
+#include <chrono>
+#include "tokenizer/filters/filters.h"
+#include "searcher/search.h"
+#include "storages/indexes/multi/multiFileIndexStorage.h"
+#include "processing/dataHandler.h"
 
-
-int main(){
+int main() {
     system("chcp 65001");
     Logger::init("info","");
+    std::vector<Base*> filters = { new Htmler(), new Punctuator(),
+                                   new StopWords()};
+
     MultiFileIndexStorage storage;
-    std::vector<Base*> filters = {};
-    DataHandler dh(filters,100, storage);
-    std::string text = "Привет, мир!";
-    Lowercaser* low = new Lowercaser();    
-    std::string testtexttt = "АБВГДЕЁЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
-    std::string testtext = "Hello, World!";
-    // low->process(testtexttt);
-    std::cout << testtexttt;
-    
-    std::string filename = "test_output.txt";
-    dh.processText(testtexttt, filename);
-    for (auto filter : filters) {
-        delete filter;
-    }
+    DataHandler dataHandler(filters, 1024*1024*16, storage);
+
+    std::string str = "This ebook is for the use of anyone anywhere in the United States and\n"
+                      "most other parts of the world at no cost and with almost no restrictions\n"
+                      "whatsoever. You may copy it, give it away or re-use it under the terms\n"
+                      "of the Project Gutenberg License included with this ebook or online\n"
+                      "at www.gutenberg.org. If you are not located in the United States,\n"
+                      "you will have to check the laws of the country where you are located\n"
+                      "before using this eBook.";
+
+    dataHandler.processText(str, "file1");
+
+    Search search(filters, storage);
+    std::string find = "parts of the world";
+    auto res = search.search(find);
+    Search::printSearchResults(res);
+
+    for (auto f : filters) delete f;
     return 0;
 }

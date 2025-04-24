@@ -22,11 +22,11 @@ void Lowercaser::process(std::string& token) {
             i++;
             continue;
         }
-        
+
         // UTF-8 Cyrillic
         if (i + 1 < size) {
             const unsigned char c2 = static_cast<unsigned char>(token[i + 1]);
-            
+
             // All letters (except for Ё)
             if (c1 == 0xD0 && c2 >= 0x90 && c2 <= 0x9F) {
                 result += static_cast<char>(0xD0);
@@ -34,15 +34,15 @@ void Lowercaser::process(std::string& token) {
                 i += 2;
                 continue;
             }
-            
+
             if (c1 == 0xD0 && c2 >= 0xA0 && c2 <= 0xAF) {
-                result += static_cast<char>(0xD1);    
+                result += static_cast<char>(0xD1);
                 result += static_cast<char>(c2 - 0x20);
                 i += 2;
                 continue;
             }
 
-            
+
             // Ё (D0 81 -> D1 91)
             if (c1 == 0xD0 && c2 == 0x81) {
                 result += static_cast<char>(0xD1);
@@ -51,12 +51,12 @@ void Lowercaser::process(std::string& token) {
                 continue;
             }
         }
-        
+
         // The rest
         int len = 2;
         if     ((c1 & 0xF0) == 0xF0) len = 4;
         else if ((c1 & 0xE0) == 0xE0) len = 3;
-        
+
         len = (i + len > size) ? 1 : len;
         std::string_view ch(&token[i], len);
         if (auto it = lower_map.find(ch); it != lower_map.end()) {
@@ -64,9 +64,9 @@ void Lowercaser::process(std::string& token) {
         } else {
             result += ch;
         }
-        
+
         i += len;
     }
-    
+
     token = std::move(result);
 }
