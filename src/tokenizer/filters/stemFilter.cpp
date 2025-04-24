@@ -21,26 +21,26 @@ bool CyrillicChar(const std::string &text, size_t index) {
     return false;
 }
 
-std::string StemFilter::detect_language(const std::string &token) const {
-    bool has_cyrillic = false;
-    bool has_latin = false;
+std::string StemFilter::detectLanguage(const std::string &token) const {
+    bool hasCyrillic = false;
+    bool hasLatin = false;
 
     for (size_t i = 0; i < token.size(); ++i) {
         unsigned char c = token[i];
         if (CyrillicChar(token, i)) {
-            has_cyrillic = true;
+            hasCyrillic = true;
             ++i;
         }
         else if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
-            has_latin = true;
+            hasLatin = true;
         }
     }
 
-    if (has_cyrillic && !has_latin) {
+    if (hasCyrillic && !hasLatin) {
         LOG_DEBUG(logger, "Russian language detected for word {}",token);
         return "ru";
     }
-    if (has_latin && !has_cyrillic) {
+    if (hasLatin && !hasCyrillic) {
         LOG_DEBUG(logger,"English language detected for word {}",token);
         return "en";
     }
@@ -50,12 +50,12 @@ std::string StemFilter::detect_language(const std::string &token) const {
 
 void StemFilter::process(std::string &token) {
     try {
-        std::string lang = detect_language(token);
+        std::string lang = detectLanguage(token);
         if (lang == "ru") {
-            russian_stemmer.process(token);
+            russianStemmer.process(token);
         }
         if (lang == "en") {
-            english_stemmer.process(token);
+            englishStemmer.process(token);
         }
     } catch (...) {
         LOG_INFO(logger,"stemFilter::process - Undefined exception!");
