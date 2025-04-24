@@ -34,7 +34,7 @@ private:
      * @param token Слово для обработки.
      * @return std::string Результат после применения шага 1.
      */
-    std::string step1(std::string token);
+    void step1(std::string &token);
 
     /**
      * @brief Вспомогательный метод для первого шага, если были удалены деепричастия.
@@ -42,7 +42,7 @@ private:
      * @param token Слово для обработки.
      * @return std::string Результат после дополнительной обработки.
      */
-    std::string step1If(std::string token);
+    void step1If(std::string & token);
 
     std::string vowels; ///< Гласные буквы, используемые для выделения областей слова.
 

@@ -2,7 +2,6 @@
 // Created by okosh on 14.03.2025.
 //
 #include "russianPorterStemmer.h"
-
 #include <algorithm>
 #include <regex>
 #include "lowercaser.h"
@@ -132,7 +131,7 @@ void RussianPorterStemmer::setRussianRegions(std::string &token, std::string &rv
  * @param word Исходное слово для обработки.
  * @return Обработанное слово после первого шага.
  */
-std::string RussianPorterStemmer::step1(std::string word) {
+void RussianPorterStemmer::step1(std::string & word) {
     bool endsWithPGerund = false;
     std::string rv, rv1, rv2;
     setRussianRegions(word, rv, rv1, rv2);
@@ -159,9 +158,8 @@ std::string RussianPorterStemmer::step1(std::string word) {
     }
     // Если не найдено, применяем первый шаг для других случаев
     if (!endsWithPGerund) {
-        word = step1If(word);
+        step1If(word);
     }
-    return word;
 }
 
 /**
@@ -169,7 +167,7 @@ std::string RussianPorterStemmer::step1(std::string word) {
  * @param word Исходное слово для обработки.
  * @return Обработанное слово после подшага первого шага.
  */
-std::string RussianPorterStemmer::step1If(std::string word) {
+void RussianPorterStemmer::step1If(std::string & word) {
     std::string rv, r1, r2;
     setRussianRegions(word, rv, r1, r2);  // Используем setRussianRegions как есть
     // Проверка рефлексивных окончаний
@@ -198,17 +196,17 @@ std::string RussianPorterStemmer::step1If(std::string word) {
                         if (endsWith(rv, "а" + participleEnding) || endsWith(rv, "я" + participleEnding)) {
                             word.replace(word.size() - participleEndingSize, participleEndingSize, "");
                             setRussianRegions(word, rv, r1, r2);  // Используем setRussianRegions как есть
-                            return word;
+                            return;
                         }
                     }
                     if (std::find(participle2.begin(), participle2.end(), participleEnding) != participle2.end()) {
                         word.replace(word.size() - participleEndingSize, participleEndingSize, "");
                         setRussianRegions(word, rv, r1, r2);  // Используем setRussianRegions как есть
-                        return word;
+                        return;
                     }
                 }
             }
-            return word;
+            return;
         }
     }
     // Проверка глагольных окончаний
@@ -220,13 +218,13 @@ std::string RussianPorterStemmer::step1If(std::string word) {
                 if (endsWith(rv, "а" + ending) || endsWith(rv, "я" + ending)) {
                     word.replace(word.size() - endingSize, endingSize, "");
                     setRussianRegions(word, rv, r1, r2);  // Используем setRussianRegions как есть
-                    return word;
+                    return;
                 }
             }
             if (std::find(verb2.begin(), verb2.end(), ending) != verb2.end()) {
                 word.replace(word.size() - endingSize, endingSize, "");
                 setRussianRegions(word, rv, r1, r2);  // Используем setRussianRegions как есть
-                return word;
+                return;
             }
         }
     }
@@ -236,10 +234,9 @@ std::string RussianPorterStemmer::step1If(std::string word) {
         size_t rvSize = rv.size();
         if (rvSize >= endingSize && rv.compare(rvSize - endingSize, endingSize, ending) == 0) {
             word.replace(word.size() - endingSize, endingSize, "");
-            return word;
+            return;
         }
     }
-    return word;
 }
 
 /**
@@ -251,7 +248,7 @@ void RussianPorterStemmer::process(std::string &word) {
     std::string rv, r1, r2;
     setRussianRegions(word, rv, r1, r2);
     // Шаг 1
-    word = step1(word);
+    step1(word);
     setRussianRegions(word, rv, r1, r2);
     // Шаг 2
     size_t rvSize = rv.size();
