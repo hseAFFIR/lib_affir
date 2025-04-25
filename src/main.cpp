@@ -4,7 +4,7 @@
 
 int main() {
     system("chcp 65001");
-    Logger::init(Logger::Level::Info,"");
+    Logger::init(Logger::Level::Info, "");
     LOG_INFO(Logger::logger, "Application started");
 
     Engine engine(EngineFocus::POSES, FilterType::HTMLER | FilterType::LOWERCASER, IndexStorageType::MULTI);

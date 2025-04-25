@@ -51,7 +51,7 @@ std::vector<Base*> Engine::createFilters(FilterType filterFlags) {
     if ((filterFlags & FilterType::STEMMER_EN) == FilterType::STEMMER_EN)
         filters.push_back(new EnglishStemmer());
 
-    Logger::debug("Engine", "Filters created: {}", filters.size());
+    LOG_INFO(Logger::logger, "Filters created: {}", filters.size());
 
     return std::move(filters);
 }
@@ -97,7 +97,7 @@ SearchResult Engine::find(std::string query) const {
 
 std::map<FileId, std::vector<std::string>> Engine::returnResultInContext(const SearchResult &result, size_t contextSymbols) {
     // Define language by the first word in result query
-    std::string lang = StemFilter::detect_language(result.query.substr(0, result.query.find(' ')));
+    std::string lang = StemFilter::detectLanguage(result.query.substr(0, result.query.find(' ')));
 
     if(!contextSymbols) contextSymbols++;
     if(lang == "ru")
@@ -144,7 +144,7 @@ Engine::~Engine() {
     for (auto f : filters) delete f;
 
     instancesNumber--;
-    Logger::debug("Engine", "Destructed (number of instances = {})", instancesNumber);
+    LOG_INFO(Logger::logger, "Destructed (number of instances = {})", instancesNumber);
 }
 
 void Engine::flush() {
