@@ -19,7 +19,7 @@ set(MODEL_FILES
 )
 
 set(PROCESSING_FILES
-        src/processing/filterOrder.h
+        src/tokenizer/filters/filterOrder.h
         src/processing/dataHandler.h
         src/processing/dataHandler.cpp
 )
@@ -32,6 +32,7 @@ set(INDEXER_FILES
 set(SEARCHER_FILES
         src/searcher/search.cpp
         src/searcher/search.h
+        src/searcher/searchResult.h
 )
 
 set(FILTERS
@@ -63,7 +64,9 @@ set(SOURCE_FILES
         src/logger/logger.h
         src/logger/logger.cpp
         src/tokenizer/tokenizer.h
-        src/tokenizer/tokenizer.cpp)
+        src/tokenizer/tokenizer.cpp
+        src/engine.cpp
+        src/engine.h)
 
 
 add_executable(lib_affir src/main.cpp
@@ -74,6 +77,7 @@ add_executable(lib_tests tests/main.cpp
         tests/common.h
         tests/functional/tokIndIndStor.cpp
         tests/functional/getTokenInCreatedIndex.cpp
+        tests/pipline/engineTests.cpp
         tests/utils/utils.cpp
         tests/tests.h
         tests/utils/utils.h

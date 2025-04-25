@@ -34,6 +34,16 @@ bool isAlnumCustom(const std::string& text, size_t index) {
     return isCyrillicChar(text, index);
 }
 
+Tokenizer::Tokenizer(TokenizerMode tokenizerMode, std::vector<Base*> filters)
+        : filters(std::move(filters)),
+          htmlPattern(R"(<\/?\w+.*?>)"),
+          htmlPatternLimit(DEFAULT_HTML_PATTERN_LIMIT),
+          tokenizerMode(tokenizerMode) {
+    std::sort(this->filters.begin(), this->filters.end(), [](const Base* a, const Base* b) {
+        return a->getOrder() < b->getOrder();
+    });
+}
+
 bool Tokenizer::hasNext() {
     // Пропускаем пробельные символы
     while (i < text.size() && std::isspace(static_cast<unsigned char>(text[i]))) {
@@ -44,7 +54,7 @@ bool Tokenizer::hasNext() {
     // Skip empty tokens in order to make next token valid
     while(i < text.size() and !prepareNext());
 
-    return i < text.size();
+    return i < text.size() or !preparedToken.body.empty();
 }
 
 bool Tokenizer::prepareNext() {
@@ -82,6 +92,8 @@ bool Tokenizer::prepareNext() {
                 body += text[i + 1];
                 i += 2;
                 currentPos++;
+                if(tokenizerMode == TokenizerMode::NATIVE_POSES)
+                    currentPos++;
             } else {
                 ++i;
                 ++currentPos;

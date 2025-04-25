@@ -2,6 +2,7 @@
 #define LIB_AFFIR_SEARCH_H
 #include "../indexer/indexer.h"
 #include "../tokenizer/tokenizer.h"
+#include "searchResult.h"
 #include <vector>
 #include <string>
 
@@ -11,19 +12,11 @@
 class Search {
 public:
     /**
-     * @brief Structure for storing search results
-     */
-    struct SearchResult {
-        std::string query;       ///< Original query
-        PosMap posMap;           ///< Position map in files
-    };
-
-    /**
      * @brief Constructor
      * @param indexer Reference to indexer
      */
-    explicit Search(const std::vector<Base*> &filters, IIndexStorage &indStor);
-    explicit Search(IIndexStorage &indStor) : Search({}, indStor) { };
+    explicit Search(TokenizerMode tokenizerMode, const std::vector<Base*> &filters, IIndexStorage &indStor);
+    explicit Search(TokenizerMode tokenizerMode, IIndexStorage &indStor) : Search(tokenizerMode, {}, indStor) { };
 
     virtual ~Search();
 
@@ -35,15 +28,7 @@ public:
      */
     SearchResult search(std::string& query) const;
 
-    /**
-     * @brief Prints search results to console
-     * @param results Vector of search results
-     */
-    static void printSearchResults(const std::vector<SearchResult>& results);
-    static void printSearchResults(const SearchResult& result) { printSearchResults(std::vector<SearchResult>{result}); };
-
 private:
-    quill::Logger* logger;
     Tokenizer *tokenizer;
     Indexer *indexer;                        ///< Reference to indexer
     static constexpr size_t MAX_QUERY_LENGTH = 1000;

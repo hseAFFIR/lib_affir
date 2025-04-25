@@ -60,7 +60,7 @@ size_t FileStorage::read(std::vector<char> &buffer, size_t bytesToRead, size_t s
     if (startPos >= dataStruct.filesize)
         throw std::out_of_range("Starting position exceeds file's end position.");
 
-    dataStream.seekg((long)startPos);
+    dataStream.seekg((long)(startPos + dataStruct.startPos));
 
     buffer.resize(bytesToRead + 1);
     size_t bytesToEnd = dataStruct.endPos() - dataStream.tellg();
@@ -75,11 +75,6 @@ size_t FileStorage::read(std::vector<char> &buffer, size_t bytesToRead) {
     size_t bytesRead = read(buffer, bytesToRead, currentPosition);
     currentPosition += bytesToRead;
     return bytesRead;
-}
-
-void FileStorage::close() {
-    dataStream.close();
-    delete this;
 }
 
 FileId FileStorage::getId() const {
@@ -114,7 +109,7 @@ void FileStorage::loadStorageMeta() {
     std::ifstream metaFileIn(FileStorage::META_FILENAME_PATH, std::ios::binary);
     if (!metaFileIn.is_open()) {
         auto* logger =  Logger::logger;
-        LOG_ERROR(logger,"Cannot open file: {}", std::string(strerror(errno)));
+        LOG_WARNING(logger, "Cannot load metadata of storage: {}", std::string(strerror(errno)));
         return;
     }
 

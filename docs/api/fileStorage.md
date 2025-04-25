@@ -44,9 +44,6 @@ while (file.read(buffer.data(), CHUNK_SIZE) || file.gcount() > 0) {
     storage.write(data);
 }
 
-// Do not forget to close storage!
-storage.close();
-
 ...
 
 // Do not forget to manually save metadata in the end of your program!
@@ -72,9 +69,6 @@ while (!storage.isEnd()) {
     Logger::info("ClassName", "Bytes read — {}", bytesRead);
     Logger::info("ClassName", "Buffer is {}", std::string(buffer.begin(), buffer.end()));
 }
-
-// Do not forget to close storage!
-storage.close();
 
 ...
 ```

@@ -20,10 +20,10 @@
  */
 class StemFilter : public Base {
 private:
-    quill::Logger* logger;
     RussianPorterStemmer russianStemmer; ///< Стеммер для русского языка.
     EnglishStemmer englishStemmer; ///< Стеммер для английского языка.
 
+public:
     /**
      * @brief Определяет язык переданного слова.
      *
@@ -31,9 +31,7 @@ private:
      * @param token Входное слово.
      * @return Строка, указывающая язык ("ru" для русского, "en" для английского).
      */
-    std::string detectLanguage(const std::string &token) const;
-
-public:
+    static std::string detectLanguage(const std::string &token);
     /**
      * @brief Конструктор по умолчанию.
      *

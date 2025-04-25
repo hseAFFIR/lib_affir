@@ -18,6 +18,12 @@
  * применения различных фильтров к этим токенам. Он поддерживает работу как
  * с необработанными текстами, так и с текстами, уже прошедшими фильтрацию.
  */
+
+enum class TokenizerMode {
+    NATIVE_POSES,
+    CLEAR_POSES
+};
+
 class Tokenizer {
 public:
     /**
@@ -26,12 +32,9 @@ public:
      *
      * Этот конструктор инициализирует объект с набором фильтров и шаблоном для поиска HTML-тегов.
      */
-    explicit Tokenizer(std::vector<Base*> filters)
-        : filters(std::move(filters)),
-            htmlPattern(R"(<\/?\w+.*?>)"),
-            htmlPatternLimit(10) { };
+    explicit Tokenizer(TokenizerMode tokenizerMode, std::vector<Base*> filters);
 
-    explicit Tokenizer() : Tokenizer(std::vector<Base*>()) { }
+    explicit Tokenizer(TokenizerMode tokenizerMode) : Tokenizer(tokenizerMode, {}) { }
 
     bool hasNext();
 
@@ -46,9 +49,12 @@ public:
     void tokenize(std::string &text, FileId inFileId = 0);
 
 private:
+    TokenizerMode tokenizerMode;
     std::vector<Base*> filters; /**< Список фильтров, применяемых к токенам. */
     const std::regex htmlPattern;     /**< Регулярное выражение для поиска HTML-тегов. */
     const size_t htmlPatternLimit;
+
+    static const size_t DEFAULT_HTML_PATTERN_LIMIT = 10;
 
     bool prepareNext();
     Token preparedToken;
@@ -57,7 +63,7 @@ private:
     size_t wordPos = 0;
     size_t i = 0;
     std::string text;
-    FileId fileId;
+    FileId fileId = 0;
 
     /**
      * @brief Применяет все фильтры к токену.

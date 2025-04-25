@@ -1,50 +1,92 @@
 #include "utils.h"
+#include <iostream>
 
 #if defined(_WIN32)
 #include <windows.h>
 #include <psapi.h>
-/**
-* @brief Вывод использованной в пике RAM
-*/
+
+// Текущее использование памяти
+size_t getCurrenMemoryUsage() {
+    PROCESS_MEMORY_COUNTERS pmc;
+    GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc));
+    return pmc.WorkingSetSize;
+}
+
+// Пиковое использование памяти
 void printPeakMemoryUsage() {
     PROCESS_MEMORY_COUNTERS pmc;
     if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
         std::cout << "Peak memory usage: "
-                  << pmc.PeakWorkingSetSize / 1024 << " KB (Windows)" << std::endl;
+                  << pmc.PeakWorkingSetSize / 1024 << " KB (Windows)\n";
     } else {
-        std::cerr << "Failed to get memory info on Windows" << std::endl;
+        std::cerr << "Failed to get memory info\n";
     }
 }
 
-#elif defined(__unix__) || defined(__APPLE__)
-
+#elif defined(__APPLE__)
+#include <mach/mach.h>
 #include <sys/resource.h>
 
-/**
- * @brief Вывод использованной в пике RAM
- */
+// Текущее использование памяти (RSS)
+size_t getCurrenMemoryUsage() {
+    task_vm_info_data_t vm_info;
+    mach_msg_type_number_t count = TASK_VM_INFO_COUNT;
+    kern_return_t result = task_info(
+            mach_task_self(),
+            TASK_VM_INFO,
+            (task_info_t)&vm_info,
+            &count
+    );
+
+    if (result != KERN_SUCCESS) return 0;
+    return vm_info.internal + vm_info.compressed;
+}
+
+// Пиковое использование памяти
 void printPeakMemoryUsage() {
     struct rusage usage;
     if (getrusage(RUSAGE_SELF, &usage) == 0) {
-        // macOS reports ru_maxrss in bytes, Linux in kilobytes
-#if defined(__APPLE__)
         std::cout << "Peak memory usage: "
-                  << usage.ru_maxrss / 1024 << " KB (macOS)" << std::endl;
-#else
-        std::cout << "Peak memory usage: "
-                  << usage.ru_maxrss << " KB (Linux/Unix)" << std::endl;
-#endif
+                  << usage.ru_maxrss / 1024 << " KB (macOS)\n";
     } else {
-        std::cerr << "Failed to get memory usage on Unix" << std::endl;
+        std::cerr << "Failed to get memory info\n";
+    }
+}
+
+#elif defined(__unix__)
+#include <sys/resource.h>
+#include <unistd.h>
+#include <fstream>
+
+// Текущее использование памяти
+size_t getCurrenMemoryUsage() {
+    std::ifstream statm("/proc/self/statm");
+    size_t rss;
+    statm >> rss >> rss; // Второе значение - RSS в страницах
+    statm.close();
+    return rss * sysconf(_SC_PAGESIZE);
+}
+
+// Пиковое использование памяти
+void printPeakMemoryUsage() {
+    struct rusage usage;
+    if (getrusage(RUSAGE_SELF, &usage) == 0) {
+        std::cout << "Peak memory usage: "
+                  << usage.ru_maxrss << " KB (Linux)\n";
+    } else {
+        std::cerr << "Failed to get memory info\n";
     }
 }
 
 #else
 void printPeakMemoryUsage() {
-        std::cerr << "Memory usage not supported on this platform" << std::endl;
-    }
-#endif
+    std::cerr << "Not supported\n";
+}
 
+size_t getCurrenMemoryUsage() {
+    return 0;
+}
+#endif
 
 size_t countOccurrences(const std::string &text, const std::string &word) {
     size_t count = 0;
@@ -96,3 +138,6 @@ void searchWordInFiles(const std::string &folderPath, const std::string &word) {
     std::cout << "Total occurrences of \"" << word << "\": " << totalOccurrences << '\n';
     std::cout << "Search time: " << elapsed.count() << " ms\n";
 }
+
+
+

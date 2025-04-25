@@ -70,8 +70,6 @@ void Indexer::addToken(const Token &token) {
 //    Logger::debug("Indexer (addToken)", "{} sizeInBytes {}", token.body, currentSizeInBytes);
 
     LOG_DEBUG( logger,"Indexer (addToken)", "{} sizeInBytes {}", token.body, currentSizeInBytes);
-
-
 }
 
 BigToken Indexer::getTokenInfo(const std::string &tokenName) {

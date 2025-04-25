@@ -1,7 +1,5 @@
 #include "search.h"
 #include "../logger/logger.h"
-#include "../tokenizer/tokenizer.h"
-#include <iostream>
 #include <stdexcept>
 
 void Search::validateQuery(const std::string& query) {
@@ -20,9 +18,9 @@ std::string Search::combinePhrase(const std::vector<Token>& tokens) {
     return std::move(result);
 }
 
-Search::Search(const std::vector<Base*> &filters, IIndexStorage &indStor) {
+Search::Search(TokenizerMode tokenizerMode, const std::vector<Base*> &filters, IIndexStorage &indStor) {
     indexer = new Indexer(indStor);
-    tokenizer = new Tokenizer(filters);
+    tokenizer = new Tokenizer(tokenizerMode, filters);
 }
 
 PosMap Search::getPhrasePositions(const std::vector<Token>& tokens) const {
@@ -80,46 +78,26 @@ PosMap Search::getPhrasePositions(const std::vector<Token>& tokens) const {
     return std::move(phrasePositions);
 }
 
-Search::SearchResult Search::search(std::string& query) const {
+SearchResult Search::search(std::string& query) const {
     validateQuery(query);
-    auto* logger =  Logger::logger;
-    LOG_DEBUG( logger,"Search", "Searching for: {}", query);
+    LOG_DEBUG(Logger::logger, "Search", "Searching for: {}", query);
+    const size_t querySize = query.size();
 
     std::vector<Token> tokens;
     tokenizer->tokenize(query);
     while (tokenizer->hasNext()) {
         Token token = tokenizer->next();
         tokens.push_back(std::move(token));
-        LOG_DEBUG( logger,"Search", "pushed token: {}", token.body);
+        LOG_DEBUG(Logger::logger,"Search", "pushed token: {}", token.body);
     }
 
     if (tokens.empty()) {
-        LOG_DEBUG( logger,"Search", "Empty vector after tokenization!");
+        LOG_DEBUG(Logger::logger,"Search", "Empty vector after tokenization!");
 
         return {};
     }
 
-    return std::move(SearchResult(combinePhrase(tokens), getPhrasePositions(tokens)));
-}
-
-void Search::printSearchResults(const std::vector<SearchResult>& results) {
-    auto* logger =  Logger::logger;
-    if (results.empty()) {
-        LOG_INFO( logger,"Search", "No results found!");
-        return;
-    }
-
-    for (const auto& result : results) {
-        std::cout << "--------------------------------" << std::endl;
-        LOG_INFO( logger,"Search", "Found results for query {}:", result.query);
-        for (const auto& [fileId, tokenInfos] : result.posMap) {
-            std::cout << "File ID: " << fileId << std::endl;
-            std::cout << "  Positions: ";
-            for (const auto& info : tokenInfos)
-                std::cout << "(pos=" << info.pos << ", wordPos=" << info.wordPos << ") ";
-            std::cout << std::endl;
-        }
-    }
+    return std::move(SearchResult(combinePhrase(tokens), querySize, getPhrasePositions(tokens)));
 }
 
 Search::~Search() {

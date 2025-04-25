@@ -2,8 +2,7 @@
 #include "../../logger/logger.h"
 
 StemFilter::StemFilter() {
-    logger = Logger::logger;
-    LOG_INFO(logger,"StemFilter module initialized");
+    LOG_INFO(Logger::logger, "StemFilter module initialized");
 }
 
 bool CyrillicChar(const std::string &text, size_t index) {
@@ -21,7 +20,7 @@ bool CyrillicChar(const std::string &text, size_t index) {
     return false;
 }
 
-std::string StemFilter::detectLanguage(const std::string &token) const {
+std::string StemFilter::detectLanguage(const std::string &token) {
     bool hasCyrillic = false;
     bool hasLatin = false;
 
@@ -37,14 +36,14 @@ std::string StemFilter::detectLanguage(const std::string &token) const {
     }
 
     if (hasCyrillic && !hasLatin) {
-        LOG_DEBUG(logger, "Russian language detected for word {}",token);
+        LOG_DEBUG(Logger::logger, "Russian language detected for word {}",token);
         return "ru";
     }
     if (hasLatin && !hasCyrillic) {
-        LOG_DEBUG(logger,"English language detected for word {}",token);
+        LOG_DEBUG(Logger::logger,"English language detected for word {}",token);
         return "en";
     }
-    LOG_WARNING(logger,"Unknown language! {}",token);
+    LOG_WARNING(Logger::logger,"Unknown language! {}",token);
     return "";
 }
 
@@ -58,6 +57,6 @@ void StemFilter::process(std::string &token) {
             englishStemmer.process(token);
         }
     } catch (...) {
-        LOG_INFO(logger,"stemFilter::process - Undefined exception!");
+        LOG_INFO(Logger::logger,"stemFilter::process - Undefined exception!");
     }
 }
