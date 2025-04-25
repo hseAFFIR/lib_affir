@@ -84,6 +84,8 @@ add_executable(lib_tests tests/main.cpp
         ${SOURCE_FILES}
 )
 
-add_subdirectory(externals/spdlog)
-target_link_libraries(lib_affir PRIVATE spdlog::spdlog)
-target_link_libraries(lib_tests PRIVATE spdlog::spdlog)
+set(CMAKE_PREFIX_PATH externals/quill_x64-windows)
+
+find_package(quill REQUIRED)
+target_link_libraries(lib_affir PRIVATE quill::quill)
+target_link_libraries(lib_tests PRIVATE quill::quill)

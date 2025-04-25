@@ -11,6 +11,7 @@
 #include "../../../common.h"
 #include <map>
 #include <sstream>
+#include <quill/Logger.h>
 
 // Mask indicating the block size in tokens
 enum BlockMask : uint8_t {
@@ -57,6 +58,8 @@ public:
     void saveStorageMeta() override;
 
 private:
+    quill::Logger* logger;
+
     static std::unordered_map<std::string, IndexPos> indexMap; ///< Path to the reverse index file.
     const static std::string STORAGE_FILENAME_PATH; ///< Path to the single index file.
     const static std::string META_FILENAME_PATH; ///< Path to the metadata file.

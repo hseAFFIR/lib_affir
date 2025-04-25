@@ -3,8 +3,9 @@
 #include "engine.h"
 
 int main() {
-    Logger::init("logs/log.txt");
-    Logger::info("Main", "Application started");
+    system("chcp 65001");
+    Logger::init(Logger::Level::Info,"");
+    LOG_INFO(Logger::logger, "Application started");
 
     Engine engine(EngineFocus::POSES, FilterType::HTMLER | FilterType::LOWERCASER, IndexStorageType::MULTI);
     // Или без фильтров: Engine engine(EngineFocus::NATIVE, Engine::IndexStorageType::SINGLE); // Либо можно передать FilterType::NONE
@@ -18,13 +19,13 @@ int main() {
     engine.openFS(fileId);
     std::vector<char> buffer;
     engine.read(buffer);
-    Logger::info("Main", "Read 512 bytes of the given file ({}):\n{}", fileId, buffer.data());
+    LOG_INFO(Logger::logger, "Read 512 bytes of the given file ({}):\n{}", fileId, buffer.data());
 
     auto res = engine.find("Карелия");
-    Logger::info("Main", "Result:\n{}", res.toString());
+    LOG_INFO(Logger::logger, "Result:\n{}", res.toString());
 
     size_t contextSymbols = 20;
-    Logger::info("Main", "Result in context in file ({}): {}", fileId, Engine::returnResultInContext(res, contextSymbols)[fileId].front());
+    LOG_INFO(Logger::logger, "Result in context in file ({}): {}", fileId, Engine::returnResultInContext(res, contextSymbols)[fileId].front());
 
     return 0;
 }

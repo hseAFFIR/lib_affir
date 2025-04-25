@@ -1,34 +1,61 @@
-//
-// Created by amenk on 22.03.2025.
-//
 #include "logger.h"
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <cstdlib> // для getenv
+#include <iostream>
 
-std::shared_ptr<spdlog::logger> Logger::logger = nullptr;
+quill::Logger* Logger::logger = nullptr;
 
-void Logger::init(const std::string& logFilePath) {
 
-    // Создаем сенки (sinks) для вывода в файл и консоль
-    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFilePath, true);
+void Logger::init(Level level, std::string path) {
+    if (logger != nullptr) {
+        LOG_WARNING(logger, "Logger is already initialized");
+        return;
+    }
+    try{ 
+    quill::Backend::start();
 
-    // Устанавливаем формат вывода
-    console_sink->set_pattern("%^%l: %Y-%m-%d %H:%M:%S [%n]: %v%$");
-    file_sink->set_pattern("%l: %Y-%m-%d %H:%M:%S [%n]: %v");
+    std::vector<std::shared_ptr<quill::Sink>> sinks;
+    sinks.push_back(quill::Frontend::create_or_get_sink<quill::ConsoleSink>("consoleSink"));
 
-    // Создаем логгер с двумя сенками
-    logger = std::make_shared<spdlog::logger>("logger", spdlog::sinks_init_list{console_sink, file_sink});
-
-    // Устанавливаем уровень логирования в зависимости от переменной окружения DEBUG
-    const char* debugEnv = std::getenv("DEBUG");
-    if (debugEnv && std::string(debugEnv) == "false") {
-        logger->set_level(spdlog::level::info); // Только info и выше
-    } else {
-        logger->set_level(spdlog::level::trace); // Все уровни
+    if (!path.empty()) {
+        auto file_sink = quill::Frontend::create_or_get_sink<quill::FileSink>(
+            path,
+            []() {
+                quill::FileSinkConfig cfg;
+                cfg.set_open_mode('w');
+                cfg.set_filename_append_option(quill::FilenameAppendOption::StartDateTime);
+                return cfg;
+            }(),
+            quill::FileEventNotifier{});
+        sinks.push_back(file_sink);
     }
 
-    // Регистрируем логгер
-    spdlog::register_logger(logger);
+    // Создаем логгер с обоими синками
+    logger = quill::Frontend::create_or_get_logger("root", sinks);
+
+    LOG_INFO(logger, "Logger module init");
+    
+    
+    // Устанавливаем уровень логирования
+    switch (level) {
+        case Level::Info:
+            logger->set_log_level(quill::LogLevel::Info);
+            break;
+        case Level::Debug:
+            logger->set_log_level(quill::LogLevel::Debug);
+            break;
+        case Level::Error:
+            logger->set_log_level(quill::LogLevel::Error);
+            break;
+        case Level::Warn:
+            logger->set_log_level(quill::LogLevel::Warning);
+            break;
+        case Level::None:
+            logger->set_log_level(quill::LogLevel::None);
+            break;
+    }
+}catch (const std::exception& e) {
+        std::cerr << "Error initializing logger: " << e.what() << std::endl;
+    }
+}
+Logger::~Logger() {
+    quill::Frontend::remove_logger(logger);
 }

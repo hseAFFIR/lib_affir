@@ -5,6 +5,7 @@
 #ifndef STEM_FILTER_H
 #define STEM_FILTER_H
 
+#include <quill/Logger.h>
 #include "base.h"
 #include "russianPorterStemmer.h"
 #include "englishStemmer.h"
@@ -19,8 +20,8 @@
  */
 class StemFilter : public Base {
 private:
-    RussianPorterStemmer russian_stemmer; ///< Стеммер для русского языка.
-    EnglishStemmer english_stemmer; ///< Стеммер для английского языка.
+    RussianPorterStemmer russianStemmer; ///< Стеммер для русского языка.
+    EnglishStemmer englishStemmer; ///< Стеммер для английского языка.
 
 public:
     /**
@@ -30,7 +31,7 @@ public:
      * @param token Входное слово.
      * @return Строка, указывающая язык ("ru" для русского, "en" для английского).
      */
-    static std::string detect_language(const std::string &token);
+    static std::string detectLanguage(const std::string &token);
     /**
      * @brief Конструктор по умолчанию.
      *

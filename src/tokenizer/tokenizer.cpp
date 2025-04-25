@@ -12,9 +12,9 @@ bool isCyrillicChar(const std::string& text, size_t index) {
     unsigned char second = text[index + 1];
 
     if (first == 0xD0) {
-        return (second >= 0x90 && second <= 0xBF);
+        return (second >= 0x90 && second <= 0xBF)||second == 0x81;
     } else if (first == 0xD1) {
-        return (second >= 0x80 && second <= 0x8F);
+        return (second >= 0x80 && second <= 0x8F) || second == 0x91;
     }
 
     return false;

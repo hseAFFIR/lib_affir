@@ -80,7 +80,7 @@ PosMap Search::getPhrasePositions(const std::vector<Token>& tokens) const {
 
 SearchResult Search::search(std::string& query) const {
     validateQuery(query);
-    Logger::info("Search", "Searching for: {}", query);
+    LOG_DEBUG(Logger::logger, "Search", "Searching for: {}", query);
     const size_t querySize = query.size();
 
     std::vector<Token> tokens;
@@ -88,11 +88,12 @@ SearchResult Search::search(std::string& query) const {
     while (tokenizer->hasNext()) {
         Token token = tokenizer->next();
         tokens.push_back(std::move(token));
-        Logger::debug("Search", "pushed token: {}", token.body);
+        LOG_DEBUG(Logger::logger,"Search", "pushed token: {}", token.body);
     }
 
     if (tokens.empty()) {
-        Logger::warn("Search", "Empty vector after tokenization!");
+        LOG_DEBUG(Logger::logger,"Search", "Empty vector after tokenization!");
+
         return {};
     }
 
