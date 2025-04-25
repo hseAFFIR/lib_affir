@@ -9,7 +9,7 @@ std::map<uint32_t, uint32_t> SingleIndexStorage::freeBlockPoses;
 uint32_t SingleIndexStorage::currentBlockPos = 0;
 
 SingleIndexStorage::SingleIndexStorage() {
-    logger = Logger::GetRootLogger();
+    logger = Logger::logger;
     LOG_INFO(logger, "Storage module initialized");
     loadStorageMeta();
     open();
@@ -119,7 +119,7 @@ BlockMask SingleIndexStorage::getMask(size_t size) {
 }
 
 void SingleIndexStorage::markBlockAvailable(const uint32_t blockStart, const uint32_t blockCount) {
-    auto* logger =  Logger::GetRootLogger();
+    auto* logger =  Logger::logger;
     if(blockCount <= 0) return;
     LOG_DEBUG(logger, "freeBlockPoses (before): {}", to_str_map(freeBlockPoses));
     // -1 to avoid self finding
@@ -159,7 +159,7 @@ IndexPos SingleIndexStorage::getNewBlock(uint32_t indexSize) {
             break;
         }
     }
-    auto* logger = Logger::GetRootLogger();
+    auto* logger = Logger::logger;
     // We should remove reserved space from map
     if(availableBlocks) {
 

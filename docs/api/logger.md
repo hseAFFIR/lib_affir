@@ -34,7 +34,7 @@ Log messages can be written using the Quill logging macros:
 
 ```cpp
 // Get the logger instance
-auto logger = Logger::GetRootLogger();
+auto logger = Logger::logger;
 
 // Log messages at different levels
 LOG_DEBUG(logger, "Debug information");
@@ -84,7 +84,7 @@ By default, logs are written in the following format:
 Logger::init("info", "logs/app.log");
 
 // Get the logger instance
-auto logger = Logger::GetRootLogger();
+auto logger = Logger::logger;
 
 // Log application start
 LOG_INFO(logger, "Application started");

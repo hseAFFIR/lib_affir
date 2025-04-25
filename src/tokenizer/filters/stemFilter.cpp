@@ -2,7 +2,7 @@
 #include "../../logger/logger.h"
 
 StemFilter::StemFilter() {
-    logger = Logger::GetRootLogger();
+    logger = Logger::logger;
     LOG_INFO(logger,"StemFilter module initialized");
 }
 
