@@ -109,7 +109,7 @@ void FileStorage::loadStorageMeta() {
     std::ifstream metaFileIn(FileStorage::META_FILENAME_PATH, std::ios::binary);
     if (!metaFileIn.is_open()) {
         auto* logger =  Logger::logger;
-        LOG_ERROR(logger,"Cannot open file: {}", std::string(strerror(errno)));
+        LOG_WARNING(logger, "Cannot load metadata of storage: {}", std::string(strerror(errno)));
         return;
     }
 
