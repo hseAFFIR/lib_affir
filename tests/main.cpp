@@ -1,8 +1,11 @@
 #include <vector>
-#include "../src/storages/indexes/multi/multiFileIndexStorage.h"
-#include "../src/storages/indexes/single/singleIndexStorage.h"
+#include "../affir/storages/indexes/multi/multiFileIndexStorage.h"
+#include "../affir/storages/indexes/single/singleIndexStorage.h"
 #include "utils/utils.h"
 #include "tests.h"
+#include "../affir/logger/logger.h"
+
+using namespace affir;
 
 int main() {
     system("chcp 65001"); // Для корректного отображения русского языка в логах

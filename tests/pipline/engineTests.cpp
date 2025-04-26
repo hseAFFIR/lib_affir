@@ -5,9 +5,10 @@ const std::string fileStorageMeta = "file_storage_metadata.bin";
 const std::string fileStorage = "file_storage_raw";
 
 std::string printIndStorageType(IndexStorageType &indexStorageType) {
-    if (indexStorageType == IndexStorageType::MULTI){
+    if (indexStorageType == IndexStorageType::MULTI) {
         return "Multi";
-    } else if (indexStorageType == IndexStorageType::SINGLE) {
+    }
+    else if (indexStorageType == IndexStorageType::SINGLE) {
         return "Single";
     }
 
@@ -40,18 +41,19 @@ void runEngineSideLoadTest(std::string dataPath, EngineFocus engineFocus, Filter
             std::uintmax_t count = fs::remove_all(fs::path(indexDirPath));
             std::cout << "Deleted " << count << " items in: " << indexDirPath << "\n";
         }
-    } catch (const fs::filesystem_error& e) {
+    } catch (const fs::filesystem_error &e) {
         std::cerr << "Filesystem error: " << e.what() << "\n";
-    } catch (const std::exception& e) {
+    } catch (const std::exception &e) {
         std::cerr << "Error: " << e.what() << "\n";
     }
 
 
     std::unordered_map<std::string, std::string> fileContents;
 
-    std::cout<<"============================================================\n";
-    std::cout<<"Test: engine without file read time\n";
-    std::cout << "Buffer - " << buffer << " bytes | indexStorage - " <<printIndStorageType(indexStorageType)<<std::endl;
+    std::cout << "============================================================\n";
+    std::cout << "Test: engine without file read time\n";
+    std::cout << "Buffer - " << buffer << " bytes | indexStorage - " << printIndStorageType(indexStorageType)
+              << std::endl;
 
 
     for (const auto &entry: fs::directory_iterator(dataPath)) {
@@ -81,12 +83,13 @@ void runEngineSideLoadTest(std::string dataPath, EngineFocus engineFocus, Filter
     auto end = std::chrono::high_resolution_clock::now();
     size_t endMem = getCurrenMemoryUsage();
 
-    std::chrono::duration<double> diff = end - start;
     size_t difMemKb = (endMem - startMem) / (1024);
+    engine.flush();
+    std::chrono::duration<double> diff = end - start;
 
     std::cout << "Time:"
               << diff.count() << " seconds\n";
-    std::cout << "Memory usage: "<< difMemKb << " Kb\n";
-    std::cout<<"============================================================\n";
+    std::cout << "Memory usage: " << difMemKb << " Kb\n";
+    std::cout << "============================================================\n";
 
 }

@@ -6,8 +6,10 @@
 #define LIB_TESTS_TESTS_H
 
 #include "common.h"
-#include "../src/engine.h"
+#include "../affir/engine.h"
 #include "utils/utils.h"
+
+using namespace affir;
 
 void runTestGetTokenInCreatedIndex(std::string &text, size_t buffer, std::vector<Base *> &filters, IIndexStorage &storage);
 

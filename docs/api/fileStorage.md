@@ -20,10 +20,12 @@ A path to the structure describing metadata of the text is defined in `META_FILE
 loading metadata from `META_FILENAME_PATH` is launched once automatically. 
 ### To save data
 ```c++
-#include "storages/files/fileStorage.h"
 #include <fstream>
 #include <vector>
-#include "logger/logger.h"
+#include "affir/storages/files/fileStorage.h"
+#include "affir/logger/logger.h"
+
+using namespace affir;
 
 ...
 
@@ -32,7 +34,7 @@ const size_t CHUNK_SIZE = 512;
 // Initialise FileStorage in input mode
 FileStorage storage("my_input_filename", INPUT_FILESIZE);
 
-Logger::info("ClassName", "File ID in the storage is {}", storage.getId());
+Logger::info(Logger::logger, "File ID in the storage is {}", storage.getId());
 
 std::ifstream file("path_to_my_file.txt");
 
@@ -54,20 +56,21 @@ FileStorage::saveStorageMeta();
 ```c++
 #include "storages/files/fileStorage.h"
 
+using namespace affir;
 ...
 // Some file id that you will get from IndexStorage
 FileId someFileId = ...;
 // Initialise FileStorage in output mode
 FileStorage storage(someFileId);
 
-Logger::info("ClassName", "Filename is {}\nFile size is {}",
+Logger::info(Logger::logger, "Filename is {}\nFile size is {}",
              storage.getFilename(), storage.getFilesize());
 
 std::vector<char> buffer;
 while (!storage.isEnd()) {
     size_t bytesRead = storage.read(buffer);
-    Logger::info("ClassName", "Bytes read — {}", bytesRead);
-    Logger::info("ClassName", "Buffer is {}", std::string(buffer.begin(), buffer.end()));
+    Logger::info(Logger::logger, "Bytes read — {}", bytesRead);
+    Logger::info(Logger::logger, "Buffer is {}", std::string(buffer.begin(), buffer.end()));
 }
 
 ...

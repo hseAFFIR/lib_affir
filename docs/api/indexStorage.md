@@ -41,8 +41,11 @@ virtual void loadStorageMeta() = 0;
 ```
 ### How to create index
 ```c++
-#include "storages/indexes/multi/multiFileIndexStorage.h"
-#include "storages/indexes/single/singleIndexStorage.h"
+#include "affir/storages/indexes/multi/multiFileIndexStorage.h"
+#include "affir/storages/indexes/single/singleIndexStorage.h"
+
+using namespace affir;
+
 ...
 
 // Prepare example
@@ -74,8 +77,11 @@ indexStorage->saveStorageMeta();
 ```
 ### How to get index
 ```c++
-#include "storages/indexes/multi/multiFileIndexStorage.h"
-#include "storages/indexes/single/singleIndexStorage.h"
+#include "affir/storages/indexes/multi/multiFileIndexStorage.h"
+#include "affir/storages/indexes/single/singleIndexStorage.h"
+
+using namespace affir;
+
 ...
 
 IIndexStorage *indexStorage = new MultiFileIndexStorage();
