@@ -24,4 +24,6 @@ void runEngineTestFile(std::string dataPath, EngineFocus engineFocus, FilterType
 void runEngineTestString(std::string dataPath, EngineFocus engineFocus, FilterType filterFlags,
                            IndexStorageType indexStorageType, size_t buffer);
 
+void groupTest(std::string dataPath);
+
 #endif //LIB_TESTS_TESTS_H
