@@ -24,7 +24,7 @@ Filters may include:
 ### Tokenizing raw text
 Example usage of `Tokenizer` without filtering:
 ```cpp
-#include "Tokenizer.h"
+#include "tokenizer.h"
 #include <iostream>
 
 int main() {
@@ -44,13 +44,13 @@ int main() {
 ### Tokenizing with filters
 To use filtering, pass a list of filters to the `Tokenizer` constructor:
 ```cpp
-#include "tokenizer/filters/filters.h"
-#include "tokenizer/tokenizer.h"
-#include "models/token.h"
 #include <vector>
 #include <iostream>
+#include "affir/tokenizer/filters/filters.h"
+#include "affir/tokenizer/tokenizer.h"
+#include "affir/models/token.h"
 
-
+using namespace affir;
 
 int main() {
     std::vector<Base*> filters = {new Lowercaser(), new Htmler(), new Punctuator(),

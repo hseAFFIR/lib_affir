@@ -46,7 +46,9 @@ however, it allows you to output the **correct context for search results**.
 #### Examples
 
 ```C++
-#include "engine.h"
+#include "affir/engine.h"
+
+using namespace affir;
 
 int main() {
     
@@ -90,8 +92,8 @@ engine.openFS(fileId);
 std::vector<char> buffer;
 while (!storage.isEnd()) {
     size_t bytesRead = storage.read(buffer);
-    Logger::info("ClassName", "Bytes read — {}", bytesRead);
-    Logger::info("ClassName", "Buffer is {}", std::string(buffer.begin(), buffer.end()));
+    Logger::info(Logger::logger, "Bytes read — {}", bytesRead);
+    Logger::info(Logger::logger, "Buffer is {}", std::string(buffer.begin(), buffer.end()));
 }
 // Or
 engine.read(buffer, CUSTOM_BYTES_BLOCK); // DEFAULT BYTES_BLOCK = 512
@@ -102,13 +104,13 @@ engine.read(buffer, CUSTOM_BYTES_BLOCK); // DEFAULT BYTES_BLOCK = 512
 auto res = engine.find("Карелия");
 // It will display clear positions if only
 // you've chosen EngineFocus::POSES mode during engine initialisation
-Logger::info("Main", "Result:\n{}", res.toString());
+Logger::info(Logger::logger, "Result:\n{}", res.toString());
 
 // It will display correct context if only
 // you've chosen EngineFocus::CONTEXT mode during engine initialisation
 size_t customContextSymbols = 10; // DEFAULT_CONTEXT_SYMBOLS = 20
 auto contextResultsMap = Engine::returnResultInContext(res, contextSymbols);
 FileId fileId = 1;
-Logger::info("Main", "Result in context in file ({}): {}", fileId, contextResultsMap[fileId][0]);
+Logger::info(Logger::logger, "Result in context in file ({}): {}", fileId, contextResultsMap[fileId][0]);
 ```
 

@@ -22,10 +22,10 @@ Before using the logger, it must be initialized with a log level and optional fi
 
 ```cpp
 // Initialize with console logging only
-Logger::init("info", "");
+Logger::init(Logger::Level::info, "");
 
 // Initialize with both console and file logging
-Logger::init("debug", "logs/app.log");
+Logger::init(Logger::Level::debug, "logs/app.log");
 ```
 
 ### Logging Messages
@@ -81,7 +81,7 @@ By default, logs are written in the following format:
 
 ```cpp
 // Initialize logger with both console and file output
-Logger::init("info", "logs/app.log");
+Logger::init(Logger::Level::info, "logs/app.log");
 
 // Get the logger instance
 auto logger = Logger::logger;

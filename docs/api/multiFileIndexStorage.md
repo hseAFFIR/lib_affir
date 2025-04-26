@@ -21,7 +21,9 @@ The path to the metadata is specified in `metadataFile`.
 
 ### To save data
 ```c++
-#include "storages/multiFileIndexStorage.h"
+#include "affir/storages/multiFileIndexStorage.h"
+
+using namespace affir;
 
 ...
 
@@ -40,7 +42,9 @@ storage.saveMetadata();
 ```
 ### To load raw index
 ```c++
-#include "storages/multiFileIndexStorage.h"
+#include "affir/storages/multiFileIndexStorage.h"
+
+using namespace affir;
 
 ...
 

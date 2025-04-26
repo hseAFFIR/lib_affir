@@ -24,9 +24,11 @@ The search operates on pre-indexed data through `Indexer` and `MultiFileIndexSto
 
 ### Initialization
 ```cpp
-#include "storages/multiFileIndexStorage.h"
-#include "indexer/indexer.h"
-#include "search/search.h"
+#include "affir/storages/multiFileIndexStorage.h"
+#include "affir/indexer/indexer.h"
+#include "affir/search/search.h"
+
+using namespace affir;
 
 MultiFileIndexStorage storage;
 Indexer indexer;
@@ -39,7 +41,7 @@ Searcher searcher(indexer);
 auto results = searcher.search("fox");
 
 // Print results using built-in function
-searcher.printSearchResults(results);
+std::cout << results.toString();
 ```
 
 ### Searching for exact phrases
@@ -48,17 +50,18 @@ searcher.printSearchResults(results);
 auto results = searcher.search("quick brown fox");
 
 // Print results using built-in function
-searcher.printSearchResults(results);
+std::cout << results.toString();
 ```
 
 ## Class Structure
 
 ### SearchResult Structure
 ```cpp
-struct SearchResult {
-    std::string query;       // Original search query
-    PosMap posMap;           // Position map in files
-    bool isPhrase;          // Whether the result is a phrase search
+class SearchResult {
+    std::string query;       ///< Tokenized query
+    size_t queryOriginalSize{};
+    PosMap posMap;           ///< Position map in files
+    ...
 };
 ```
 

@@ -18,8 +18,10 @@ In `indStor` it is passed `indexStorage`.
 After all tokens have been processed, call `saveTo()`
 ### To add new token
 ```c++
-#include "storages/multiFileIndexStorage.h"
-#include "indexer/indexer.h"
+#include "affir/storages/multiFileIndexStorage.h"
+#include "affir/indexer/indexer.h"
+
+using namespace affir;
 
 ...
 
@@ -39,8 +41,10 @@ indexer.saveTo()
 
 ### To get token positions by token name
 ```c++
-#include "storages/multiFileIndexStorage.h"
-#include "indexer/indexer.h"
+#include "affir/storages/multiFileIndexStorage.h"
+#include "affir/indexer/indexer.h"
+
+using namespace affir;
 
 ...
 
