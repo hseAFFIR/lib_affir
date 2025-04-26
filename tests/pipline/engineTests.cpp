@@ -1,5 +1,7 @@
 #include "../tests.h"
 
+std::string csvFormatData;
+
 void runEngineTestFile(std::string dataPath, EngineFocus engineFocus, FilterType filterFlags,
                    IndexStorageType indexStorageType, const size_t buffer) {
     deleteStorageForTests();
@@ -49,6 +51,10 @@ void runEngineTestFile(std::string dataPath, EngineFocus engineFocus, FilterType
               << diff.count() << " seconds\n";
     std::cout << "Memory usage: " << difMemKb << " Kb\n";
     std::cout << "==================================================================\n";
+
+    csvFormatData.append(formatCsvString(buffer, indexStorageType, filter, diff, difMemKb));
+
+    std::cout << csvFormatData << std::endl;
 }
 
 
@@ -104,4 +110,7 @@ void runEngineTestString(std::string dataPath, EngineFocus engineFocus, FilterTy
     std::cout << "Memory usage: " << difMemKb << " Kb\n";
     std::cout << "==================================================================\n";
 
+    csvFormatData.append(formatCsvString(buffer, indexStorageType, filter, diff, difMemKb));
+
+    std::cout << csvFormatData << std::endl;
 }

@@ -141,7 +141,7 @@ void searchWordInFiles(const std::string &folderPath, const std::string &word) {
     std::cout << "Search time: " << elapsed.count() << " ms\n";
 }
 
-std::string printIndStorageType(IndexStorageType &indexStorageType) {
+std::string printIndStorageType(const IndexStorageType &indexStorageType) {
     if (indexStorageType == IndexStorageType::MULTI) {
         return "Multi";
     }
@@ -151,9 +151,6 @@ std::string printIndStorageType(IndexStorageType &indexStorageType) {
 
     return "error";
 }
-
-
-
 
 void deleteStorageForTests() {
     try {
@@ -190,4 +187,8 @@ std::string filterTypeToString(FilterType fT) {
         case FilterType::STOPWORDS : return "STOPWORDS";
         default: return "ALL";
     }
+}
+
+std::string formatCsvString(const size_t &buffer, const IndexStorageType &storageType, const std::string &filter, const std::chrono::duration<double> &timeDif, const size_t &memDif) {
+    return std::to_string(timeDif.count()) + ";" + std::to_string(memDif) + ";" + std::to_string(buffer) + ";" + printIndStorageType(storageType) + ";" + filter + "\n";
 }
