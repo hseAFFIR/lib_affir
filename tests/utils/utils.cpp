@@ -152,3 +152,30 @@ std::string printIndStorageType(IndexStorageType &indexStorageType) {
     return "error";
 }
 
+
+
+
+void deleteStorageForTests() {
+    try {
+        // Удаление файлов
+        if (fs::exists(fileStorageMeta)) {
+            fs::remove(fs::path(fileStorageMeta));
+            std::cout << "Deleted: " << fileStorageMeta << "\n";
+        }
+
+        if (fs::exists(fileStorage)) {
+            fs::remove(fs::path(fileStorage));
+            std::cout << "Deleted: " << fileStorage << "\n";
+        }
+
+        // Рекурсивное удаление директории
+        if (fs::exists(indexDirPath)) {
+            std::uintmax_t count = fs::remove_all(fs::path(indexDirPath));
+            std::cout << "Deleted " << count << " items in: " << indexDirPath << "\n";
+        }
+    } catch (const fs::filesystem_error &e) {
+        std::cerr << "Filesystem error: " << e.what() << "\n";
+    } catch (const std::exception &e) {
+        std::cerr << "Error: " << e.what() << "\n";
+    }
+}
