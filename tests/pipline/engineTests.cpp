@@ -21,7 +21,8 @@ void runEngineTestFile(std::string dataPath, EngineFocus engineFocus, FilterType
 
             std::string text((std::istreambuf_iterator<char>(file)),
                              std::istreambuf_iterator<char>());
-            filenames.push_back(entry.path().filename().string());
+            std::string filename = dataPath + "/" + entry.path().filename().string();
+            filenames.push_back(filename);
             file.close();
         }
     }
