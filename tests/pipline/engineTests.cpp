@@ -5,11 +5,13 @@ void runEngineTestFile(std::string dataPath, EngineFocus engineFocus, FilterType
     deleteStorageForTests();
 
     std::vector<std::string> filenames;
+    std::string filter = filterTypeToString(filterFlags);
 
     std::cout << "============================== Test ==============================\n";
     std::cout << "Name: engine without file process\n";
     std::cout << "Buffer - " << buffer << " bytes | indexStorage - " << printIndStorageType(indexStorageType)
               << std::endl;
+    std::cout << "Filters - " << filter << std::endl;
 
     for (const auto &entry: fs::directory_iterator(dataPath)) {
         if (entry.is_regular_file()) {
@@ -55,11 +57,14 @@ void runEngineTestString(std::string dataPath, EngineFocus engineFocus, FilterTy
     deleteStorageForTests();
 
     std::unordered_map<std::string, std::string> fileContents;
+    std::string filter = filterTypeToString(filterFlags);
 
     std::cout << "============================== Test ==============================\n";
     std::cout << "Name: engine string process\n";
     std::cout << "Buffer - " << buffer << " bytes | indexStorage - " << printIndStorageType(indexStorageType)
               << std::endl;
+
+    std::cout << "Filters - " << filter << std::endl;
 
 
     for (const auto &entry: fs::directory_iterator(dataPath)) {

@@ -179,3 +179,15 @@ void deleteStorageForTests() {
         std::cerr << "Error: " << e.what() << "\n";
     }
 }
+
+std::string filterTypeToString(FilterType fT) {
+    switch (fT) {
+        case FilterType::NONE : return "NONE";
+        case FilterType::STEMMER : return "STEMMER";
+        case FilterType::PUNCTUATOR : return "PUNCTUATOR";
+        case FilterType::HTMLER : return "HTMLER";
+        case FilterType::LOWERCASER : return "LOWERCASER";
+        case FilterType::STOPWORDS : return "STOPWORDS";
+        default: return "ALL";
+    }
+}

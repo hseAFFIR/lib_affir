@@ -19,6 +19,8 @@ std::string printIndStorageType(IndexStorageType &indexStorageType);
 
 void deleteStorageForTests();
 
+std::string filterTypeToString(FilterType fT);
+
 const std::string indexDirPath = "index_files";
 const std::string fileStorageMeta = "file_storage_metadata.bin";
 const std::string fileStorage = "file_storage_raw";
