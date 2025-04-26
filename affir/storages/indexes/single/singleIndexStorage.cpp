@@ -23,7 +23,7 @@ void SingleIndexStorage::createIndex(const std::unordered_map<std::string, BigTo
                   key, value.getFilePositions().size(), incomingIndexSize);
         // Already exists
         if (indexMap.find(key) != indexMap.end()) {
-            LOG_WARNING(Logger::logger, "Token body already exists in map. Appending...");
+            LOG_DEBUG(Logger::logger, "Token body already exists in map. Appending...");
             IndexPos curIndexPos = indexMap[key];
             BlockMask neededMask = getMask(curIndexPos.bytesSize + incomingIndexSize);
             LOG_DEBUG(Logger::logger, "Current index pos: {},\n\tNeeded mask: {}", to_str_indexpos(curIndexPos),
