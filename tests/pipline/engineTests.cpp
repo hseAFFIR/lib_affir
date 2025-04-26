@@ -83,8 +83,9 @@ void runEngineSideLoadTest(std::string dataPath, EngineFocus engineFocus, Filter
     auto end = std::chrono::high_resolution_clock::now();
     size_t endMem = getCurrenMemoryUsage();
 
-    std::chrono::duration<double> diff = end - start;
     size_t difMemKb = (endMem - startMem) / (1024);
+    engine.flush();
+    std::chrono::duration<double> diff = end - start;
 
     std::cout << "Time:"
               << diff.count() << " seconds\n";
