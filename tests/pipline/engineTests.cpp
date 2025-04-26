@@ -1,20 +1,9 @@
 #include "../tests.h"
 
+
 const std::string indexDirPath = "index_files";
 const std::string fileStorageMeta = "file_storage_metadata.bin";
 const std::string fileStorage = "file_storage_raw";
-
-std::string printIndStorageType(IndexStorageType &indexStorageType) {
-    if (indexStorageType == IndexStorageType::MULTI) {
-        return "Multi";
-    }
-    else if (indexStorageType == IndexStorageType::SINGLE) {
-        return "Single";
-    }
-
-    return "error";
-}
-
 void
 runEngineTest(std::string dataPath, EngineFocus engineFocus, FilterType filterFlags, IndexStorageType indexStorageType,
               const size_t buffer) {

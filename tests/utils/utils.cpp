@@ -141,5 +141,14 @@ void searchWordInFiles(const std::string &folderPath, const std::string &word) {
     std::cout << "Search time: " << elapsed.count() << " ms\n";
 }
 
+std::string printIndStorageType(IndexStorageType &indexStorageType) {
+    if (indexStorageType == IndexStorageType::MULTI) {
+        return "Multi";
+    }
+    else if (indexStorageType == IndexStorageType::SINGLE) {
+        return "Single";
+    }
 
+    return "error";
+}
 
