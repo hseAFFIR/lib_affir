@@ -8,12 +8,13 @@
  * @param filters фильтры для токенизатора
  * @param storage Instance of object MFIS or SFIS
  */
-void runTestGetTokenInCreatedIndex(std::string &text, size_t buffer, std::vector<Base *> &filters, IIndexStorage &storage) {
-    Tokenizer tk(TokenizerMode::CLEAR_POSES,filters);
+void
+runTestGetTokenInCreatedIndex(std::string &text, size_t buffer, std::vector<Base *> &filters, IIndexStorage &storage) {
+    Tokenizer tk(TokenizerMode::CLEAR_POSES, filters);
     Indexer ind(buffer, storage);
 
     tk.tokenize(text);
-    while(tk.hasNext()) {
+    while (tk.hasNext()) {
         auto start = std::chrono::high_resolution_clock::now();
         ind.getTokenInfo(tk.next().body);
         auto end = std::chrono::high_resolution_clock::now();

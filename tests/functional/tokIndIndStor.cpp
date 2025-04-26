@@ -37,7 +37,7 @@ void runTestTokIndIndStor(const std::string &folderPath, size_t buffer, std::vec
         Indexer ind(buffer, storage);
         tk.tokenize(text);
 
-        while(tk.hasNext())
+        while (tk.hasNext())
             ind.addToken(tk.next());
 
         ind.saveTo();
@@ -51,5 +51,4 @@ void runTestTokIndIndStor(const std::string &folderPath, size_t buffer, std::vec
 
     std::cout << "Total Tokenizer+Indexer+IndexStorage time (buffer - " << buffer << " bytes): "
               << diff.count() << " seconds\n";
-
 }

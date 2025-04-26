@@ -10,7 +10,7 @@
  */
 void runTestProcessingWithoutReadTime(const std::string &folderPath, size_t buffer, std::vector<Base *> &filters,
                                       IIndexStorage &storage) {
-    DataHandler dh(TokenizerMode::CLEAR_POSES,filters, buffer, storage);
+    DataHandler dh(TokenizerMode::CLEAR_POSES, filters, buffer, storage);
 
     // Загружаем все файлы заранее, чтобы не учитывать время чтения
     std::unordered_map<std::string, std::string> fileContents;
@@ -43,5 +43,4 @@ void runTestProcessingWithoutReadTime(const std::string &folderPath, size_t buff
 
     std::cout << "Total processing time (buffer - " << buffer << " bytes): "
               << diff.count() << " seconds\n";
-
 }

@@ -4,54 +4,54 @@ project(lib_affir)
 set(CMAKE_CXX_STANDARD 20)
 
 set(STORAGE_FILES
-        src/storages/files/fileStorage.cpp
-        src/storages/files/fileStorage.h
-        src/storages/indexes/iIndexStorage.h
-        src/storages/indexes/multi/multiFileIndexStorage.h
-        src/storages/indexes/multi/multiFileIndexStorage.cpp
-        src/storages/indexes/single/singleIndexStorage.cpp
-        src/storages/indexes/single/singleIndexStorage.h
+        affir/storages/files/fileStorage.cpp
+        affir/storages/files/fileStorage.h
+        affir/storages/indexes/iIndexStorage.h
+        affir/storages/indexes/multi/multiFileIndexStorage.h
+        affir/storages/indexes/multi/multiFileIndexStorage.cpp
+        affir/storages/indexes/single/singleIndexStorage.cpp
+        affir/storages/indexes/single/singleIndexStorage.h
 )
 
 set(MODEL_FILES
-        src/models/bigToken.h
-        src/models/bigToken.cpp
+        affir/models/bigToken.h
+        affir/models/bigToken.cpp
 )
 
 set(PROCESSING_FILES
-        src/tokenizer/filters/filterOrder.h
-        src/processing/dataHandler.h
-        src/processing/dataHandler.cpp
+        affir/tokenizer/filters/filterOrder.h
+        affir/processing/dataHandler.h
+        affir/processing/dataHandler.cpp
 )
 
 set(INDEXER_FILES
-        src/indexer/indexer.cpp
-        src/indexer/indexer.h
+        affir/indexer/indexer.cpp
+        affir/indexer/indexer.h
 )
 
 set(SEARCHER_FILES
-        src/searcher/search.cpp
-        src/searcher/search.h
-        src/searcher/searchResult.h
+        affir/searcher/search.cpp
+        affir/searcher/search.h
+        affir/searcher/searchResult.h
 )
 
 set(FILTERS
-        src/tokenizer/filters/base.h
-        src/tokenizer/filters/stemFilter.cpp
-        src/tokenizer/filters/stemFilter.h
-        src/tokenizer/filters/russianPorterStemmer.cpp
-        src/tokenizer/filters/russianPorterStemmer.h
-        src/tokenizer/filters/englishStemmer.cpp
-        src/tokenizer/filters/englishStemmer.h
-        src/tokenizer/filters/htmler.cpp
-        src/tokenizer/filters/htmler.h
-        src/tokenizer/filters/lowercaser.cpp
-        src/tokenizer/filters/lowercaser.h
-        src/tokenizer/filters/punctuator.h
-        src/tokenizer/filters/punctuator.cpp
-        src/tokenizer/filters/stopWords.h
-        src/tokenizer/filters/stopWords.cpp
-        src/tokenizer/filters/filters.h)
+        affir/tokenizer/filters/base.h
+        affir/tokenizer/filters/stemFilter.cpp
+        affir/tokenizer/filters/stemFilter.h
+        affir/tokenizer/filters/russianPorterStemmer.cpp
+        affir/tokenizer/filters/russianPorterStemmer.h
+        affir/tokenizer/filters/englishStemmer.cpp
+        affir/tokenizer/filters/englishStemmer.h
+        affir/tokenizer/filters/htmler.cpp
+        affir/tokenizer/filters/htmler.h
+        affir/tokenizer/filters/lowercaser.cpp
+        affir/tokenizer/filters/lowercaser.h
+        affir/tokenizer/filters/punctuator.h
+        affir/tokenizer/filters/punctuator.cpp
+        affir/tokenizer/filters/stopWords.h
+        affir/tokenizer/filters/stopWords.cpp
+        affir/tokenizer/filters/filters.h)
 
 set(SOURCE_FILES
         ${STORAGE_FILES}
@@ -60,16 +60,16 @@ set(SOURCE_FILES
         ${INDEXER_FILES}
         ${PROCESSING_FILES}
         ${SEARCHER_FILES}
-        src/common.h
-        src/logger/logger.h
-        src/logger/logger.cpp
-        src/tokenizer/tokenizer.h
-        src/tokenizer/tokenizer.cpp
-        src/engine.cpp
-        src/engine.h)
+        affir/common.h
+        affir/logger/logger.h
+        affir/logger/logger.cpp
+        affir/tokenizer/tokenizer.h
+        affir/tokenizer/tokenizer.cpp
+        affir/engine.cpp
+        affir/engine.h)
 
 
-add_executable(lib_affir src/main.cpp
+add_executable(lib_affir main.cpp
         ${SOURCE_FILES})
 
 add_executable(lib_tests tests/main.cpp

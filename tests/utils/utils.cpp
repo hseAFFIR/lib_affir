@@ -54,6 +54,7 @@ void printPeakMemoryUsage() {
 }
 
 #elif defined(__unix__)
+
 #include <sys/resource.h>
 #include <unistd.h>
 #include <fstream>
@@ -73,7 +74,8 @@ void printPeakMemoryUsage() {
     if (getrusage(RUSAGE_SELF, &usage) == 0) {
         std::cout << "Peak memory usage: "
                   << usage.ru_maxrss << " KB (Linux)\n";
-    } else {
+    }
+    else {
         std::cerr << "Failed to get memory info\n";
     }
 }
