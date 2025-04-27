@@ -52,7 +52,7 @@ namespace affir {
         virtual void loadStorageMeta() = 0;
 
     protected:
-        constexpr static std::string STORAGE_DIR = "index_files";
+        inline static const std::string STORAGE_DIR = "index_files";
 
     private:
         void createIndexDir() {
