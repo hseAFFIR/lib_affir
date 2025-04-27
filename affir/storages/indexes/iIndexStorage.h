@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include <filesystem>
 #include "../../models/bigToken.h"
 
 namespace affir {
@@ -16,6 +17,8 @@ namespace affir {
  */
     class IIndexStorage {
     public:
+        explicit IIndexStorage() { createIndexDir(); }
+
         virtual ~IIndexStorage() = default;
 
         /**
@@ -50,6 +53,12 @@ namespace affir {
 
     protected:
         constexpr static std::string STORAGE_DIR = "index_files";
+
+    private:
+        void createIndexDir() {
+            if (!std::filesystem::exists(STORAGE_DIR))
+                std::filesystem::create_directory(STORAGE_DIR);
+        }
     };
 }
 

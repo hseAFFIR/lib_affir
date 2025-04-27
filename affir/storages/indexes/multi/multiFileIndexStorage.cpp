@@ -12,11 +12,6 @@ bool MultiFileIndexStorage::isMetadataLoaded = false;
 
 MultiFileIndexStorage::MultiFileIndexStorage() {
     LOG_INFO(Logger::logger, "MultiFileIndexStorage module init");
-    // Create folder for storing indexes
-    if (!std::filesystem::exists(STORAGE_DIR)) {
-        std::filesystem::create_directory(STORAGE_DIR);
-    }
-
     loadStorageMeta();
 }
 

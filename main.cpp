@@ -8,7 +8,7 @@ int main() {
     Logger::init(Logger::Level::Info, "logs/log.log");
     LOG_INFO(Logger::logger, "Application started");
 
-    Engine engine(EngineFocus::POSES, FilterType::HTMLER | FilterType::LOWERCASER, IndexStorageType::MULTI);
+    Engine engine(EngineFocus::POSES, FilterType::HTMLER | FilterType::LOWERCASER, IndexStorageType::SINGLE);
     // Или без фильтров: Engine engine(EngineFocus::NATIVE, Engine::IndexStorageType::SINGLE); // Либо можно передать FilterType::NONE
 
     engine.proceed(
@@ -18,7 +18,7 @@ int main() {
     // Или передать путь до файла. Вторым параметром по желанию можно указать CHUNK_SIZE
 //    engine.proceed("/path/to/file");
 
-    FileId fileId = 1;
+    FileId fileId = 2;
     engine.openFS(fileId);
     std::vector<char> buffer;
     engine.read(buffer);

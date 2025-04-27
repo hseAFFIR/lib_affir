@@ -11,11 +11,7 @@ std::map<uint32_t, uint32_t> SingleIndexStorage::freeBlockPoses;
 uint32_t SingleIndexStorage::currentBlockPos = 0;
 
 SingleIndexStorage::SingleIndexStorage() {
-    LOG_INFO(Logger::logger, "Storage module initialized");
-    // Create folder for storing indexes
-    if (!std::filesystem::exists(STORAGE_DIR)) {
-        std::filesystem::create_directory(STORAGE_DIR);
-    }
+    LOG_INFO(Logger::logger, "SingleIndexStorage module initialized");
     loadStorageMeta();
     open();
 }
