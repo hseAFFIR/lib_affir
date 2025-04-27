@@ -47,6 +47,9 @@ namespace affir {
         * @brief Load static index metadata into internal structures.
         */
         virtual void loadStorageMeta() = 0;
+
+    protected:
+        constexpr static std::string STORAGE_DIR = "index_files";
     };
 }
 
