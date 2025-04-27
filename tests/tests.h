@@ -26,4 +26,6 @@ void runEngineTestString(std::string dataPath, EngineFocus engineFocus, FilterTy
 
 void groupTest(std::string dataPath);
 
+void saveCsvToFile();
+
 #endif //LIB_TESTS_TESTS_H

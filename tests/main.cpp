@@ -15,6 +15,8 @@ int main() {
 
     groupTest("final_dataset");
 
+    saveCsvToFile();
+
     printPeakMemoryUsage();
 
     return 0;

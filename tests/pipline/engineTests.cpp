@@ -54,7 +54,6 @@ void runEngineTestFile(std::string dataPath, EngineFocus engineFocus, FilterType
 
     csvFormatData.append(formatCsvString(buffer, indexStorageType, filter, diff, difMemKb));
 
-    std::cout << csvFormatData << std::endl;
 }
 
 
@@ -112,5 +111,13 @@ void runEngineTestString(std::string dataPath, EngineFocus engineFocus, FilterTy
 
     csvFormatData.append(formatCsvString(buffer, indexStorageType, filter, diff, difMemKb));
 
-    std::cout << csvFormatData << std::endl;
+}
+
+void saveCsvToFile() {
+    std::ofstream outFile("testResult.csv");
+
+    outFile << csvFormatData;
+    outFile.close();
+
+    std::cout << "Test results saved :)"
 }
