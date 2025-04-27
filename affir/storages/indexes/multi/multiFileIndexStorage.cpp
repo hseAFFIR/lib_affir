@@ -12,16 +12,11 @@ bool MultiFileIndexStorage::isMetadataLoaded = false;
 
 MultiFileIndexStorage::MultiFileIndexStorage() {
     LOG_INFO(Logger::logger, "MultiFileIndexStorage module init");
-    // Create folder for storing indexes
-    if (!std::filesystem::exists(storageDir)) {
-        std::filesystem::create_directory(storageDir);
-    }
-
     loadStorageMeta();
 }
 
 void MultiFileIndexStorage::createIndex(const std::unordered_map<std::string, BigToken> &data) {
-    std::string filename = storageDir + "/index_" + std::to_string(fileCounter++) + ".json";
+    std::string filename = STORAGE_DIR + "/index_" + std::to_string(fileCounter++) + ".json";
     std::ofstream outFile(filename, std::ios::binary);
 
     if (!outFile) {

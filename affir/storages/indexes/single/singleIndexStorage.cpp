@@ -3,15 +3,15 @@
 
 using namespace affir;
 
-const std::string SingleIndexStorage::STORAGE_FILENAME_PATH = "index_storage.bin";
-const std::string SingleIndexStorage::META_FILENAME_PATH = "index_storage_metadata.bin";
+const std::string SingleIndexStorage::STORAGE_FILENAME_PATH = STORAGE_DIR + "/index_storage.bin";
+const std::string SingleIndexStorage::META_FILENAME_PATH = STORAGE_DIR + "/index_storage_metadata.bin";
 bool SingleIndexStorage::isStorageLoaded = false;
 std::unordered_map<std::string, IndexPos> SingleIndexStorage::indexMap;
 std::map<uint32_t, uint32_t> SingleIndexStorage::freeBlockPoses;
 uint32_t SingleIndexStorage::currentBlockPos = 0;
 
 SingleIndexStorage::SingleIndexStorage() {
-    LOG_INFO(Logger::logger, "Storage module initialized");
+    LOG_INFO(Logger::logger, "SingleIndexStorage module initialized");
     loadStorageMeta();
     open();
 }
