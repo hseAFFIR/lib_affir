@@ -21,7 +21,7 @@ void deleteStorageForTests();
 
 std::string filterTypeToString(FilterType fT);
 
-std::string formatCsvString(const size_t &buffer, const IndexStorageType &storageType, const std::string &filter, const std::chrono::duration<double> &timeDif, const size_t &memDif);
+std::string formatCsvString(const size_t &buffer, const IndexStorageType &storageType, const std::string &filter, const std::chrono::duration<double> &timeDif, double cpuTime, const size_t &memDif);
 
 const std::string indexDirPath = "index_files";
 const std::string fileStorageMeta = "file_storage_metadata.bin";

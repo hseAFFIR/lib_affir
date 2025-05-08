@@ -1,4 +1,5 @@
 #include "../tests.h"
+#include <ctime>
 
 std::string csvFormatData;
 
@@ -31,6 +32,7 @@ void runEngineTestFile(std::string dataPath, EngineFocus engineFocus, FilterType
         }
     }
 
+    std::clock_t cpuStart = std::clock();
     auto start = std::chrono::high_resolution_clock::now();
     size_t startMem = getCurrenMemoryUsage();
 
@@ -40,19 +42,21 @@ void runEngineTestFile(std::string dataPath, EngineFocus engineFocus, FilterType
         engine.proceed(filename);
     }
 
+    std::clock_t cpuEnd = std::clock();
     auto end = std::chrono::high_resolution_clock::now();
     size_t endMem = getCurrenMemoryUsage();
 
     size_t difMemKb = (endMem - startMem) / (1024);
     engine.flush();
+    double cpuTime = static_cast<double>(cpuEnd - cpuStart) / CLOCKS_PER_SEC;
     std::chrono::duration<double> diff = end - start;
 
-    std::cout << "Time:"
-              << diff.count() << " seconds\n";
+    std::cout << "Wall-clock Time: " << diff.count() << " seconds\n";
+    std::cout << "CPU Time: " << cpuTime << " seconds\n";
     std::cout << "Memory usage: " << difMemKb << " Kb\n";
     std::cout << "==================================================================\n";
 
-    csvFormatData.append(formatCsvString(buffer, indexStorageType, filter, diff, difMemKb));
+    csvFormatData.append(formatCsvString(buffer, indexStorageType, filter, diff, cpuTime, difMemKb));
 
 }
 
@@ -88,6 +92,7 @@ void runEngineTestString(std::string dataPath, EngineFocus engineFocus, FilterTy
         }
     }
 
+    std::clock_t cpuStart = std::clock();
     auto start = std::chrono::high_resolution_clock::now();
     size_t startMem = getCurrenMemoryUsage();
 
@@ -97,19 +102,21 @@ void runEngineTestString(std::string dataPath, EngineFocus engineFocus, FilterTy
         engine.proceed(text, filename);
     }
 
+    std::clock_t cpuEnd = std::clock();
     auto end = std::chrono::high_resolution_clock::now();
     size_t endMem = getCurrenMemoryUsage();
 
     size_t difMemKb = (endMem - startMem) / (1024);
     engine.flush();
+    double cpuTime = static_cast<double>(cpuEnd - cpuStart) / CLOCKS_PER_SEC;
     std::chrono::duration<double> diff = end - start;
 
-    std::cout << "Time:"
-              << diff.count() << " seconds\n";
+    std::cout << "Wall-clock Time: " << diff.count() << " seconds\n";
+    std::cout << "CPU Time: " << cpuTime << " seconds\n";
     std::cout << "Memory usage: " << difMemKb << " Kb\n";
     std::cout << "==================================================================\n";
 
-    csvFormatData.append(formatCsvString(buffer, indexStorageType, filter, diff, difMemKb));
+    csvFormatData.append(formatCsvString(buffer, indexStorageType, filter, diff, cpuTime,  difMemKb));
 
 }
 
@@ -119,5 +126,5 @@ void saveCsvToFile() {
     outFile << csvFormatData;
     outFile.close();
 
-    std::cout << "Test results saved :)"
+    std::cout << "Test results saved :)";
 }

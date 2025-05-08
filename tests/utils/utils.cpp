@@ -189,6 +189,6 @@ std::string filterTypeToString(FilterType fT) {
     }
 }
 
-std::string formatCsvString(const size_t &buffer, const IndexStorageType &storageType, const std::string &filter, const std::chrono::duration<double> &timeDif, const size_t &memDif) {
-    return std::to_string(timeDif.count()) + ";" + std::to_string(memDif) + ";" + std::to_string(buffer) + ";" + printIndStorageType(storageType) + ";" + filter + "\n";
+std::string formatCsvString(const size_t &buffer, const IndexStorageType &storageType, const std::string &filter, const std::chrono::duration<double> &timeDif, double cpuTime, const size_t &memDif) {
+    return std::to_string(timeDif.count()) + ";"+ std::to_string(cpuTime) + ";" + std::to_string(memDif) + ";" + std::to_string(buffer) + ";" + printIndStorageType(storageType) + ";" + filter + "\n";
 }
