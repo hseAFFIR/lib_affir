@@ -185,6 +185,8 @@ std::string filterTypeToString(FilterType fT) {
         case FilterType::HTMLER : return "HTMLER";
         case FilterType::LOWERCASER : return "LOWERCASER";
         case FilterType::STOPWORDS : return "STOPWORDS";
+        case FilterType::STEMMER_RU: return "STEMMER_RU";
+        case FilterType::STEMMER_EN: return "STEMMER_EN";
         default: return "ALL";
     }
 }

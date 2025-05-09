@@ -126,5 +126,5 @@ void saveEngineTestCsvToFile() {
     outFile <<"wallClockTime;cpuTime;memory;buffer;storage;filter\n" + csvFormatData;
     outFile.close();
 
-    std::cout << "Test results saved :)";
+    std::cout << "Test results saved :)\n";
 }

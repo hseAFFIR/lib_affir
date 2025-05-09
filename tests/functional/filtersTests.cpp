@@ -3,10 +3,18 @@
 std::string filtersCsv;
 
 void filtersTests(std::string dataPath) {
-    std::vector<FilterType> filtersNames = {FilterType::STEMMER, FilterType::HTMLER, FilterType::STOPWORDS, FilterType::LOWERCASER, FilterType::PUNCTUATOR};
-    std::vector<Base*> filters = {new StemFilter(), new Htmler(), new StopWords(), new Lowercaser(), new Punctuator()};
+    std::vector<FilterType> filtersNames = {FilterType::STEMMER, FilterType::HTMLER, FilterType::STOPWORDS, FilterType::LOWERCASER, FilterType::PUNCTUATOR, FilterType::STEMMER_RU, FilterType::STEMMER_EN, FilterType::NONE};
 
-    for (int i = 0; i < 5; i++) {
+    class EmptyFilter : public Base{
+        void process(std::string &token) override{}
+        FilterOrder getOrder() const override {
+            return FilterOrder::EnglishStemmer;
+        }
+    };
+
+    std::vector<Base*> filters = {new StemFilter(), new Htmler(), new StopWords(), new Lowercaser(), new Punctuator(), new RussianPorterStemmer(), new EnglishStemmer(), new EmptyFilter()};
+
+    for (int i = 0; i < 8; i++) {
         Tokenizer tokenizer(TokenizerMode::CLEAR_POSES, {filters[i]});
         std::unordered_map<std::string, std::string> fileContents;
 
@@ -76,5 +84,5 @@ void saveFiltersTestCsvToFile() {
     outFile <<"wallClockTime;cpuTime;memory;buffer;storage;filter\n" + filtersCsv;
     outFile.close();
 
-    std::cout << "Test results saved :)";
+    std::cout << "Test results saved :)\n";
 }
