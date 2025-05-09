@@ -77,6 +77,7 @@ add_executable(lib_tests tests/main.cpp
         tests/common.h
         tests/functional/tokIndIndStor.cpp
         tests/functional/getTokenInCreatedIndex.cpp
+        tests/functional/filtersTests.cpp
         tests/pipline/engineTests.cpp
         tests/pipline/groupTest.cpp
         tests/utils/utils.cpp

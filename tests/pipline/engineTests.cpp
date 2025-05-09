@@ -120,10 +120,10 @@ void runEngineTestString(std::string dataPath, EngineFocus engineFocus, FilterTy
 
 }
 
-void saveCsvToFile() {
-    std::ofstream outFile("testResult.csv");
+void saveEngineTestCsvToFile() {
+    std::ofstream outFile("testResultEngine.csv");
 
-    outFile << csvFormatData;
+    outFile <<"wallClockTime;cpuTime;memory;buffer;storage;filter\n" + csvFormatData;
     outFile.close();
 
     std::cout << "Test results saved :)";
