@@ -19,6 +19,5 @@ void groupTest(std::string dataPath) {
 //        runEngineTestString(dataPath, EngineFocus::POSES, fiveFilters, sT, 1024*1024*16);
 
         runEngieTestSearch(dataPath, EngineFocus::POSES, FilterType::NONE, sT, 1024*1024*16);
-
     }
 }
