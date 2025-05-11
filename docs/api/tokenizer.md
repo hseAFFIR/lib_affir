@@ -19,24 +19,37 @@ Filters may include:
 - Filtering out stop words
 - Stemming
 
+The tokenizer supports two processing modes:
+
+1. **`NATIVE_POSES`** - preserves original token positions
+2. **`CLEAR_POSES`** - provides normalized positioning
 ## How to use
 
 ### Tokenizing raw text
 Example usage of `Tokenizer` without filtering:
 ```cpp
-#include "tokenizer.h"
+### Basic tokenization
+```cpp
+#include "affir/tokenizer/tokenizer.h"
 #include <iostream>
 
+using namespace affir;
+
 int main() {
-    Tokenizer tokenizer({});
+    // Initialize with NATIVE_POSES mode and no filters
+    Tokenizer tokenizer(TokenizerMode::NATIVE_POSES);
+    std::string text = "Sample text with <b>HTML</b> tags";
     
-    std::string text = "Hello, this is a <b>test</b> message!";
-    FileId fileId = 1;
-
-    tokenizer.tokenizeRaw(text, fileId, [](Token token) {
-        std::cout << "Token: " << token.getBody() << " | Pos: " << token.getPos() << std::endl;
-    });
-
+    // Process the text
+    tokenizer.tokenize(text);
+    
+    // Iterate through tokens
+    while(tokenizer.hasNext()) {
+        Token token = tokenizer.next();
+        std::cout << "Token: " << token.getBody() 
+                  << " | Position: " << token.getPos() << std::endl;
+    }
+    
     return 0;
 }
 ```
@@ -53,21 +66,31 @@ To use filtering, pass a list of filters to the `Tokenizer` constructor:
 using namespace affir;
 
 int main() {
-    std::vector<Base*> filters = {new Lowercaser(), new Htmler(), new Punctuator(),
-                                  new StopWords(), new StemFilter()};
+    // Create filter chain
+    std::vector<Base*> filters = {
+        new Lowercaser(),    // Convert to lowercase
+        new Htmler(),        // Remove HTML tags
+        new Punctuator()     // Remove punctuation
+    };
 
-    Tokenizer tokenizer(filters);
-    std::string text = "Hello, this is a <b>test</b> text with HTML and some stopwords.";
-    FileId fileId = 1;
-
-    tokenizer.tokenizeFiltered(text, fileId, [](Token token) {
-        std::cout << "Token: " << token.getBody() << " | Pos: " << token.getPos() << std::endl;
-    });
-
-    for (auto filter : filters) {
-        delete filter;
+    // Initialize with CLEAR_POSES mode and filters
+    Tokenizer tokenizer(TokenizerMode::CLEAR_POSES, filters);
+    std::string text = "Filtered <i>text</i> with UPPERCASE and punctuation!";
+    
+    // Process the text
+    tokenizer.tokenize(text);
+    
+    // Iterate through filtered tokens
+    while(tokenizer.hasNext()) {
+        Token token = tokenizer.next();
+        // Process filtered tokens
     }
 
+    // Cleanup filters
+    for(auto filter : filters) {
+        delete filter;
+    }
+    
     return 0;
 }
 ```
