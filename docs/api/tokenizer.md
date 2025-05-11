@@ -46,8 +46,10 @@ int main() {
     // Iterate through tokens
     while(tokenizer.hasNext()) {
         Token token = tokenizer.next();
-        std::cout << "Token: " << token.getBody() 
-                  << " | Position: " << token.getPos() << std::endl;
+        std::cout << "Token: " << token.body 
+                  << " | Absolute pos: " << token.info.pos
+                  << " | Word pos: " << token.info.wordPos
+                  << " | File ID: " << token.fileId << "\n";
     }
     
     return 0;
@@ -83,6 +85,10 @@ int main() {
     // Iterate through filtered tokens
     while(tokenizer.hasNext()) {
         Token token = tokenizer.next();
+        std::cout << "Token: " << token.body 
+                  << " | Absolute pos: " << token.info.pos
+                  << " | Word pos: " << token.info.wordPos
+                  << " | File ID: " << token.fileId << "\n";
         // Process filtered tokens
     }
 
