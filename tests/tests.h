@@ -24,6 +24,9 @@ void runEngineTestFile(std::string dataPath, EngineFocus engineFocus, FilterType
 void runEngineTestString(std::string dataPath, EngineFocus engineFocus, FilterType filterFlags,
                            IndexStorageType indexStorageType, size_t buffer);
 
+void runEngieTestSearch(std::string dataPath, EngineFocus engineFocus, FilterType filterFlags,
+                        IndexStorageType indexStorageType, size_t buffer);
+
 void groupTest(std::string dataPath);
 
 void filtersTests(std::string dataPath);

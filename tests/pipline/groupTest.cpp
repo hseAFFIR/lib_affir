@@ -8,15 +8,17 @@ void groupTest(std::string dataPath) {
 
 
     for (auto &sT: storages) {
-        for (auto &b: buffer_sizes) {
-            runEngineTestString(dataPath, EngineFocus::POSES, FilterType::NONE, sT, b);
-        }
+//        for (auto &b: buffer_sizes) {
+//            runEngineTestString(dataPath, EngineFocus::POSES, FilterType::NONE, sT, b);
+//        }
 
-        for (auto &f : filters) {
-            runEngineTestString(dataPath, EngineFocus::POSES, f, sT, 1024*1024*16);
-        }
+//        for (auto &f : filters) {
+//            runEngineTestString(dataPath, EngineFocus::POSES, f, sT, 1024*1024*16);
+//        }
+//
+//        runEngineTestString(dataPath, EngineFocus::POSES, fiveFilters, sT, 1024*1024*16);
 
-        runEngineTestString(dataPath, EngineFocus::POSES, fiveFilters, sT, 1024*1024*16);
+        runEngieTestSearch(dataPath, EngineFocus::POSES, FilterType::NONE, sT, 1024*1024*16);
 
     }
 }

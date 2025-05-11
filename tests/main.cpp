@@ -13,13 +13,9 @@ int main() {
 
     LOG_INFO(Logger::logger, "Application started");
 
-//    groupTest("final_dataset");
+    groupTest("final_dataset");
 
-//    saveEngineTestCsvToFile()
-
-    filtersTests("final_dataset");
-
-    saveFiltersTestCsvToFile();
+    saveEngineTestCsvToFile();
 
     printPeakMemoryUsage();
 
