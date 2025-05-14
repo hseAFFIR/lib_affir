@@ -27,6 +27,8 @@ void runEngineTestString(std::string dataPath, EngineFocus engineFocus, FilterTy
 void runEngieTestSearch(std::string dataPath, EngineFocus engineFocus, FilterType filterFlags,
                         IndexStorageType indexStorageType, size_t buffer);
 
+void tokenizerPerformanceTest(std::string dataPath);
+
 void groupTest(std::string dataPath);
 
 void filtersTests(std::string dataPath);
