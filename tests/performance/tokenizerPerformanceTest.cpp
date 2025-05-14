@@ -22,7 +22,7 @@ void tokenizerPerformanceTest(std::string dataPath) {
 
 
     std::cout << "============================== Test ==============================\n";
-    std::cout << "Name: tokenizer performane\n";
+    std::cout << "Name: tokenizer performance\n";
     std::cout << "Filters - NONE" << std::endl;
 
     auto start = std::chrono::high_resolution_clock::now();
