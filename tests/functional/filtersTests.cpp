@@ -54,6 +54,7 @@ void filtersTests(std::string dataPath) {
 
             while (tokenizer.hasNext()) {
                 Token token = tokenizer.next();
+//                std::cout<<token.body<<std::endl;
             }
         }
 
