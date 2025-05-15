@@ -1,0 +1,66 @@
+@startuml
+actor User
+participant Engine
+participant FileStorage
+participant Search
+participant Tokenizer
+participant Indexer
+participant SingleIndexStorage as IIndexStorage
+
+== Сценарий 2: Поиск по индексированному тексту ==
+
+note right of User : <b>Расшифровка:</b> engineFocus (EF), filters (F), indexStorageType (IST), bufferSize (BS)
+User -> Engine : init(EF, F, IST, BS)
+activate Engine
+note right of Engine : Инициализируем выбранный тип: <b>SingleIndexStorage</b> или <b>MultiIndexStorage</b>
+Engine -> IIndexStorage : init()
+Engine -> Search : init(filters, indexStorage)
+activate Search
+Search -> Tokenizer : init(filters)
+activate Tokenizer
+deactivate Tokenizer
+Search -> Indexer : init(indexStorage)
+activate Indexer
+deactivate Indexer
+deactivate Search
+deactivate Engine
+
+User -> Engine : find(query)
+activate Engine
+Engine -> Search : search(query)
+activate Search
+Search -> Tokenizer : tokenize(query)
+
+activate Tokenizer
+loop while Tokenizer.hasNext()
+    Search -> Tokenizer : next()
+    Tokenizer -> Tokenizer : applyFilters()
+    Tokenizer -> Search : token
+    Search -> Search : tokens.append(token)
+end
+deactivate Tokenizer
+Search -> Search : getPhrasePositions(tokens)
+activate Search
+Search -> Indexer : getTokenInfo(tokens[0])
+activate Indexer
+Indexer -> IIndexStorage : getRawIndex(tokenName)
+activate IIndexStorage
+IIndexStorage -> Indexer : map<FileId, TokenPositions>
+deactivate IIndexStorage
+Indexer -> Search : map<FileId, TokenPositions>
+note right of Search : Анализируем позиции токенов, чтобы найти искомый запрос в конкретном файле
+Search -> Search : QueryPositions
+deactivate Search
+Search -> Engine : QueryPositions
+deactivate Search
+
+note right of Engine : Получаем из хранилища файлов срез текста, чтобы восстановить контекст искомого запроса
+Engine -> FileStorage : read(read_from, read_to)
+activate FileStorage
+FileStorage -> Engine : data
+deactivate FileStorage
+
+Engine -> User : Result
+
+deactivate Engine
+@enduml
