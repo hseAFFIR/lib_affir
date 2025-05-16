@@ -9,11 +9,13 @@ using namespace affir;
 
 int main() {
     system("chcp 65001"); // Для корректного отображения русского языка в логах
-    Logger::init(Logger::Level::Info, "logs/test.log");
+    Logger::init(Logger::Level::None, "logs/test.log");
 
     LOG_INFO(Logger::logger, "Application started");
 
-    runEngineSideLoadTest("death_data", EngineFocus::POSES, FilterType::NONE, IndexStorageType::MULTI, 1024*1024*16);
+    groupTest("final_dataset");
+
+    saveEngineTestCsvToFile();
 
     printPeakMemoryUsage();
 

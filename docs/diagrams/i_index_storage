@@ -1,0 +1,33 @@
+@startuml
+interface IIndexStorage {
+  +createIndex(data: unordered_map<string, BigToken>&): void
+  +getRawIndex(body: string, output: vector<PosMap>&): void
+  +close(): void
+  +saveStorageMeta(): void
+  +loadStorageMeta(): void
+}
+
+class SingleIndexStorage {
+  +createIndex(data: unordered_map<string, BigToken>&): void
+  +getRawIndex(body: string, output: vector<PosMap>&): void
+  +close(): void
+  +saveStorageMeta(): void
+  +loadStorageMeta(): void
+  -markBlockAvailable(blockStart: uint32_t, blockCount: uint32_t): void
+  -copyBytes(from: IndexPos, to: IndexPos): void
+  -getNewBlock(indexSize: uint32_t): IndexPos
+  -getMask(size: size_t): BlockMask
+  -toBaseBlocks(blockMask: BlockMask): uint32_t
+}
+
+class MultiIndexStorage {
+  +createIndex(data: unordered_map<string, BigToken>&): void
+  +getRawIndex(body: string, output: vector<PosMap>&): void
+  +close(): void
+  +saveStorageMeta(): void
+  +loadStorageMeta(): void
+}
+
+IIndexStorage <|.. SingleIndexStorage
+IIndexStorage <|.. MultiIndexStorage
+@enduml

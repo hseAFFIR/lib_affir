@@ -1,59 +1,79 @@
 #include "../tests.h"
+#include <ctime>
 
-const std::string indexDirPath = "index_files";
-const std::string fileStorageMeta = "file_storage_metadata.bin";
-const std::string fileStorage = "file_storage_raw";
+std::string csvFormatData;
 
-std::string printIndStorageType(IndexStorageType &indexStorageType) {
-    if (indexStorageType == IndexStorageType::MULTI) {
-        return "Multi";
-    }
-    else if (indexStorageType == IndexStorageType::SINGLE) {
-        return "Single";
-    }
+void runEngineTestFile(std::string dataPath, EngineFocus engineFocus, FilterType filterFlags,
+                   IndexStorageType indexStorageType, size_t buffer) {
+    deleteStorageForTests();
 
-    return "error";
-}
+    std::vector<std::string> filenames;
+    std::string filter = filterTypeToString(filterFlags);
 
-void
-runEngineTest(std::string dataPath, EngineFocus engineFocus, FilterType filterFlags, IndexStorageType indexStorageType,
-              const size_t buffer) {
-
-}
-
-
-void runEngineSideLoadTest(std::string dataPath, EngineFocus engineFocus, FilterType filterFlags,
-                           IndexStorageType indexStorageType, const size_t buffer) {
-    try {
-        // Удаление файлов
-        if (fs::exists(fileStorageMeta)) {
-            fs::remove(fs::path(fileStorageMeta));
-            std::cout << "Deleted: " << fileStorageMeta << "\n";
-        }
-
-        if (fs::exists(fileStorage)) {
-            fs::remove(fs::path(fileStorage));
-            std::cout << "Deleted: " << fileStorage << "\n";
-        }
-
-        // Рекурсивное удаление директории
-        if (fs::exists(indexDirPath)) {
-            std::uintmax_t count = fs::remove_all(fs::path(indexDirPath));
-            std::cout << "Deleted " << count << " items in: " << indexDirPath << "\n";
-        }
-    } catch (const fs::filesystem_error &e) {
-        std::cerr << "Filesystem error: " << e.what() << "\n";
-    } catch (const std::exception &e) {
-        std::cerr << "Error: " << e.what() << "\n";
-    }
-
-
-    std::unordered_map<std::string, std::string> fileContents;
-
-    std::cout << "============================================================\n";
-    std::cout << "Test: engine without file read time\n";
+    std::cout << "============================== Test ==============================\n";
+    std::cout << "Name: engine without file process\n";
     std::cout << "Buffer - " << buffer << " bytes | indexStorage - " << printIndStorageType(indexStorageType)
               << std::endl;
+    std::cout << "Filters - " << filter << std::endl;
+
+    for (const auto &entry: fs::directory_iterator(dataPath)) {
+        if (entry.is_regular_file()) {
+            std::ifstream file(entry.path());
+            if (!file) {
+                std::cerr << "Could not open file: " << entry.path() << std::endl;
+                continue;
+            }
+
+            std::string text((std::istreambuf_iterator<char>(file)),
+                             std::istreambuf_iterator<char>());
+            std::string filename = dataPath + "/" + entry.path().filename().string();
+            filenames.push_back(filename);
+            file.close();
+        }
+    }
+
+    std::clock_t cpuStart = std::clock();
+    auto start = std::chrono::high_resolution_clock::now();
+    size_t startMem = getCurrenMemoryUsage();
+
+    Engine engine(engineFocus, filterFlags, indexStorageType, buffer);
+
+    for (auto &filename: filenames) {
+        engine.proceed(filename);
+    }
+
+    std::clock_t cpuEnd = std::clock();
+    auto end = std::chrono::high_resolution_clock::now();
+    size_t endMem = getCurrenMemoryUsage();
+
+    size_t difMemKb = (endMem - startMem) / (1024);
+    engine.flush();
+    double cpuTime = static_cast<double>(cpuEnd - cpuStart) / CLOCKS_PER_SEC;
+    std::chrono::duration<double> diff = end - start;
+
+    std::cout << "Wall-clock Time: " << diff.count() << " seconds\n";
+    std::cout << "CPU Time: " << cpuTime << " seconds\n";
+    std::cout << "Memory usage: " << difMemKb << " Kb\n";
+    std::cout << "==================================================================\n";
+
+    csvFormatData.append(formatCsvString(buffer, indexStorageType, filter, diff, cpuTime, difMemKb));
+
+}
+
+
+void runEngineTestString(std::string dataPath, EngineFocus engineFocus, FilterType filterFlags,
+                           IndexStorageType indexStorageType, size_t buffer) {
+    deleteStorageForTests();
+
+    std::unordered_map<std::string, std::string> fileContents;
+    std::string filter = filterTypeToString(filterFlags);
+
+    std::cout << "============================== Test ==============================\n";
+    std::cout << "Name: engine string process\n";
+    std::cout << "Buffer - " << buffer << " bytes | indexStorage - " << printIndStorageType(indexStorageType)
+              << std::endl;
+
+    std::cout << "Filters - " << filter << std::endl;
 
 
     for (const auto &entry: fs::directory_iterator(dataPath)) {
@@ -68,9 +88,11 @@ void runEngineSideLoadTest(std::string dataPath, EngineFocus engineFocus, Filter
                              std::istreambuf_iterator<char>());
             std::string filename = entry.path().filename().string();
             fileContents[filename] = std::move(text);
+            file.close();
         }
     }
 
+    std::clock_t cpuStart = std::clock();
     auto start = std::chrono::high_resolution_clock::now();
     size_t startMem = getCurrenMemoryUsage();
 
@@ -80,16 +102,89 @@ void runEngineSideLoadTest(std::string dataPath, EngineFocus engineFocus, Filter
         engine.proceed(text, filename);
     }
 
+    std::clock_t cpuEnd = std::clock();
     auto end = std::chrono::high_resolution_clock::now();
     size_t endMem = getCurrenMemoryUsage();
 
     size_t difMemKb = (endMem - startMem) / (1024);
     engine.flush();
+    double cpuTime = static_cast<double>(cpuEnd - cpuStart) / CLOCKS_PER_SEC;
     std::chrono::duration<double> diff = end - start;
 
-    std::cout << "Time:"
-              << diff.count() << " seconds\n";
+    std::cout << "Wall-clock Time: " << diff.count() << " seconds\n";
+    std::cout << "CPU Time: " << cpuTime << " seconds\n";
     std::cout << "Memory usage: " << difMemKb << " Kb\n";
-    std::cout << "============================================================\n";
+    std::cout << "==================================================================\n";
+
+    csvFormatData.append(formatCsvString(buffer, indexStorageType, filter, diff, cpuTime,  difMemKb));
+
+}
+
+void saveEngineTestCsvToFile() {
+    std::ofstream outFile("testResultEngine.csv");
+
+    outFile <<"wallClockTime;cpuTime;memory;buffer;storage;filter\n" + csvFormatData;
+    outFile.close();
+
+    std::cout << "Test results saved :)\n";
+}
+
+void runEngieTestSearch(std::string dataPath, EngineFocus engineFocus, FilterType filterFlags,
+                        IndexStorageType indexStorageType, size_t buffer){
+    std::unordered_map<std::string, std::string> fileContents;
+    std::string filter = filterTypeToString(filterFlags);
+
+    std::cout << "============================== Test ==============================\n";
+    std::cout << "Name: search time\n";
+    std::cout << "Buffer - " << buffer << " bytes | indexStorage - " << printIndStorageType(indexStorageType)
+              << std::endl;
+
+    std::cout << "Filters - " << filter << std::endl;
+
+
+    for (const auto &entry: fs::directory_iterator(dataPath)) {
+        if (entry.is_regular_file()) {
+            std::ifstream file(entry.path());
+            if (!file) {
+                std::cerr << "Could not open file: " << entry.path() << std::endl;
+                continue;
+            }
+
+            std::string text((std::istreambuf_iterator<char>(file)),
+                             std::istreambuf_iterator<char>());
+            std::string filename = entry.path().filename().string();
+            fileContents[filename] = std::move(text);
+            file.close();
+        }
+    }
+
+    Engine engine(engineFocus, filterFlags, indexStorageType, buffer);
+
+    for (auto &[filename, text]: fileContents) {
+        engine.proceed(text, filename);
+    }
+
+    std::vector<std::string> words = {
+            "дом", "работа", "вода", "а", "и",    // Часто употребительные русские слова
+            "фаэтон", "тавтология", "ренессанс", "эпатаж", "иллюзия",  // Редко употребительные русские слова
+            "house", "work", "water", "a", "and",  // Часто употребительные английские слова
+            "obfuscate", "nefarious", "ineffable", "ephemeral", "verisimilitude"  // Редко употребительные английские слова
+    };
+
+    for (auto &w : words) {
+        auto start = std::chrono::high_resolution_clock::now();
+        size_t startMem = getCurrenMemoryUsage();
+
+        engine.find(w);
+
+        auto end = std::chrono::high_resolution_clock::now();
+        size_t endMem = getCurrenMemoryUsage();
+
+        size_t difMemKb = (endMem - startMem) / (1024);
+        std::chrono::duration<double> diff = end - start;
+
+        std::cout << w << " - wall-clock: "<< diff.count() << ", memory: " << difMemKb << " Kb\n";
+
+    }
 
 }
