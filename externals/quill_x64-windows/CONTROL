@@ -1,7 +1,0 @@
-Package: quill
-Version: 9.0.2
-Depends: vcpkg-cmake, vcpkg-cmake-config
-Architecture: x64-windows
-Multi-Arch: same
-Abi: f8332621ec079bfcd0941ddd5819a919de3bff275ac2744bdee13e94608b0104
-Description: Asynchronous Low Latency C++ Logging Library

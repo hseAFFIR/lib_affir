@@ -3,6 +3,8 @@ project(lib_affir)
 
 set(CMAKE_CXX_STANDARD 20)
 
+add_subdirectory(externals/quill)
+
 set(STORAGE_FILES
         affir/storages/files/fileStorage.cpp
         affir/storages/files/fileStorage.h
@@ -84,8 +86,8 @@ add_executable(lib_tests tests/main.cpp
         ${SOURCE_FILES}
 )
 
-set(CMAKE_PREFIX_PATH externals/quill_x64-windows)
+set(CMAKE_PREFIX_PATH externals/quill)
 
-find_package(quill REQUIRED)
+#find_package(quill REQUIRED)
 target_link_libraries(lib_affir PRIVATE quill::quill)
 target_link_libraries(lib_tests PRIVATE quill::quill)
