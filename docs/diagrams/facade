@@ -1,0 +1,36 @@
+@startuml
+package "Facade Pattern" {
+    rectangle Client
+    rectangle Engine
+    rectangle {
+        rectangle FileStorage
+        rectangle Search
+        rectangle DataHandler
+        rectangle IndexStorages
+        rectangle "A lot of other modules..."
+        rectangle Filters {
+          rectangle Filter1
+          rectangle Filter2
+          rectangle others...
+        }
+        rectangle Indexer
+        rectangle Tokenizer
+    }
+    rectangle IndexStorages {
+        rectangle SingleIndexStorage
+        rectangle MultiIndexStorage
+    }
+
+    Client -down-> Engine : interacts with
+    Engine -down-> FileStorage
+    Engine -down-> Search
+    Engine -down-> DataHandler
+    DataHandler -down-> Indexer
+    DataHandler -down-> Tokenizer
+    DataHandler --[dashed]-> IndexStorages
+    Search -down-> Indexer
+    Search -down-> Tokenizer
+    Engine -down-> IndexStorages
+    Engine -down-> Filters
+}
+@enduml

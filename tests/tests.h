@@ -19,9 +19,22 @@ void runTestTokIndIndStor(const std::string &folderPath, size_t buffer, std::vec
 void runTestProcessingWithoutReadTime(const std::string &folderPath, size_t buffer, std::vector<Base *> &filters,
                                       IIndexStorage &storage);
 
-void runEngineTest(std::string dataPath, EngineFocus engineFocus, FilterType filterFlags, IndexStorageType indexStorageType, size_t buffer);
+void runEngineTestFile(std::string dataPath, EngineFocus engineFocus, FilterType filterFlags, IndexStorageType indexStorageType, size_t buffer);
 
-void runEngineSideLoadTest(std::string dataPath, EngineFocus engineFocus, FilterType filterFlags,
+void runEngineTestString(std::string dataPath, EngineFocus engineFocus, FilterType filterFlags,
                            IndexStorageType indexStorageType, size_t buffer);
+
+void runEngieTestSearch(std::string dataPath, EngineFocus engineFocus, FilterType filterFlags,
+                        IndexStorageType indexStorageType, size_t buffer);
+
+void tokenizerPerformanceTest(std::string dataPath);
+
+void groupTest(std::string dataPath);
+
+void filtersTests(std::string dataPath);
+
+void saveEngineTestCsvToFile();
+
+void saveFiltersTestCsvToFile();
 
 #endif //LIB_TESTS_TESTS_H

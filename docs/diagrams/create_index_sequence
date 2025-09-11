@@ -1,0 +1,63 @@
+@startuml
+actor User
+participant Engine
+participant FileStorage
+participant DataHandler
+participant Tokenizer
+participant Indexer
+participant SingleIndexStorage as IIndexStorage
+
+== Сценарий 1: Индексация текста ==
+
+note right of User : <b>Расшифровка:</b> engineFocus (EF), filters (F), indexStorageType (IST), bufferSize (BS)
+User -> Engine : init(EF, F, IST, BS)
+activate Engine
+note right of Engine : Инициализируем выбранный тип: <b>SingleIndexStorage</b> или <b>MultiIndexStorage</b>
+Engine -> IIndexStorage : init()
+Engine -> DataHandler : init(filters, bufferSize, indexStorage)
+activate DataHandler
+DataHandler -> Tokenizer : init(filters)
+activate Tokenizer
+deactivate Tokenizer
+DataHandler -> Indexer : init(bufferSize, indexStorage)
+activate Indexer
+deactivate Indexer
+deactivate DataHandler
+deactivate Engine
+
+User -> Engine : proceed(data)
+activate Engine
+Engine -> FileStorage : init()
+activate FileStorage
+FileStorage -> Engine : file_id
+deactivate FileStorage
+
+loop for each data_chunk
+    Engine -> FileStorage : write(data_chunk)
+    Engine -> DataHandler : processText(data_chunk)
+    activate DataHandler
+    DataHandler -> Tokenizer : tokenize(data_chunk)
+    activate Tokenizer
+
+    loop while Tokenizer.hasNext()
+        DataHandler -> Tokenizer : next()
+        Tokenizer -> Tokenizer : applyFilters()
+        Tokenizer -> DataHandler : token
+        DataHandler -> Indexer : addToken(token)
+        activate Indexer
+        alt if currentBufferSize + newTokenSize > maxBufferSize
+            Indexer -> IIndexStorage : createIndex(token_buffer)
+            activate IIndexStorage
+            deactivate IIndexStorage
+            Indexer -> Indexer : clearBuffer()
+        end
+        Indexer -> Indexer : buffer.append(token)
+        deactivate Indexer
+    end
+    deactivate Tokenizer
+    deactivate DataHandler
+end
+
+
+deactivate Engine
+@enduml

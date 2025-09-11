@@ -141,5 +141,57 @@ void searchWordInFiles(const std::string &folderPath, const std::string &word) {
     std::cout << "Search time: " << elapsed.count() << " ms\n";
 }
 
+std::string printIndStorageType(const IndexStorageType &indexStorageType) {
+    if (indexStorageType == IndexStorageType::MULTI) {
+        return "Multi";
+    }
+    else if (indexStorageType == IndexStorageType::SINGLE) {
+        return "Single";
+    }
 
+    return "error";
+}
+
+void deleteStorageForTests() {
+    try {
+        // Удаление файлов
+        if (fs::exists(fileStorageMeta)) {
+            fs::remove(fs::path(fileStorageMeta));
+            std::cout << "Deleted: " << fileStorageMeta << "\n";
+        }
+
+        if (fs::exists(fileStorage)) {
+            fs::remove(fs::path(fileStorage));
+            std::cout << "Deleted: " << fileStorage << "\n";
+        }
+
+        // Рекурсивное удаление директории
+        if (fs::exists(indexDirPath)) {
+            std::uintmax_t count = fs::remove_all(fs::path(indexDirPath));
+            std::cout << "Deleted " << count << " items in: " << indexDirPath << "\n";
+        }
+    } catch (const fs::filesystem_error &e) {
+        std::cerr << "Filesystem error: " << e.what() << "\n";
+    } catch (const std::exception &e) {
+        std::cerr << "Error: " << e.what() << "\n";
+    }
+}
+
+std::string filterTypeToString(FilterType fT) {
+    switch (fT) {
+        case FilterType::NONE : return "NONE";
+        case FilterType::STEMMER : return "STEMMER";
+        case FilterType::PUNCTUATOR : return "PUNCTUATOR";
+        case FilterType::HTMLER : return "HTMLER";
+        case FilterType::LOWERCASER : return "LOWERCASER";
+        case FilterType::STOPWORDS : return "STOPWORDS";
+        case FilterType::STEMMER_RU: return "STEMMER_RU";
+        case FilterType::STEMMER_EN: return "STEMMER_EN";
+        default: return "ALL";
+    }
+}
+
+std::string formatCsvString(const size_t &buffer, const IndexStorageType &storageType, const std::string &filter, const std::chrono::duration<double> &timeDif, double cpuTime, const size_t &memDif) {
+    return std::to_string(timeDif.count()) + ";"+ std::to_string(cpuTime) + ";" + std::to_string(memDif) + ";" + std::to_string(buffer) + ";" + printIndStorageType(storageType) + ";" + filter + "\n";
+}
 
